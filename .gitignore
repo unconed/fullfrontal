@@ -1,0 +1,5 @@
+/slides/videos/*
+/deck.js
+/mathjax
+/mathbox
+.DS_Store

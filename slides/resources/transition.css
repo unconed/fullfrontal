@@ -1,0 +1,186 @@
+.deck-container > .slide .deck-before, .deck-container > .slide .deck-previous {
+  opacity: 0.4;
+}
+.deck-container > .slide .deck-before.temp, .deck-container > .slide .deck-previous.temp {
+  opacity: 0;
+}
+.deck-container > .slide .deck-before.temp-delay {
+  opacity: 0;
+}
+
+.csstransitions.csstransforms .deck-container .slide.deck-after + .deck-after {
+  position: absolute;
+  top: 2000px;
+}
+
+.deck-container > .slide .deck-before:not(.deck-child-current) .deck-before, .deck-container > .slide .deck-before:not(.deck-child-current) .deck-previous, .deck-container > .slide .deck-previous:not(.deck-child-current) .deck-before, .deck-container > .slide .deck-previous:not(.deck-child-current) .deck-previous {
+  opacity: 1;
+}
+.deck-container > .slide .deck-child-current {
+  opacity: 1;
+}
+
+.csstransitions.csstransforms .deck-container {
+  overflow-y: hidden;
+  -webkit-perspective: 1000px;
+  -moz-perspective: 1000px;
+  -ms-perspective: 1000px;
+  -o-perspective: 1000px;
+  perspective: 1000px;
+
+  -webkit-perspective-origin: 50% 25%;
+}
+
+.csstransitions.csstransforms .slomo .deck-container > .slide {
+  -webkit-transition: -webkit-transform 2000ms ease-in-out, opacity 2000ms ease-in-out;
+  -moz-transition: -moz-transform 2000ms ease-in-out, opacity 2000ms  ease-in-out;
+  -ms-transition: -ms-transform 2000ms ease-in-out, opacity 2000ms  ease-in-out;
+  -o-transition: -o-transform 2000ms ease-in-out, opacity 2000ms  ease-in-out;
+  transition: transform 2000ms ease-in-out, opacity 2000ms  ease-in-out;
+  
+  -webkit-transform-style: preserve-3d;
+}
+.csstransitions.csstransforms .deck-container > .slide {
+  -webkit-transition-delay: 66ms;
+  -moz-transition-delay: 66ms;
+  -o-transition-delay: 66ms;
+  transition-delay: 66ms;
+
+  -webkit-transition: -webkit-transform 500ms ease-in-out, opacity 500ms ease-in-out;
+  -moz-transition: -moz-transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  -ms-transition: -ms-transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  -o-transition: -o-transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  transition: transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  
+  -webkit-transform-style: preserve-3d;
+}
+.csstransitions.csstransforms .deck-container > .slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.csstransitions.csstransforms .slomo .deck-container > .slide .slide {
+  position: relative;
+  left: 0;
+  top: 0;
+  -webkit-transition: -webkit-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+  -moz-transition: -moz-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+  -ms-transition: -ms-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+  -o-transition: -o-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+  transition: -webkit-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+
+  -webkit-transform-style: preserve-3d;
+}
+.csstransitions.csstransforms .deck-container > .slide .slide {
+  position: relative;
+  left: 0;
+  top: 0;
+  -webkit-transition: -webkit-transform 300ms ease-in-out, opacity 300ms ease-in-out;
+  -moz-transition: -moz-transform 300ms ease-in-out, opacity 300ms ease-in-out;
+  -ms-transition: -ms-transform 300ms ease-in-out, opacity 300ms ease-in-out;
+  -o-transition: -o-transform 300ms ease-in-out, opacity 300ms ease-in-out;
+  transition: -webkit-transform 300ms ease-in-out, opacity 300ms ease-in-out;
+
+  -webkit-transform-style: preserve-3d;
+}
+.csstransitions.csstransforms .deck-container > .deck-current {
+  -webkit-transform: translateZ(0px);
+}
+
+.csstransitions.csstransforms .deck-container > .slide .deck-next, .csstransitions.csstransforms .deck-container > .slide .deck-after {
+  -webkit-transform: rotateY(-10deg) translate3d(0, 50px, -100px);
+  -moz-transform: rotateY(-10deg) translate3d(0, 50px, -100px);
+  -ms-transform: rotateY(-10deg) translate3d(0, 50px, -100px);
+  -o-transform: rotateY(-10deg) translate(0, 50px);
+  transform: rotateY(-10deg) translate3d(0, 50px, -100px);
+}
+.csstransitions.csstransforms .deck-container > .deck-previous,
+.csstransitions.csstransforms .deck-container > .deck-before {
+  -webkit-transform: rotateY(25deg) translateY(-150px);
+}
+.csstransitions.csstransforms .deck-container > .deck-next,
+.csstransitions.csstransforms .deck-container > .deck-after {
+  -webkit-transform: rotateY(-25deg) translateY(150px);
+}
+
+.csstransitions.csstransforms .deck-container > .slide .deck-next.zoom,
+.csstransitions.csstransforms .deck-container > .deck-next.zoom,
+.csstransitions.csstransforms .deck-container > .deck-after.zoom {
+  -webkit-transform: translateZ(100px);
+}
+
+.csstransitions.csstransforms .deck-container > .deck-previous.zoom:not(.deck-child-current),
+.csstransitions.csstransforms .deck-container > .deck-before.zoom {
+  -webkit-transform: none;
+}
+
+.csstransitions.csstransforms .deck-container > .slide .deck-next, .csstransitions.csstransforms .deck-container > .slide .deck-after,
+.csstransitions.csstransforms .deck-container > .deck-previous,
+.csstransitions.csstransforms .deck-container > .deck-before,
+.csstransitions.csstransforms .deck-container > .deck-next,
+.csstransitions.csstransforms .deck-container > .deck-after {
+  opacity: 0;
+}
+
+.csstransitions.csstransforms .deck-container > .deck-before .slide, .csstransitions.csstransforms .deck-container > .deck-previous .slide {
+}
+.csstransitions.csstransforms .deck-container > .deck-child-current {
+  -webkit-transform: translateZ(0px);
+  -moz-transform: translateZ(0px);
+  -ms-transform: translateZ(0px);
+  -o-transform: translateZ(0px);
+  transform: translateZ(0px);
+  opacity: 1;
+  -webkit-transform-style: preserve-3d;
+}
+
+.csstransitions.csstransforms  .deck-container .slide .delay1 {
+  -webkit-transition-delay: 100ms;
+  -moz-transition-delay: 100ms;
+  -o-transition-delay: 100ms;
+  transition-delay: 100ms;
+}
+
+.csstransitions.csstransforms  .deck-container .slide .delay10 {
+  -webkit-transition-delay: 1000ms;
+  -moz-transition-delay: 1000ms;
+  -o-transition-delay: 1000ms;
+  transition-delay: 1000ms;
+}
+
+.csstransitions.csstransforms  .deck-container .slide .delay20 {
+  -webkit-transition-delay: 2000ms;
+  -moz-transition-delay: 2000ms;
+  -o-transition-delay: 2000ms;
+  transition-delay: 2000ms;
+}
+
+.csstransitions.csstransforms  .deck-container .slide .delay30 {
+  -webkit-transition-delay: 3000ms;
+  -moz-transition-delay: 3000ms;
+  -o-transition-delay: 3000ms;
+  transition-delay: 3000ms;
+}
+
+.csstransitions.csstransforms  .deck-container .slide .delay40 {
+  -webkit-transition-delay: 4000ms;
+  -moz-transition-delay: 4000ms;
+  -o-transition-delay: 4000ms;
+  transition-delay: 4000ms;
+}
+
+.csstransitions.csstransforms  .deck-container .slide .deck-previous.delay1,
+.csstransitions.csstransforms  .deck-container .slide .deck-previous.delay10,
+.csstransitions.csstransforms  .deck-container .slide .deck-previous.delay20,
+.csstransitions.csstransforms  .deck-container .slide .deck-previous.delay30,
+.csstransitions.csstransforms  .deck-container .slide .deck-previous.delay40 {
+  -webkit-transition-delay: 0;
+  -moz-transition-delay: 0;
+  -o-transition-delay: 0;
+  transition-delay: 0;
+}

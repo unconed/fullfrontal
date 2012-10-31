@@ -1,0 +1,243 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxOptions = {
+  camera: new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 100),
+};
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-2, 2], [-1, 1]],
+      scale: [2.5, 1.25],
+    });
+
+}
+
+var controlPoints = function (x, i) {
+  var points = [
+    [-1.5, 0],
+    [1.5, 0],
+  ];
+
+  return points[i];
+}
+
+var controlPointsOffset = function (offset) {
+  return function (x, i) {
+    return controlPoints(x, i + offset);
+  };
+}
+
+function lerp(a, b, t) {
+  return [ a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t ];
+}
+
+var vector1 = [ [-.6, -.3, 0], [.6, .3, 0] ];
+var vector2 = [ [-.4, .3, 0], [.4, -.3, 0] ];
+var vector3 = [ [-.6, -.3, 0], [1.4, -.3, 0] ];
+var vector4 = [ [.6, .3, 0], [1.8, .9, 0] ];
+var vector5 = [ [1.8, .9, 0], [3.0, 1.5, 0] ];
+var vector6 = [ [-.6, -.3, 0], [3.0, 1.5, 0] ];
+
+window.mathBoxSteps = [
+
+  [],
+
+  // Vector A
+  [
+    ['add', 'vector', {
+      id: 'a',
+      n: 1,
+      live: true,
+      data: vector1,
+      lineWidth: 6,
+      size: .15,
+    }],
+  ],
+
+  // Vector B
+  [
+    ['add', 'vector', {
+      id: 'b',
+      n: 1,
+      live: true,
+      data: vector1,
+      lineWidth: 6,
+      size: .15,
+      color: 0xC02050,
+    }],
+    ['animate', '#a', {
+      worldPosition: [-1, 0, 0],
+    }, {
+      duration: 300
+    }],
+    ['animate', '#b', {
+      worldPosition: [1, 0, 0],
+    }, {
+      duration: 300
+    }],
+  ],
+
+  // Lengths
+  [
+    ['add', 'curve', {
+      id: 'al',
+      n: 2,
+      live: true,
+      data: vector1,
+      lineWidth: 4,
+      color: 0x909090,
+      worldPosition: [1.05, -.1, 0],
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'bl',
+      n: 2,
+      live: true,
+      data: vector1,
+      lineWidth: 4,
+      color: 0x909090,
+      worldPosition: [-.95, -.1, 0],
+    }],
+    ['animate', '#al', {
+      worldPosition: [1, 0, -0.001],
+      worldScale: [8, 8, 1],
+      color: 0xB0B0B0,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+    ['animate', '#bl', {
+      worldPosition: [-1, 0, -0.001],
+      worldScale: [8, 8, 1],
+      color: 0xB0B0B0,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+  ],
+
+  // Different vectors
+  [
+    ['remove', 'curve'],
+    ['animate', '#b', {
+      data: vector2,
+    }]
+  ],
+
+  // Add
+  [
+    ['animate', '#a', {
+      worldPosition: [-.62, 0, 0],
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#b', {
+      worldPosition: [.62, 0, 0],
+    }, {
+      duration: 300,
+    }],
+    ['add', 'vector', {
+      id: 'c',
+      n: 1,
+      live: true,
+      data: vector3,
+      lineWidth: 6,
+      size: .15,
+      color: 0x20C050,
+      worldPosition: [-.62, 0, 0],
+    }, {
+      delay: 600,
+      duration: 300,
+    }],
+  ],
+
+  // Sub
+  [
+    ['animate', '#b', {
+      worldRotation: [0, 0, π],
+    }, {
+      duration: 400,
+    }],
+  ],
+
+  // Multiply
+  [
+    ['animate', 'viewport', {
+      range: [[-1.2, 2.8], [-.6, 1.4]],
+    }, {
+      duration: 900,
+    }],
+    ['remove', '#b'],
+    ['remove', '#c'],
+    ['add', 'vector', {
+      id: 'b',
+      n: 1,
+      live: true,
+      data: vector4,
+      lineWidth: 6,
+      size: .15,
+      worldPosition: [-.62, 0, 0],
+      opacity: .5,
+    }, {
+      delay: 300,
+      duration: 300,
+    }],
+    ['add', 'vector', {
+      id: 'c',
+      n: 1,
+      live: true,
+      data: vector5,
+      lineWidth: 6,
+      size: .15,
+      worldPosition: [-.62, 0, 0],
+      opacity: .5,
+    }, {
+      delay: 600,
+      duration: 300,
+    }],
+    ['add', 'vector', {
+      id: 'd',
+      n: 1,
+      live: true,
+      data: vector6,
+      lineWidth: 6,
+      size: .15,
+      worldPosition: [-.42, -.4, 0],
+      color: 0x20C050,
+    }, {
+      delay: 1200,
+      duration: 300,
+    }],
+  ],
+
+  // Divide
+  [
+    ['animate', '#a', {
+      worldPosition: [-.42, -.4, 0],
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#b', {
+      worldPosition: [-.42, -.4, 0],
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#c', {
+      worldPosition: [-.42, -.4, 0],
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#d', {
+      worldPosition: [-.62, 0, 0],
+    }, {
+      duration: 300,
+    }],
+  ],
+
+];
+
+</script>

@@ -1,0 +1,425 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'polar',
+      range: [[-2, 2], [0, 1]],
+      scale: [1, .5],
+      polar: 0,
+    })
+    .camera({
+      phi: τ/4,
+    });
+
+}
+
+window.mathBoxSteps = [
+
+  // Circle
+  [
+    ['add', 'curve', {
+      n: 100,
+      domain: [-π, π],
+      expression: function (x) { return [ Math.cos(x), Math.sin(x)*.5 + .5 ] },
+      lineWidth: 5,
+    }],
+  ],
+
+  // Point on circle
+  [
+    ['animate', 'curve', {
+      opacity: .6,
+    }],
+    ['add', 'curve', {
+      n: 1,
+      live: true,
+      line: false,
+      points: true,
+      domain: [0,0],
+      expression: function (x) {
+        var t = clock(1);
+        var a = Math.max(0, x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), Math.sin(-a) *.5 + .5 ];
+      },
+      color: 0x0040A0,
+      pointSize: 30,
+    }, { duration: 500 }],
+  ],
+
+  // Turn 90 degrees, show tail
+  [
+    ['animate', 'curve', {
+      worldRotation: new THREE.Vector3(0, -τ/4, 0),
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      n: 128,
+      live: true,
+      line: true,
+      points: false,
+      domain: [0, 16],
+      expression: function (x) {
+        var t = clock(1), q = clock(2);
+        x = Math.min((q*2-3)*1.8, x);
+        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), Math.sin(-a) *.5 + .5, x * .5 ];
+      },
+      color: 0x0040A0,
+      lineWidth: 5,
+      worldRotation: [0, -τ/4, 0],
+    }, {
+      delay: 1500, duration: 500
+    }],
+    ['add', 'curve', {
+      id: 'shadow1',
+      n: 128,
+      live: true,
+      line: true,
+      points: false,
+      domain: [0, 16],
+      expression: function (x) {
+        var t = clock(1), q = clock(2);
+        x = Math.min((q*2-3)*1.8, x);
+        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), (-Math.sin(-a) -2.02) *.5 + .5, x * .5 ];
+      },
+      color: 0x000000,
+      opacity: .07,
+      lineWidth: 10,
+      worldRotation: [0, -τ/4, 0],
+    }, {
+      delay: 1500, duration: 500
+    }],
+    ['add', 'curve', {
+      id: 'shadow2',
+      n: 100,
+      domain: [-π, π],
+      expression: function (x) { return [ Math.cos(x), (Math.sin(x) -2.05) *.5 + .5 ] },
+      lineWidth: 10,
+      worldRotation: [0, -τ/4, 0],
+      color: 0x000000,
+      opacity: .04,
+    }, {
+      delay: 1500, duration: 500
+    }],
+    ['animate', 'curve', {
+      worldPosition: [1.6, 0, 0],
+    }, {
+      delay: 1000,
+      duration: 4000,
+    }],
+  ],
+
+  // Rotate back 90 degrees, show graph
+  [
+    ['animate', 'camera', {
+      phi: τ/4-.4,
+      theta: .7,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4,
+      theta: 0,
+    }, {
+      delay: 1000,
+      duration: 1000,
+    }],
+    ['animate', 'curve', {
+      worldPosition: [1.8, 0, -3],
+      worldScale: [1, 2, 2],
+    }, {
+      delay: 2000,
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      range: [[-π, π], [0, 1]],
+      scale: [1, .5],
+    }, {
+      delay: 3200,
+      duration: 900,
+    }],
+    ['remove', 'curve', {
+      delay: 3100,
+      duration: 2000,
+    }],
+    ['add', 'curve', {
+      id: 'bump',
+      n: 512,
+      live: true,
+      domain: [-π*2, π*2],
+      expression: function (x) {
+        return [ x, .5- .5 * Math.cos(x) ];
+      },
+      lineWidth: 5,
+    }, {
+      delay: 4200,
+      duration: 600,
+    }],
+    ['add', 'axis', {
+      axis: 0,
+      n: 96,
+      ticks: 4,
+      tickBase: π,
+    }, {
+      delay: 2800,
+      duration: 600,
+    }],
+    ['add', 'axis', {
+      axis: 1,
+      n: 96,
+      ticks: 8,
+    }, {
+      delay: 2800,
+      duration: 600,
+    }],
+    ['add', 'grid', {
+      n: [ 96, 2 ],
+      lineWidth: 3,
+      tickBase: [π, 1],
+      ticks: [4, 8],
+    }, {
+      delay: 2800,
+      duration: 600,
+      color: 0x909090,
+    }],
+  ],
+
+  // Polar warp
+  [
+    ['animate', '#bump', {
+      domain: [-π, π],
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', 'camera', {
+      lookAt: [0, -.1, 0],
+    }, {
+      duration: 1700,
+    }],
+    ['animate', 'viewport', {
+      range: [[-π, π], [-1, 1]],
+      scale: [1.1, 1.1],
+      polar: 1,
+    }, {
+      duration: 1700,
+    }],
+  ],
+
+  // Flower spread
+  [
+    ['animate', 'camera', {
+      lookAt: [0, 0, 0],
+    }, {
+      duration: 1400,
+    }],
+    ['animate', 'viewport', {
+      scale: [1, 1],
+    }, {
+      duration: 1400,
+    }],
+    ['set', '#bump', {
+      expression: function (x) {
+        var domain = this.get().domain;
+        var scale = π / domain[1];
+        var fraction = (domain[1] - π) / 7;
+        return [ x * scale, .5-.5*Math.cos(x + fraction)];
+      },
+    }],
+
+    ['animate', '#bump', {
+      domain: [-π*8, π*8],
+    }, {
+      delay: 0,
+      duration: 1600,
+    }],
+  ],
+
+  // Flower spread
+  [
+    ['animate', 'viewport', {
+      range: [[-π, π], [-.1, 1]],
+      scale: [.8, .8],
+      polar: 1,
+    }, {
+      delay: 300,
+      duration: 2000,
+    }],
+    ['animate', 'grid', {
+      opacity: .75,
+    }],
+    ['animate', 'axis', {
+      opacity: .5,
+    }],
+    ['set', '#bump', {
+      expression: function (x) {
+        var t = clock(3);
+        var fraction = Math.min(1, t);
+        var modulate = Math.max(0, Math.min(1, t - 2.5));
+        var wipe = Math.max(0, Math.min(1, t - 4))*Math.max(0, Math.min(1, 6 - t))*.05;
+        var y = .5-.5*Math.cos(x + τ/2);
+        y = y+(Math.asin(y)/π*2-y)*fraction;
+        m = 1+modulate*(-.5+.5*Math.cos(x/8));
+        var rx = Math.random()*2-1;
+        var ry = Math.random()*2-1;
+        return [ x / 8 + rx*wipe, y*m + ry*wipe];
+      },
+    }],
+    ['animate', '#bump', {
+      lineWidth: 10,
+      color: 0x40C000,
+    }, {
+      delay: 1300,
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      id: 'modulate',
+      n: 128,
+      live: true,
+      domain: [-π, π],
+      expression: function (x) {
+        return [ x, .5+.5*Math.cos(x) ];
+      },
+      lineWidth: 5,
+      worldRotation: [0, 0, π],
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', '#modulate', {
+      worldRotation: [0, 0, 0],
+    }, {
+      delay: 250,
+      duration: 1000,
+    }],
+    ['animate', '#modulate', {
+      opacity: 0,
+    }, {
+      delay: 2000,
+      duration: 2500,
+    }],
+    ['add', 'curve', {
+      n: 512,
+      live: true,
+      domain: [-π*8, π*8],
+      lineWidth: 10,
+      color: 0x40C000,
+      expression: function (x) {
+        var t = clock(3);
+        var fraction = Math.min(1, t);
+        var modulate = Math.max(0, Math.min(1, t - 1.5));
+        var wipe = Math.max(0, Math.min(1, t - 4))*Math.max(0, Math.min(1, 6 - t))*.05;
+        var y = .5-.5*Math.cos(x + τ/2);
+        y = y+(Math.asin(y)/π*2-y)*fraction;
+        m = 1+modulate*(-.5+.5*Math.cos(x/8));
+        var rx = Math.random()*2-1;
+        var ry = Math.random()*2-1;
+        return [ x / 8 - Math.sin(x) * .05 + rx*wipe, y*m * .8 + ry*wipe ];
+      },
+    }, {
+      delay: 1300,
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      n: 512,
+      live: true,
+      domain: [-π*8, π*8],
+      lineWidth: 10,
+      color: 0x40C000,
+      expression: function (x) {
+        var t = clock(3);
+        var fraction = Math.min(1, t);
+        var modulate = Math.max(0, Math.min(1, t - 1.5));
+        var wipe = Math.max(0, Math.min(1, t - 4))*Math.max(0, Math.min(1, 6 - t))*.05;
+        var y = .5-.5*Math.cos(x + τ/2);
+        y = y+(Math.asin(y)/π*2-y)*fraction;
+        m = 1+modulate*(-.5+.5*Math.cos(x/8));
+        var rx = Math.random()*2-1;
+        var ry = Math.random()*2-1;
+        return [ x / 8 - Math.sin(x) * .1 + rx*wipe, y*m * .6 + ry*wipe ];
+      },
+    }, {
+      delay: 1300,
+      duration: 1000,
+    }],
+  ],
+
+  // Switch to bunny
+  [
+    ['animate', 'viewport', {
+      range: [[-π, π], [0, 1]],
+      scale: [1, 1],
+      polar: 0,
+    }, {
+      delay: 0,
+      duration: 1000,
+    }],
+    ['remove', 'curve', {
+      delay: 1100,
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      n: 512,
+      live: true,
+      domain: [-π, π],
+      lineWidth: 10,
+      live: true,
+      color: 0xC01050,
+      expression: function (x) {
+        var t = clock(4);
+        var wipe = Math.max(0, Math.min(1, t - 3.3))*.02;
+        var xx = (x + τ) % τ - π;
+        var y = Math.cos((xx*xx*5+Math.abs(xx))/6*1.1)*.4+.4;
+        var rx = Math.random()*2-1;
+        var ry = Math.random()*2-1;
+        return [ x + rx*wipe/y, y + ry*wipe ];
+      },
+    }, {
+      delay: 1100,
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      n: 2,
+      points: true,
+      line: false,
+      domain: [π-.3, -π+.3],
+      pointSize: 30,
+      color: 0xC01050,
+      expression: function (x) {
+        return [ x, .55 ];
+      },
+    }, {
+      delay: 3100,
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      n: 12,
+      domain: [π-.2, π+.2],
+      lineWidth: 5,
+      color: 0xC01050,
+      expression: function (x) {
+        return [ x, .6 - Math.cos(x*3)*.05 ];
+      },
+    }, {
+      delay: 3100,
+      duration: 1000,
+    }],
+    ['animate', 'viewport', {
+      range: [[-π, π], [-1, 1]],
+      scale: [1, 1],
+      polar: 1,
+    }, {
+      delay: 1100,
+      duration: 1200,
+    }],
+  ],
+
+
+  // 
+];
+
+</script>
