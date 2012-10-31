@@ -263,12 +263,12 @@ window.mathBoxSteps = [
 
   // Surface
   [
-    ['remove', '#sweep'],
-    ['remove', '#sweepdots'],
-    ['remove', '#b1'],
-    ['remove', '#b2'],
-    ['remove', '#b3'],
-    ['remove', '#b4'],
+    ['remove', '#sweep', { duration: 1000 }],
+    ['remove', '#sweepdots', { duration: 1000 }],
+    ['remove', '#b1', { duration: 1000 }],
+    ['remove', '#b2', { duration: 1000 }],
+    ['remove', '#b3', { duration: 1000 }],
+    ['remove', '#b4', { duration: 1000 }],
     ['animate', '#shadow', {
       opacity: .1,
     }, {
@@ -342,7 +342,7 @@ window.mathBoxSteps = [
     }],
     ['animate', 'camera', {
       phi: 0,
-      theta: 1,
+      theta: .8,
     }, {
       duration: 10000,
     }],

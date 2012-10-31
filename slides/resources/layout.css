@@ -86,6 +86,12 @@ body .slide * {
 .deck-container .box.images > :last-child {
   padding-right: 0;
 }
+.deck-container .slide.overlay img {
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 20px rgba(255,255,255,1);
+  opacity: .8;
+}
 
 /* cover page layout */
 body .deck-container .slide h1 {
@@ -125,6 +131,16 @@ body .deck-container .slide.page-cover h3 {
   left: auto;
   top: 300px;
   right: 200px;
+  z-index: 20;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-tc {
+  width: 100%;
+  position: absolute !important;
+  bottom: auto;
+  top: 50px;
+  left: 0;
+  right: 0;
+  text-align: center;
   z-index: 20;
 }
 .csstransitions.csstransforms .deck-container .slide.abs-tl {

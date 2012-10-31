@@ -24,13 +24,13 @@ body .deck-container .slide h3 {
 
 
 body .deck-container h1, body .deck-container h2, body .deck-container h3, body .deck-container h4 {
-  font-family: 'klavika-web', sans-serif;
+  font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
   font-weight: bold;
   font-style: italic;
 }
 
 body .deck-container {
-  font-family: 'klavika-web', sans-serif;
+  font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
   font-weight: normal;
   font-style: italic;
 
@@ -76,13 +76,13 @@ body .deck-container .slide {
 body .deck-container .slide h1 {
   font-size: 96px;
   font-weight: bold;
-  -webkit-text-stroke: 3px #333;
+  -webkit-text-stroke: 2px #333;
   text-align: center;
   word-spacing: 5px;
 }
 body .deck-container .slide h1 i {
   opacity: .4;
-  -webkit-text-stroke: 3px #243540;
+  -webkit-text-stroke: 2px #243540;
 }
 
 body .deck-container .slide h2 {
@@ -103,7 +103,7 @@ body .deck-container .slide h3 {
 /* cover page */
 body .deck-container .slide.page-cover h3 span {
   -webkit-text-stroke: 0;
-  letter-spacing: 1px;
+  letter-spacing: 0px;
 }
 
 body .deck-container .slide.page-cover h2 {
