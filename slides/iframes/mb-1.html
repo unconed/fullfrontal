@@ -148,7 +148,7 @@ window.mathBoxSteps = [
     }],
     ['add', 'curve', {
       id: 'bump',
-      n: 512,
+      n: 1024,
       live: true,
       domain: [-π*2, π*2],
       expression: function (x) {
@@ -256,16 +256,16 @@ window.mathBoxSteps = [
       opacity: .5,
     }],
     ['set', '#bump', {
-      expression: function (x) {
+      expression: function (x, i) {
         var t = clock(3);
         var fraction = Math.min(1, t);
         var modulate = Math.max(0, Math.min(1, t - 2.5));
-        var wipe = Math.max(0, Math.min(1, t - 4))*Math.max(0, Math.min(1, 6 - t))*.05;
+        var wipe = (.5-.5*Math.cos(π*Math.max(0, Math.min(1, t - 4))))*.01;
         var y = .5-.5*Math.cos(x + τ/2);
         y = y+(Math.asin(y)/π*2-y)*fraction;
         m = 1+modulate*(-.5+.5*Math.cos(x/8));
-        var rx = Math.random()*2-1;
-        var ry = Math.random()*2-1;
+        var rx = (i%2)*2-1;
+        var ry = 0;
         return [ x / 8 + rx*wipe, y*m + ry*wipe];
       },
     }],
@@ -273,7 +273,7 @@ window.mathBoxSteps = [
       lineWidth: 10,
       color: 0x40C000,
     }, {
-      delay: 1300,
+      delay: 3300,
       duration: 1000,
     }],
     ['add', 'curve', {
@@ -286,6 +286,7 @@ window.mathBoxSteps = [
       },
       lineWidth: 5,
       worldRotation: [0, 0, π],
+      color: 0x20C050,
     }, {
       delay: 0,
       duration: 500,
@@ -303,48 +304,48 @@ window.mathBoxSteps = [
       duration: 2500,
     }],
     ['add', 'curve', {
-      n: 512,
+      n: 1024,
       live: true,
       domain: [-π*8, π*8],
       lineWidth: 10,
       color: 0x40C000,
-      expression: function (x) {
+      expression: function (x, i) {
         var t = clock(3);
         var fraction = Math.min(1, t);
         var modulate = Math.max(0, Math.min(1, t - 1.5));
-        var wipe = Math.max(0, Math.min(1, t - 4))*Math.max(0, Math.min(1, 6 - t))*.05;
+        var wipe = (.5-.5*Math.cos(π*Math.max(0, Math.min(1, t - 4))))*.01;
         var y = .5-.5*Math.cos(x + τ/2);
         y = y+(Math.asin(y)/π*2-y)*fraction;
         m = 1+modulate*(-.5+.5*Math.cos(x/8));
-        var rx = Math.random()*2-1;
-        var ry = Math.random()*2-1;
-        return [ x / 8 - Math.sin(x) * .05 + rx*wipe, y*m * .8 + ry*wipe ];
+        var rx = (i%2)*2-1;
+        var ry = 0;
+        return [ x / 8 - Math.sin(x) * .05, y*m * .8 ];
       },
     }, {
-      delay: 1300,
-      duration: 1000,
+      delay: 3600,
+      duration: 500,
     }],
     ['add', 'curve', {
-      n: 512,
+      n: 1024,
       live: true,
       domain: [-π*8, π*8],
       lineWidth: 10,
       color: 0x40C000,
-      expression: function (x) {
+      expression: function (x, i) {
         var t = clock(3);
         var fraction = Math.min(1, t);
         var modulate = Math.max(0, Math.min(1, t - 1.5));
-        var wipe = Math.max(0, Math.min(1, t - 4))*Math.max(0, Math.min(1, 6 - t))*.05;
+        var wipe = (.5-.5*Math.cos(π*Math.max(0, Math.min(1, t - 4))))*.01;
         var y = .5-.5*Math.cos(x + τ/2);
         y = y+(Math.asin(y)/π*2-y)*fraction;
         m = 1+modulate*(-.5+.5*Math.cos(x/8));
-        var rx = Math.random()*2-1;
-        var ry = Math.random()*2-1;
+        var rx = (i%2)*2-1;
+        var ry = 0;
         return [ x / 8 - Math.sin(x) * .1 + rx*wipe, y*m * .6 + ry*wipe ];
       },
     }, {
-      delay: 1300,
-      duration: 1000,
+      delay: 3600,
+      duration: 500,
     }],
   ],
 
@@ -352,14 +353,14 @@ window.mathBoxSteps = [
   [
     ['animate', 'viewport', {
       range: [[-π, π], [0, 1]],
-      scale: [1, 1],
+      scale: [1.6, .8],
       polar: 0,
     }, {
       delay: 0,
       duration: 1000,
     }],
     ['remove', 'curve', {
-      delay: 1100,
+      delay: 1500,
       duration: 1000,
     }],
     ['add', 'curve', {
@@ -371,7 +372,7 @@ window.mathBoxSteps = [
       color: 0xC01050,
       expression: function (x) {
         var t = clock(4);
-        var wipe = Math.max(0, Math.min(1, t - 3.3))*.02;
+        var wipe = Math.max(0, Math.min(1, t - 3.7))*.02;
         var xx = (x + τ) % τ - π;
         var y = Math.cos((xx*xx*5+Math.abs(xx))/6*1.1)*.4+.4;
         var rx = Math.random()*2-1;
@@ -379,7 +380,7 @@ window.mathBoxSteps = [
         return [ x + rx*wipe/y, y + ry*wipe ];
       },
     }, {
-      delay: 1100,
+      delay: 1500,
       duration: 1000,
     }],
     ['add', 'curve', {
@@ -393,7 +394,7 @@ window.mathBoxSteps = [
         return [ x, .55 ];
       },
     }, {
-      delay: 3100,
+      delay: 3500,
       duration: 1000,
     }],
     ['add', 'curve', {
@@ -405,7 +406,7 @@ window.mathBoxSteps = [
         return [ x, .6 - Math.cos(x*3)*.05 ];
       },
     }, {
-      delay: 3100,
+      delay: 3500,
       duration: 1000,
     }],
     ['animate', 'viewport', {
@@ -413,7 +414,7 @@ window.mathBoxSteps = [
       scale: [1, 1],
       polar: 1,
     }, {
-      delay: 1100,
+      delay: 1500,
       duration: 1200,
     }],
   ],

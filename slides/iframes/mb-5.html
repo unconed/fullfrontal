@@ -103,8 +103,19 @@ function lerptime(t) {
   return t*.5+.5;
 }
 
+var lerppoints = [
+  [1.2, 0.3, 0.1],
+  [1.2, 0.3, 0.9],
+];
+
+function lerppoint() {
+  var t = lerptime(clock(3)+3);
+  return lerp(lerppoints[0], lerppoints[1], t);
+}
+
 window.mathBoxSteps = [
 
+  // 4x4 grid
   [
     ['add', 'grid', {
       axis: [ 0, 2 ],
@@ -129,6 +140,7 @@ window.mathBoxSteps = [
     }],
   ],
 
+  // Connect 4 points each
   [
     ['animate', 'surface', {
       opacity: 0.5
@@ -167,45 +179,48 @@ window.mathBoxSteps = [
     }, {
       duration: 500,
     }],
+  ],
 
+  // Go 3d
+  [
     ['animate', 'camera', {
       theta: .5,
       phi: τ/8,
     }, {
-      delay: 1500,
+      delay: 0,
       duration: 1000,
     }],
 
     ['animate', '#b1', {
       expression: surface1(0),
     }, {
-      delay: 2800,
+      delay: 1300,
       duration: 700,
     }],
 
     ['animate', '#b2', {
       expression: surface1(1),
     }, {
-      delay: 2800,
+      delay: 1300,
       duration: 700,
     }],
     ['animate', '#b3', {
       expression: surface1(2),
     }, {
-      delay: 2800,
+      delay: 1300,
       duration: 700,
     }],
     ['animate', '#b4', {
       expression: surface1(3),
     }, {
-      delay: 2800,
+      delay: 1300,
       duration: 700,
     }],
 
     ['animate', '#dots', {
       expression: surface,
     }, {
-      delay: 2800,
+      delay: 1300,
       duration: 700,
     }],
     ['add', 'surface', {
@@ -292,7 +307,7 @@ window.mathBoxSteps = [
       pointSize: 20,
       color: 0xffffff,
     }],
-    ['add', 'beziersurface', {
+    ['add', 'bezierSurface', {
       n: 64,
       id: 'result',
       domain: [[0, 0], [0, 1]],
@@ -302,7 +317,7 @@ window.mathBoxSteps = [
       live: true,
       expression: surface,
     }],
-    ['add', 'beziersurface', {
+    ['add', 'bezierSurface', {
       n: 24,
       id: 'resultshadow',
       domain: [[0, 0], [0, 1]],
@@ -314,7 +329,7 @@ window.mathBoxSteps = [
       opacity: .1,
       expression: shadow,
     }],
-    ['add', 'beziersurface', {
+    ['add', 'bezierSurface', {
       n: 24,
       id: 'result',
       domain: [[0, 0], [0, 1]],
@@ -366,7 +381,49 @@ window.mathBoxSteps = [
     }, {
       delay: 500
     }],
-  ]
+  ],
+
+  [],
+
+  [
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      data: lerppoints,
+      color: 0xB040D0,
+      lineWidth: 6,
+      opacity: .5,
+    }, {
+      duration: 600,
+    }],
+    ['add', 'curve', {
+      n: 2,
+      points: true,
+      line: false,
+      data: lerppoints,
+      color: 0x404040,
+      pointSize: 20,
+      zIndex: 1,
+    }, {
+      duration: 600,
+    }],
+    ['add', 'curve', {
+      n: 1,
+      points: true,
+      line: false,
+      live: true,
+      expression: lerppoint,
+      color: 0xB040D0,
+      pointSize: 20,
+      zIndex: 2,
+    }, {
+      duration: 600,
+      pointSize: 20,
+    }],
+  ],
+
+  [],
 ];
 
 </script>
