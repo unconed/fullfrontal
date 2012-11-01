@@ -5,13 +5,17 @@ window.mathBoxSetup = function (mathbox) {
   mathbox
     .viewport({
       type: 'cartesian',
-      range: [[-2, 2], [-1, 1]],
+      range: [[-π, π], [-1, 1]],
       scale: [1, .5],
     });
 
 }
 
 window.mathBoxSteps = [
+
+  [
+    ['add', 'curve']
+  ],
 
 ];
 

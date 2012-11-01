@@ -18,7 +18,7 @@ window.mathBoxSetup = function (mathbox) {
 
 
 function tentacle(x, d, o) {
-  var t = clock(1)*.6;
+  var t = clock(1)*.6 + 20;
   var Q = .43, P = .05;
 
   var i = x * 13;
@@ -451,7 +451,7 @@ window.mathBoxSteps = [
     }],
     ['animate', 'viewport', {
       position: [0, 0, 0],
-      range: [[-2*π, 2*π], [-π, π], [11, 27]],
+      range: [[-1.5*π, 1.5*π], [-π, π], [11, 27]],
       scale: [.5, .125, .25],
 //      scale: [.6, .3*1.2, .3],
     }, {

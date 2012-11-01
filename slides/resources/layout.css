@@ -164,40 +164,40 @@ body .deck-container .slide.page-cover h3 {
 }
 
 .deck-container .t-2 {
-  margin-top: -50px;
-  padding-top: 0;
+  margin-top: -50px !important;
+  padding-top: 0 !important;
 }
 .deck-container .t-1 {
-  margin-top: -25px;
-  padding-top: 0;
+  margin-top: -25px !important;
+  padding-top: 0 !important;
 }
 .deck-container .t0 {
-  margin-top: 0;
-  padding-top: 0;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 .deck-container .t1 {
-  margin-top: 25px;
+  margin-top: 25px !important;
 }
 .deck-container .t2 {
-  margin-top: 50px;
+  margin-top: 50px !important;
 }
 .deck-container .t3 {
-  margin-top: 75px;
+  margin-top: 75px !important;
 }
 .deck-container .t4 {
-  margin-top: 100px;
+  margin-top: 100px !important;
 }
 .deck-container .t5 {
-  margin-top: 125px;
+  margin-top: 125px !important;
 }
 .deck-container .t6 {
-  margin-top: 150px;
+  margin-top: 150px !important;
 }
 .deck-container .l4 {
-  padding-left: 100px;
+  padding-left: 100px !important;
 }
 .deck-container .r4 {
-  padding-right: 100px;
+  padding-right: 100px !important;
 }
 
 /* code */

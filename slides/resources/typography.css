@@ -69,7 +69,10 @@ body .deck-container .MathJax {
   font-style: normal;
   -webkit-font-smoothing: subpixel-antialiased;
 }
-
+body .deck-container .slide h1 .MathJax {
+  font-style: normal;
+  font-weight: normal;
+}
 body .deck-container .slide {
   word-spacing: 2px;
 }
