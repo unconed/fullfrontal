@@ -10,7 +10,7 @@ window.mathBoxSetup = function (mathbox) {
       sphere: 1,
     })
     .camera({
-      phi: -τ/4,
+      phi: -τ/8,
       theta: .3,
     });
 
@@ -23,7 +23,7 @@ function tentacle(x, d, o) {
 
   var i = x * 13;
 
-  var time = t - i * .06 - o*3;
+  var time = t - i * .08 - o*3;
 
   if (o == 0) {
     time *= 3;
@@ -31,7 +31,7 @@ function tentacle(x, d, o) {
 
   var radius = i*.15 + .43;
   var longitude = Math.cos(time + Math.sin(time * .31)) * 2 + Math.sin(time * .83) * 3 + time*.02;
-  var latitude = Math.sin(time * .7) - Math.cos(3 + time *.43 + Math.sin(time) * .13) * 2.6;
+  var latitude = Math.sin(time * .7 + 1) - Math.cos(3 + time *.43 + Math.sin(time) * .13) * 2.3;
 
   if (o == 0) {
     longitude = (longitude - time*.02) * .3;
@@ -43,14 +43,14 @@ function tentacle(x, d, o) {
 
 function tentacleSeed(o) {
   return function (x, i) {
-    var t = Math.min(1, Math.max(0, clock(2)*.8-1));
+    var t = .5-.5*Math.cos(π * Math.min(1, Math.max(0, clock(2)*.5-1)));
     return tentacle(Math.min(t, x), i, o);
   }
 }
 
 function tentacleShadow(o) {
   return function (x, i) {
-    var t = Math.min(1, Math.max(0, clock(2)*.8-1));
+    var t = .5-.5*Math.cos(π * Math.min(1, Math.max(0, clock(2)*.5-1)));
     var p = tentacle(Math.min(t, x), i, o);
     p[2] = .85;
     return p;
@@ -59,14 +59,14 @@ function tentacleShadow(o) {
 
 function tentacleExtend(o) {
   return function (x, i) {
-    var t = clock(3)*.8;
+    var t = clock(3)*.58;
     return tentacle(Math.min(1 + t, x), i, o);
   }
 }
 
 function tentacleShadowExtend(o) {
   return function (x, i) {
-    var t = clock(3)*.8;
+    var t = clock(3)*.58;
     var p = tentacle(Math.min(1 + t, x), i, o);
     p[2] = .85;
     return p;
@@ -384,11 +384,11 @@ window.mathBoxSteps = [
       duration: 7000,
     }],
     ['animate', 'camera', {
-      phi: τ/4,
+      phi: τ/4-τ/8,
       orbit: 1.5,
     }, {
-      delay: 600,
-      duration: 7000,
+      delay: 1600,
+      duration: 5000,
     }],
   ],
 
@@ -400,24 +400,29 @@ window.mathBoxSteps = [
     ['remove', '#extrashadow', {
       duration: 300,
     }],
+    ['animate', 'camera', {
+      phi: τ/4,
+    }, {
+      duration: 5000,
+    }],
   ],
 
   // Unwrap sphere + expand grid
   [
     ['animate', 'viewport', {
-      range: [[-π, π], [-π/2, π/2], [-2, 2]],
+      range: [[-π, π], [-π/2, π/2], [-3, 3]],
       sphere: 0,
     }, {
       duration: 2000,
     }],
     ['animate', 'viewport', {
-      position: [-.1, .2, 0],
+      position: [-.15, .12, -.1],
     }, {
       delay: 0,
       duration: 2000,
     }],
     ['animate', 'camera', {
-      phi: τ/4+τ/8,
+      phi: τ/4+τ/8+.2,
     }, {
       duration: 5000,
     }],

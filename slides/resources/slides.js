@@ -23,13 +23,20 @@ $(function() {
     if (!$(iframe).data('src')) {
       var src = $(iframe).attr('src');
       $(iframe).data('src', src);
+      iframe.onload = null;
       iframe.src = 'about:blank';
     }
   }
 
-  function enable(iframe) {
+  function enable(iframe, step) {
     var src = $(iframe).data('src');
     if (src) {
+      console.log('enable', step, iframe)
+      iframe.onload = function () {
+        console.log('load', step, iframe)
+        iframe.onload = null;
+        mathboxGo(iframe, step);
+      }
       iframe.src = src;
       $(iframe).data('src', null);
     }
@@ -39,6 +46,10 @@ $(function() {
   $('iframe').each(function () {
     disable(this);
   });
+
+  function mathboxGo(iframe, step) {
+    iframe.contentWindow && iframe.contentWindow.postMessage({ mathBoxDirector: { method: 'go', args: [step] }}, '*');
+  }
 
   // Respond to presentation deck navigation
 	$(document).bind('deck.change', function (e, from, to) {
@@ -55,12 +66,17 @@ $(function() {
       return $slide;
     }
 
-    var $slide = getTopSlide(Math.max(from, to));
+    var $subslide = $.deck('getSlide', to);
+    var $slide = getTopSlide(to);
+    var step = $slide.find('.slide').index($subslide) + 2;
+
     // Pass navigation commands to active iframes
     $slide.find('iframe').each(function () {
-      this.contentWindow.postMessage({ mathBoxDirector: { method: to > from ? 'forward' : 'back' }}, '*');
+      console.log('go', step, this)
+      mathboxGo(this, step);
     });
 
+    /*
     // Skip to step in mathbox embed if arriving backwards.
     if (to < from) {
       var $slide = getTopSlide(to);
@@ -76,16 +92,20 @@ $(function() {
         });
       }
     }
+    */
 
     // Start playing videos
     $slide.find('video').each(function () {
       this.play();
     });
 
+    // Start at beginning or end of mathbox slides
+    var go = to > from ? 1 : -1;
+
     // Pre-load iframes (but allow time for current transition)
     $iframes[to].each(function () {
       var iframe = this;
-      setTimeout(function () { enable(iframe); }, 550);
+      setTimeout(function () { enable(iframe, go); }, 550);
     });
 
     // Unload old iframes
