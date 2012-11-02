@@ -79,10 +79,19 @@ window.mathBoxScript = [
   [
     ['add', 'grid', {
       axis: [0, 1],
+      n: 64,
       offset: [0, 0, .85],
       tickBase: [π, π],
       ticks: [10, 10],
       lineWidth: 2,
+    }],
+    ['add', 'axis', {
+      axis: 0,
+      n: 64,
+    }],
+    ['add', 'axis', {
+      axis: 1,
+      n: 64,
     }],
     ['add', 'surface', {
       domain: [[-π, π], [-π/2, π/2]],

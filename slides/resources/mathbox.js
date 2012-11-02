@@ -39,7 +39,7 @@ DomReady.ready(function() {
       var mathbox = mathBox(_.extend({
         cameraControls: true,
         stats: true,
-        scale: .7,
+        scale: 1,
         orbit: 3.5,
         theta: 0//,
       }, options || {})).start();

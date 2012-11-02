@@ -43,6 +43,7 @@ window.mathBoxScript = [
       },
       lineWidth: 5,
       opacity: 0.001,
+      zIndex: 3,
     }],
     ['add', 'curve', {
       id: "spiral",
@@ -97,6 +98,7 @@ window.mathBoxScript = [
       ticks: 4,
       tickBase: π,
       opacity: 0.001,
+      zIndex: 2,
     }, {
       delay: 2800,
       duration: 600,
@@ -107,6 +109,7 @@ window.mathBoxScript = [
       n: 2,
       ticks: 8,
       opacity: 0.001,
+      zIndex: 2,
     }, {
       delay: 2800,
       duration: 600,
@@ -131,7 +134,8 @@ window.mathBoxScript = [
         return [ Math.cos(a), Math.sin(-a) *.5 + .5 ];
       },
       color: 0x0040A0,
-      pointSize: 30,
+      pointSize: 20,
+      zIndex: 50,
     }, { duration: 500 }],
   ],
 
@@ -275,11 +279,11 @@ window.mathBoxScript = [
     }],
   ],
 
-  // Flower spread
+  // Leafs spread
   [
     ['animate', 'viewport', {
       range: [[-π, π], [-.1, 1]],
-      scale: [.8, .8],
+      scale: [.7, .7],
       polar: 1,
     }, {
       delay: 300,
@@ -320,6 +324,7 @@ window.mathBoxScript = [
       lineWidth: 5,
       worldRotation: [0, 0, π],
       color: 0x20C050,
+      zIndex: 4,
     }, {
       delay: 0,
       duration: 500,
@@ -351,6 +356,7 @@ window.mathBoxScript = [
         m = 1+modulate*(-.5+.5*Math.cos(x/8));
         return [ x / 8 - Math.sin(x) * .05, y*m * .8 ];
       },
+      zIndex: 4,
     }, {
       delay: 3600,
       duration: 500,
@@ -370,6 +376,7 @@ window.mathBoxScript = [
         m = 1+modulate*(-.5+.5*Math.cos(x/8));
         return [ x / 8 - Math.sin(x) * .1, y*m * .6 ];
       },
+      zIndex: 4,
     }, {
       delay: 3600,
       duration: 500,
@@ -406,6 +413,7 @@ window.mathBoxScript = [
         var ry = Math.random()*2-1;
         return [ x + rx*wipe/y, y + ry*wipe ];
       },
+      zIndex: 5,
     }, {
       delay: 1500,
       duration: 1000,
@@ -420,6 +428,7 @@ window.mathBoxScript = [
       expression: function (x) {
         return [ x, .55 ];
       },
+      zIndex: 5,
     }, {
       delay: 3500,
       duration: 1000,
@@ -432,6 +441,7 @@ window.mathBoxScript = [
       expression: function (x) {
         return [ x, .6 - Math.cos(x*3)*.05 ];
       },
+      zIndex: 5,
     }, {
       delay: 3500,
       duration: 1000,

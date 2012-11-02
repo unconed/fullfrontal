@@ -121,7 +121,8 @@ body .deck-container .slide.page-cover h3 {
 .csstransitions.csstransforms .deck-container .slide.temp {
   position: absolute;
 }
-.csstransitions.csstransforms .deck-container .slide.abs {
+.csstransitions.csstransforms .deck-container .slide.abs,
+.csstransitions.csstransforms .deck-container .slide-extra.abs {
   position: absolute !important;
   float: left;
   left: auto;
@@ -129,7 +130,8 @@ body .deck-container .slide.page-cover h3 {
   top: auto;
   bottom: auto;
 }
-.csstransitions.csstransforms .deck-container .slide.abs-r {
+.csstransitions.csstransforms .deck-container .slide.abs-r,
+.csstransitions.csstransforms .deck-container .slide-extra.abs-r {
   width: 200px;
   position: absolute !important;
   left: auto;
@@ -137,7 +139,8 @@ body .deck-container .slide.page-cover h3 {
   right: 200px;
   z-index: 20;
 }
-.csstransitions.csstransforms .deck-container .slide.abs-tc {
+.csstransitions.csstransforms .deck-container .slide.abs-tc,
+.csstransitions.csstransforms .deck-container .slide-extra.abs-tc {
   width: 100%;
   position: absolute !important;
   bottom: auto;
@@ -147,14 +150,16 @@ body .deck-container .slide.page-cover h3 {
   text-align: center;
   z-index: 20;
 }
-.csstransitions.csstransforms .deck-container .slide.abs-tl {
+.csstransitions.csstransforms .deck-container .slide.abs-tl,
+.csstransitions.csstransforms .deck-container .slide-extra.abs-tl {
   width: 200px;
   position: absolute !important;
-  left: 50px;
-  top: 50px;
+  left: 100px;
+  top: 100px;
   z-index: 20;
 }
-.csstransitions.csstransforms .deck-container .slide.abs-bc {
+.csstransitions.csstransforms .deck-container .slide.abs-bc,
+.csstransitions.csstransforms .deck-container .slide-extra.abs-bc {
   width: 100%;
   position: absolute !important;
   top: auto;
@@ -211,6 +216,9 @@ body .deck-container .slide.page-cover h3 {
   -webkit-box-shadow: inset 0 2px 5px rgba(0, 0, 0, .3);
   padding: 25px;
 }
+.deck-container .slide pre.thin {
+  padding: 10px;
+}
 .deck-container .slide pre.overlay {
   margin: 100px 50px 0 50px;
 }
@@ -228,8 +236,10 @@ body .deck-container .slide.page-cover h3 {
 /* centerfold layout */
 .deck-container .slide .icon-float {
   position: absolute;
-  bottom: 10px;
-  right: 80px;
+  bottom: 50px;
+  right: 100px;
+
+  -webkit-transform: scale(1.05, 1.05) translateZ(50px);
 }
 .deck-container .slide .icon-float img {
   margin: 0;
@@ -280,7 +290,7 @@ body .deck-container .slide.page-cover h3 {
 /* iframes */
 .deck-container .slide iframe {
   width: 100%;
-  height: 105%;
+  height: 100%;
   border: 0;
   margin: 0;
   padding: 0;
@@ -298,7 +308,7 @@ body .deck-container .slide.page-cover h3 {
   -webkit-transform: translateZ(-10px);
 }
 .slide iframe.mathbox {
-  -webkit-transform: scale3d(1.1, 1.1, 1) translateZ(-100px);
+  -webkit-transform: scale3d(1.1, 1.1, 1) translate3d(0, 16.5px, -100px);
   -webkit-transform-style: preserve-3d;
 }
 .deck-container .slide .slide iframe {

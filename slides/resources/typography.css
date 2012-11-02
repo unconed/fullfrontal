@@ -16,7 +16,7 @@ body .deck-container .slide h3 {
   background: #f7f7f7;
 }
 .deck-container .slide pre.overlay {
-  background-color: rgba(247, 247, 247, .8);
+  background-color: rgba(247, 247, 247, .9);
 }
 
 
@@ -38,7 +38,7 @@ body .deck-container {
   box-shadow: 0px 2px 30px rgba(0, 0, 0, .3);
 }
 
-body .deck-container .slide.mj {
+body .deck-container .slide.mj, body .deck-container .slide .mj {
   font-size: 38px;
   text-shadow:
     3px 0px 1px rgb(255, 255, 255),

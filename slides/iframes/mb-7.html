@@ -7,7 +7,40 @@ window.mathBoxSetup = function (mathbox) {
       type: 'cartesian',
       range: [[-4, 4], [-4, 4]],
       scale: [1.29, .65],
-      position: [0, -.1, 0]
+    })
+    .grid({
+      color: 0xB0B0B0,
+      ticks: [4, 4],
+      zIndex: -1,
+      opacity: 0.001,
+    })
+    .axis({
+      axis: 0,
+      color: 0x909090,
+      ticks: 4,
+      lineWidth: 4,
+      opacity: 0.001,
+    })
+    .axis({
+      axis: 1,
+      color: 0x909090,
+      ticks: 4,
+      lineWidth: 4,
+      opacity: 0.001,
+    })
+    .curve({
+      id: 'fdots',
+      n: 9,
+      domain: [-4, 4],
+      expression: function (x) {
+        return x;
+      },
+      points: true,
+      line: false,
+      live: true,
+      pointSize: 15,
+      zIndex: 1,
+      opacity: 0.001,
     });
 
 }
@@ -22,44 +55,20 @@ window.mathBoxScript = [
 
   [],
 
+  // Grid
   [
-    ['add', 'grid', {
-      color: 0xA0A0A0,
-      ticks: [4, 4],
-      zIndex: -1,
-    }],
-    ['add', 'axis', {
-      axis: 0,
-      color: 0x909090,
-      ticks: 4,
-      lineWidth: 4,
-    }],
-    ['add', 'axis', {
-      axis: 1,
-      color: 0x909090,
-      ticks: 4,
-      lineWidth: 4,
-    }],
+    ['animate', 'grid, axis, curve', {
+      opacity: 1,
+    }]
   ],
 
-  [
-    ['add', 'curve', {
-      id: 'fdots',
-      n: 9,
-      domain: [-4, 4],
-      expression: function (x) {
-        return x;
-      },
-      points: true,
-      line: false,
-      live: true,
-      pointSize: 15,
-      zIndex: 1,
-    }],
-  ],
-
+  // Continuous function
   [
     ['remove', 'curve'],
+    ['animate', 'viewport', {
+      range: [[-6, 6], [-6, 6]],
+      scale: [1.935, .975],
+    }, { duration: 600 }],
     ['add', 'curve', {
       id: 'f',
       n: 128,
@@ -73,8 +82,12 @@ window.mathBoxScript = [
       lineWidth: 6,
       zIndex: 1,
     }],
+    ['animate', '#f', {
+      domain: [-6, 6],
+    }, { duration: 600 }],
   ],
 
+  // x/2
   [
     ['animate', '#f', {
       expression: function (x) {
@@ -85,6 +98,7 @@ window.mathBoxScript = [
     }],
   ],
 
+  // x/2 + 1
   [
     ['animate', '#f', {
       expression: function (x) {
@@ -95,16 +109,18 @@ window.mathBoxScript = [
     }],
   ],
 
+  // atan x
   [
     ['animate', '#f', {
       expression: function (x) {
-        return Math.atan(x);
+        return 2*Math.atan(x);
       },
     }, {
       duration: 300,
     }],
   ],
 
+  // sin x
   [
     ['add', 'curve', {
       id: 'g',
@@ -124,10 +140,11 @@ window.mathBoxScript = [
     }],
   ],
 
+  // Add up f + g
   [
     ['animate', '#f', {
       expression: function (x) {
-        return Math.atan(x)+Math.sin(8*x);
+        return 2*Math.atan(x)+Math.sin(8*x);
       },
       color: 0xC02050,
     }, {
@@ -135,11 +152,49 @@ window.mathBoxScript = [
     }],
     ['animate', '#g', {
       expression: function (x) {
-        return Math.atan(x)+Math.sin(8*x);
+        return 2*Math.atan(x)+Math.sin(8*x);
       },
       color: 0xC02050,
     }, {
       duration: 600,
+    }],
+  ],
+
+  // New f = cosine bump
+  [
+    ['remove', 'curve'],
+    ['add', 'curve', {
+      id: 'f',
+      n: 128,
+      domain: [-4, 4],
+      expression: function (x) {
+        return Math.cos(x) + 1;
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 6,
+      zIndex: 1,
+    }],
+  ],
+
+  // New g = sine
+  [
+    ['add', 'curve', {
+      id: 'g',
+      n: 128,
+      domain: [-4, 4],
+      expression: function (x) {
+        return Math.sin(8*x);
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 6,
+      zIndex: 1,
+      color: 0x20C050,
+    }, {
+      duration: 400
     }],
   ],
 

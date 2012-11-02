@@ -97,6 +97,13 @@ $(function() {
       this.play();
     });
 
+    // Stop old videos
+    setTimeout(function () {
+      $.deck('getSlide', from).find('video').each(function () {
+        this.stop();
+      });
+    }, 500);
+
     // Start at beginning or end of mathbox slides
     var go = to > from ? 1 : -1;
 
