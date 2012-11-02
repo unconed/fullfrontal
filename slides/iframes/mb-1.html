@@ -135,12 +135,17 @@ window.mathBoxScript = [
       },
       color: 0x0040A0,
       pointSize: 20,
-      zIndex: 50,
+      zIndex: -50,
     }, { duration: 500 }],
   ],
 
   // Turn 90 degrees, show tail
   [
+    ['animate', '#dot', {
+      zIndex: -50,
+    }, {
+      duration: 500,
+    }],
     ['animate', '#circle, #dot', {
       worldRotation: new THREE.Vector3(0, -τ/4, 0),
     }, {

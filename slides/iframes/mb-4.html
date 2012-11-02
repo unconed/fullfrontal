@@ -112,6 +112,7 @@ window.mathBoxScript = [
       live: true,
       data: vector1,
       lineWidth: 6,
+      size: .1,
     }, {
       delay: 1000,
       duration: 300,
@@ -122,6 +123,7 @@ window.mathBoxScript = [
       data: vector2,
       lineWidth: 6,
       color: 0xC02050,
+      size: .1,
     }, {
       delay: 1000,
       duration: 300,
@@ -170,6 +172,7 @@ window.mathBoxScript = [
   [
     ['remove', 'grid'],
     ['add', 'vector', {
+      size: .1,
       id: 'c',
       live: true,
       expression: function (i, end) { return vector5[+end]; },
@@ -199,6 +202,7 @@ window.mathBoxScript = [
       duration: 1000,
     }],
     ['add', 'vector', {
+      size: .1,
       id: 'd',
       n: 1,
       line: false,

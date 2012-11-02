@@ -49,6 +49,25 @@ $(function() {
     iframe.contentWindow && iframe.contentWindow.postMessage({ mathBoxDirector: { method: 'go', args: [step] }}, '*');
   }
 
+  // Interface with websocket for remote navigation commands
+  (function () {
+    var host = window.document.location.host.replace(/:.*/, '');
+    var ws = new WebSocket('ws://' + host + ':8080');
+    ws.onmessage = function (event) {
+      var data = JSON.parse(event.data);
+      var command = {
+          up:    'prev',
+          left:  'prev',
+          down:  'next',
+          right: 'next',
+          play:  'next',
+        }[data.type];
+      if (command) {
+        $.deck(command);
+      }
+    };
+  })();
+
   // Respond to presentation deck navigation
 	$(document).bind('deck.change', function (e, from, to) {
     var out = [];
@@ -68,29 +87,10 @@ $(function() {
     var $slide = getTopSlide(to);
     var step = $slide.find('.slide').index($subslide) + 2;
 
-    // Pass navigation commands to active iframes
+    // Sync up iframe mathboxes to correct step
     $slide.find('iframe').each(function () {
-      var $nested = $(this).parents('.slide .slide');
       mathboxGo(this, step);
     });
-
-    /*
-    // Skip to step in mathbox embed if arriving backwards.
-    if (to < from) {
-      var $slide = getTopSlide(to);
-      var $last = $slide.find('.slide:last');
-      if ($last[0] == $.deck('getSlide', to)[0]) {
-        $slide.find('iframe').each(function () {
-          this.contentWindow.postMessage({ mathBoxDirector: { method: 'go', args: [-1] }}, '*');
-        });
-      }
-      if ($last.length == 0) {
-        $slide.find('iframe').each(function () {
-          this.contentWindow.postMessage({ mathBoxDirector: { method: 'forward' }}, '*');
-        });
-      }
-    }
-    */
 
     // Start playing videos
     $slide.find('video').each(function () {
@@ -100,9 +100,9 @@ $(function() {
     // Stop old videos
     setTimeout(function () {
       $.deck('getSlide', from).find('video').each(function () {
-        this.stop();
+        this.pause();
       });
-    }, 500);
+    }, 580);
 
     // Start at beginning or end of mathbox slides
     var go = to > from ? 1 : -1;
@@ -110,7 +110,7 @@ $(function() {
     // Pre-load iframes (but allow time for current transition)
     $iframes[to].each(function () {
       var iframe = this;
-      setTimeout(function () { enable(iframe, go); }, 550);
+      setTimeout(function () { enable(iframe, go); }, 580);
     });
 
     // Unload old iframes
