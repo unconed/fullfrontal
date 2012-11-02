@@ -172,7 +172,7 @@ window.mathBoxScript = [
     ['add', 'vector', {
       id: 'c',
       live: true,
-      expression: function (i) { return vector5[i]; },
+      expression: function (i, end) { return vector5[+end]; },
       lineWidth: 6,
       color: 0x20C050,
     }, {
@@ -194,7 +194,7 @@ window.mathBoxScript = [
       delay: 10,
     }],
     ['animate', '#c', {
-      expression: function (i) { return i ? lerp(points[0], points[1], 1/3) : points[0]; },
+      expression: function (i, end) { return end ? lerp(points[0], points[1], 1/3) : points[0]; },
     }, {
       duration: 1000,
     }],
@@ -204,7 +204,7 @@ window.mathBoxScript = [
       line: false,
       points: true,
       live: true,
-      expression: function (i) { return i ? lerp(points[0], points[1], 1/3) : [-1.7, .15]; },
+      expression: function (i, end) { return end ? lerp(points[0], points[1], 1/3) : [-1.7, .15]; },
       color: 0xB040D0,
       lineWidth: 6,
     }, {
@@ -253,6 +253,7 @@ window.mathBoxScript = [
       data: points,
       color: 0xB040D0,
       lineWidth: 4,
+      zIndex: -1,
     }, {
       delay: 500,
     }],
@@ -346,7 +347,7 @@ window.mathBoxScript = [
       },
       pointSize: 20,
       color: 0x20C050,
-      zIndex: 2,
+      zIndex: 3,
     }],
   ],
 
@@ -365,6 +366,7 @@ window.mathBoxScript = [
       data: points,
       color: 0xB040D0,
       lineWidth: 4,
+      zIndex: -1,
     }],
     ['add', 'curve', {
       id: 'controlpoints',
@@ -498,7 +500,7 @@ window.mathBoxScript = [
           t);
       },
       pointSize: 20,
-      zIndex: 3,
+      zIndex: 4,
     }],
   ],
 
