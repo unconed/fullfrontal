@@ -318,3 +318,18 @@ body .deck-container .slide.page-cover h3 {
 .deck-container .slide .slide iframe {
   height: 720px;
 }
+
+/* spotlight */
+div.spotlight img {
+  width: 100%;
+  -webkit-transform: translate(0, -50px) scale(2, 2);
+}
+
+/* slide invert */
+.csstransitions.csstransforms .deck-container > .slide.invert {
+  margin-top: -300px;
+  margin-left: -300px;
+  padding: 300px;
+  width: 1880px;
+  height: 1320px;
+}
