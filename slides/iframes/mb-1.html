@@ -15,24 +15,111 @@ window.mathBoxSetup = function (mathbox) {
 
 }
 
-window.mathBoxSteps = [
+window.mathBoxScript = [
 
-  // Circle
+  // Circle + preload curves/grid
   [
     ['add', 'curve', {
+      id: "circle",
       n: 100,
       domain: [-π, π],
       expression: function (x) { return [ Math.cos(x), Math.sin(x)*.5 + .5 ] },
       lineWidth: 5,
     }],
+    ['add', 'grid', {
+      n: [ 96, 2 ],
+      lineWidth: 3,
+      tickBase: [π, 1],
+      ticks: [4, 8],
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'bump',
+      n: 512,
+      live: true,
+      domain: [-π*2, π*2],
+      expression: function (x) {
+        return [ x, .5- .5 * Math.cos(x) ];
+      },
+      lineWidth: 5,
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: "spiral",
+      n: 128,
+      live: true,
+      line: true,
+      points: false,
+      domain: [0, 16],
+      expression: function (x) {
+        var t = clock(1), q = clock(2);
+        x = Math.min((q*2-3)*1.8, x);
+        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), Math.sin(-a) *.5 + .5, x * .5 ];
+      },
+      color: 0x0040A0,
+      lineWidth: 5,
+      worldRotation: [0, -τ/4, 0],
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'shadow1',
+      n: 128,
+      live: true,
+      line: true,
+      points: false,
+      domain: [0, 16],
+      expression: function (x) {
+        var t = clock(1), q = clock(2);
+        x = Math.min((q*2-3)*1.8, x);
+        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), (-Math.sin(-a) -2.02) *.5 + .5, x * .5 ];
+      },
+      color: 0x000000,
+      lineWidth: 10,
+      worldRotation: [0, -τ/4, 0],
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'shadow2',
+      n: 100,
+      domain: [-π, π],
+      expression: function (x) { return [ Math.cos(x), (Math.sin(x) -2.05) *.5 + .5 ] },
+      lineWidth: 10,
+      worldRotation: [0, -τ/4, 0],
+      color: 0x000000,
+      opacity: 0.001,
+    }],
+    ['add', 'axis', {
+      id: 'axis0',
+      axis: 0,
+      n: 96,
+      ticks: 4,
+      tickBase: π,
+      opacity: 0.001,
+    }, {
+      delay: 2800,
+      duration: 600,
+    }],
+    ['add', 'axis', {
+      id: 'axis1',
+      axis: 1,
+      n: 2,
+      ticks: 8,
+      opacity: 0.001,
+    }, {
+      delay: 2800,
+      duration: 600,
+    }],
   ],
 
   // Point on circle
   [
-    ['animate', 'curve', {
+    ['animate', '#circle', {
       opacity: .6,
     }],
     ['add', 'curve', {
+      id: "dot",
       n: 1,
       live: true,
       line: false,
@@ -50,62 +137,27 @@ window.mathBoxSteps = [
 
   // Turn 90 degrees, show tail
   [
-    ['animate', 'curve', {
+    ['animate', '#circle, #dot', {
       worldRotation: new THREE.Vector3(0, -τ/4, 0),
     }, {
       duration: 500,
     }],
-    ['add', 'curve', {
-      n: 128,
-      live: true,
-      line: true,
-      points: false,
-      domain: [0, 16],
-      expression: function (x) {
-        var t = clock(1), q = clock(2);
-        x = Math.min((q*2-3)*1.8, x);
-        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
-        return [ Math.cos(a), Math.sin(-a) *.5 + .5, x * .5 ];
-      },
-      color: 0x0040A0,
-      lineWidth: 5,
-      worldRotation: [0, -τ/4, 0],
+    ['animate', '#spiral', {
+      opacity: 1,
     }, {
       delay: 1500, duration: 500
     }],
-    ['add', 'curve', {
-      id: 'shadow1',
-      n: 128,
-      live: true,
-      line: true,
-      points: false,
-      domain: [0, 16],
-      expression: function (x) {
-        var t = clock(1), q = clock(2);
-        x = Math.min((q*2-3)*1.8, x);
-        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
-        return [ Math.cos(a), (-Math.sin(-a) -2.02) *.5 + .5, x * .5 ];
-      },
-      color: 0x000000,
+    ['animate', '#shadow1', {
       opacity: .07,
-      lineWidth: 10,
-      worldRotation: [0, -τ/4, 0],
     }, {
       delay: 1500, duration: 500
     }],
-    ['add', 'curve', {
-      id: 'shadow2',
-      n: 100,
-      domain: [-π, π],
-      expression: function (x) { return [ Math.cos(x), (Math.sin(x) -2.05) *.5 + .5 ] },
-      lineWidth: 10,
-      worldRotation: [0, -τ/4, 0],
-      color: 0x000000,
+    ['animate', '#shadow2', {
       opacity: .04,
     }, {
       delay: 1500, duration: 500
     }],
-    ['animate', 'curve', {
+    ['animate', '#circle, #dot, #spiral, #shadow1, #shadow2', {
       worldPosition: [1.6, 0, 0],
     }, {
       delay: 1000,
@@ -128,7 +180,7 @@ window.mathBoxSteps = [
       delay: 1000,
       duration: 1000,
     }],
-    ['animate', 'curve', {
+    ['animate', '#circle, #dot, #spiral, #shadow1, #shadow2', {
       worldPosition: [1.8, 0, -3],
       worldScale: [1, 2, 2],
     }, {
@@ -142,49 +194,33 @@ window.mathBoxSteps = [
       delay: 3200,
       duration: 900,
     }],
-    ['remove', 'curve', {
+    ['remove', '#circle, #dot, #spiral, #shadow1, #shadow2', {
       delay: 3100,
       duration: 2000,
     }],
-    ['add', 'curve', {
-      id: 'bump',
-      n: 1024,
-      live: true,
-      domain: [-π*2, π*2],
-      expression: function (x) {
-        return [ x, .5- .5 * Math.cos(x) ];
-      },
-      lineWidth: 5,
+    ['animate', '#bump', {
+      opacity: 1,
     }, {
       delay: 4200,
       duration: 600,
     }],
-    ['add', 'axis', {
-      axis: 0,
-      n: 96,
-      ticks: 4,
-      tickBase: π,
+    ['animate', '#axis0', {
+      opacity: 1,
     }, {
       delay: 2800,
       duration: 600,
     }],
-    ['add', 'axis', {
-      axis: 1,
-      n: 96,
-      ticks: 8,
+    ['animate', '#axis1', {
+      opacity: 1,
     }, {
       delay: 2800,
       duration: 600,
     }],
-    ['add', 'grid', {
-      n: [ 96, 2 ],
-      lineWidth: 3,
-      tickBase: [π, 1],
-      ticks: [4, 8],
+    ['animate', 'grid', {
+      opacity: 1,
     }, {
       delay: 2800,
       duration: 600,
-      color: 0x909090,
     }],
   ],
 
@@ -260,13 +296,10 @@ window.mathBoxSteps = [
         var t = clock(3);
         var fraction = Math.min(1, t);
         var modulate = Math.max(0, Math.min(1, t - 2.5));
-        var wipe = (.5-.5*Math.cos(π*Math.max(0, Math.min(1, t - 4))))*.01;
         var y = .5-.5*Math.cos(x + τ/2);
         y = y+(Math.asin(y)/π*2-y)*fraction;
         m = 1+modulate*(-.5+.5*Math.cos(x/8));
-        var rx = (i%2)*2-1;
-        var ry = 0;
-        return [ x / 8 + rx*wipe, y*m + ry*wipe];
+        return [ x / 8, y*m];
       },
     }],
     ['animate', '#bump', {
@@ -304,7 +337,7 @@ window.mathBoxSteps = [
       duration: 2500,
     }],
     ['add', 'curve', {
-      n: 1024,
+      n: 512,
       live: true,
       domain: [-π*8, π*8],
       lineWidth: 10,
@@ -313,12 +346,9 @@ window.mathBoxSteps = [
         var t = clock(3);
         var fraction = Math.min(1, t);
         var modulate = Math.max(0, Math.min(1, t - 1.5));
-        var wipe = (.5-.5*Math.cos(π*Math.max(0, Math.min(1, t - 4))))*.01;
         var y = .5-.5*Math.cos(x + τ/2);
         y = y+(Math.asin(y)/π*2-y)*fraction;
         m = 1+modulate*(-.5+.5*Math.cos(x/8));
-        var rx = (i%2)*2-1;
-        var ry = 0;
         return [ x / 8 - Math.sin(x) * .05, y*m * .8 ];
       },
     }, {
@@ -326,7 +356,7 @@ window.mathBoxSteps = [
       duration: 500,
     }],
     ['add', 'curve', {
-      n: 1024,
+      n: 512,
       live: true,
       domain: [-π*8, π*8],
       lineWidth: 10,
@@ -335,13 +365,10 @@ window.mathBoxSteps = [
         var t = clock(3);
         var fraction = Math.min(1, t);
         var modulate = Math.max(0, Math.min(1, t - 1.5));
-        var wipe = (.5-.5*Math.cos(π*Math.max(0, Math.min(1, t - 4))))*.01;
         var y = .5-.5*Math.cos(x + τ/2);
         y = y+(Math.asin(y)/π*2-y)*fraction;
         m = 1+modulate*(-.5+.5*Math.cos(x/8));
-        var rx = (i%2)*2-1;
-        var ry = 0;
-        return [ x / 8 - Math.sin(x) * .1 + rx*wipe, y*m * .6 + ry*wipe ];
+        return [ x / 8 - Math.sin(x) * .1, y*m * .6 ];
       },
     }, {
       delay: 3600,

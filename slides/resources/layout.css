@@ -86,6 +86,11 @@ body .slide * {
 .deck-container .box.images > :last-child {
   padding-right: 0;
 }
+.deck-container .box.images.equalTicks > div {
+  width: 105px;
+  padding: 0;
+  margin: 0 !important;
+}
 .deck-container .slide.overlay img {
   margin-left: auto;
   margin-right: auto;
@@ -295,4 +300,7 @@ body .deck-container .slide.page-cover h3 {
 .slide iframe.mathbox {
   -webkit-transform: scale3d(1.1, 1.1, 1) translateZ(-100px);
   -webkit-transform-style: preserve-3d;
+}
+.deck-container .slide .slide iframe {
+  height: 720px;
 }

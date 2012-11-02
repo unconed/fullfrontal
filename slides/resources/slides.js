@@ -31,9 +31,7 @@ $(function() {
   function enable(iframe, step) {
     var src = $(iframe).data('src');
     if (src) {
-      console.log('enable', step, iframe)
       iframe.onload = function () {
-        console.log('load', step, iframe)
         iframe.onload = null;
         mathboxGo(iframe, step);
       }
@@ -72,7 +70,7 @@ $(function() {
 
     // Pass navigation commands to active iframes
     $slide.find('iframe').each(function () {
-      console.log('go', step, this)
+      var $nested = $(this).parents('.slide .slide');
       mathboxGo(this, step);
     });
 

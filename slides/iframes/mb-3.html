@@ -41,7 +41,7 @@ var vector4 = [ [.6, .3, 0], [1.8, .9, 0] ];
 var vector5 = [ [1.8, .9, 0], [3.0, 1.5, 0] ];
 var vector6 = [ [-.6, -.3, 0], [3.0, 1.5, 0] ];
 
-window.mathBoxSteps = [
+window.mathBoxScript = [
 
   [],
 
@@ -103,7 +103,8 @@ window.mathBoxSteps = [
       worldPosition: [-.95, -.1, 0],
     }],
     ['animate', '#al', {
-      worldPosition: [1, 0, -0.001],
+      zIndex: -1,
+      worldPosition: [1, 0, 0],
       worldScale: [8, 8, 1],
       color: 0xB0B0B0,
     }, {
@@ -111,7 +112,8 @@ window.mathBoxSteps = [
       duration: 500,
     }],
     ['animate', '#bl', {
-      worldPosition: [-1, 0, -0.001],
+      zIndex: -1,
+      worldPosition: [-1, 0, 0],
       worldScale: [8, 8, 1],
       color: 0xB0B0B0,
     }, {

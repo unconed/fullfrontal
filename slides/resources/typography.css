@@ -5,9 +5,6 @@ body .deck-container .slide.page-cover h2,
 body .deck-container .slide.page-cover h3 span {
   color: #49637d;
 }
-body .deck-container .slide h2 {
-  -webkit-text-stroke: 1px #49637d;
-}
 body .deck-container .slide {
   color: #333;
 }

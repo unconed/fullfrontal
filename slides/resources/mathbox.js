@@ -10,47 +10,70 @@ DomReady.ready(function() {
     preload.push('mb-' + match[1] + '.html');
   }
 
+  // Clock that starts as soon as it is first called (per id).
   var clocks = {};
-  window.clock = function (i) {
-    if (!clocks[i]) clocks[i] = +new Date();
-    return (+new Date() - clocks[i]) * .001;
+  window.clock = function (id) {
+    if (!clocks[id]) clocks[id] = +new Date();
+    return (+new Date() - clocks[id]) * .001;
   }
 
   ThreeBox.preload(preload, function () {
-    // MathBox boilerplate
-    var mathbox = mathBox(_.extend({
-      cameraControls: true,
-      stats: false,
-      scale: .7,
-      orbit: 3.5,
-      theta: 0//,
-    }, window.mathBoxOptions || {})).start();
 
-    window.mathBoxStart = +new Date()
-    window.requestAnimationFrame(function recurse() {
-      window.mathBoxTime = (+new Date() - window.mathBoxStart) * .001;
-      window.requestAnimationFrame(recurse);
+    // Single or multiple mathboxen
+    if (window.mathBoxSetup.constructor != Array) {
+      window.mathBoxOptions = [window.mathBoxOptions || {}];
+      window.mathBoxSetup = [window.mathBoxSetup];
+      window.mathBoxScript = [window.mathBoxScript];
+    }
+
+    // Console access
+    window.mathbox = [];
+    window.prim = [];
+    window.director = [];
+
+    _.each(window.mathBoxOptions, function (options, i) {
+      var setup = window.mathBoxSetup[i];
+      var script = window.mathBoxScript[i];
+
+      // MathBox boilerplate
+      var mathbox = mathBox(_.extend({
+        cameraControls: true,
+        stats: true,
+        scale: .7,
+        orbit: 3.5,
+        theta: 0//,
+      }, options || {})).start();
+
+      mathbox.transition(300);
+
+      window.mathbox.push(mathbox);
+      window.prim.push(mathbox.primitives);
+
+      setup(mathbox);
+
+      var director = new MathBox.Director(mathbox, script);
+      window.director.push(director);
     });
 
-    window.mathbox = mathbox;
-    window.prim = mathbox.primitives;
-
-    window.mathBoxSetup(mathbox);
-
-    window.mathBoxDirector = new MathBox.Director(mathbox, window.mathBoxSteps);
-    window.mathbox.transition(150);
-
+    // Controls for stand-alone
     window.addEventListener('keydown', function (e) {
-      if (e.keyCode == 38 || e.keyCode == 37) mathBoxDirector.back();
-      if (e.keyCode == 40 || e.keyCode == 39) mathBoxDirector.forward();
+      _.each(window.director, function (director) {
+        if (e.keyCode == 38 || e.keyCode == 37) director.back();
+        if (e.keyCode == 40 || e.keyCode == 39) director.forward();
+      });
     });
+
+    // Receive navigation commands from parent frame
     window.addEventListener("message", function (e) {
       var data = e.data && e.data.mathBoxDirector;
       var method = data.method, args = data.args || [];
-      if (mathBoxDirector[method]) {
-        mathBoxDirector[method].apply(mathBoxDirector, args);
-      }
+      _.each(window.director, function (director) {
+        if (director[method]) {
+          director[method].apply(director, args);
+        }
+      });
     }, false);
+
   });
 
 });

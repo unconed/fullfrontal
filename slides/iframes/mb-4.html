@@ -52,7 +52,7 @@ function lerptime(t) {
   return t*.5+.5;
 }
 
-window.mathBoxSteps = [
+window.mathBoxScript = [
 
   // Line
   [
@@ -66,7 +66,7 @@ window.mathBoxSteps = [
       color: 0xA0A0A0,
       lineWidth: 4,
       opacity: 0,
-      worldPosition: [0, 0, -.001],
+      zIndex: -1,
     }],
     ['add', 'curve', {
       id: 'controlpoints',
@@ -77,13 +77,14 @@ window.mathBoxSteps = [
       data: points,
       color: 0x303030,
       pointSize: 20,
-      worldPosition: [0, 0, .001],
+      zIndex: 1,
     }],
   ],
 
   // Add axes + vectors
   [
     ['add', 'axis', {
+      id: 'a0',
       axis: 0,
       n: 2,
       line: true,
@@ -95,6 +96,7 @@ window.mathBoxSteps = [
       duration: 300,
     }],
     ['add', 'axis', {
+      id: 'a1',
       axis: 1,
       n: 2,
       line: true,
@@ -137,12 +139,12 @@ window.mathBoxSteps = [
 
   // Move origin
   [
-    ['animate', 'axis[0]', {
+    ['animate', '#a0', {
       offset: [0, .15, 0],
     }, {
       duration: 1000,
     }],
-    ['animate', 'axis[1]', {
+    ['animate', '#a1', {
       offset: [-1.7, 0, 0],
     }, {
       duration: 1000,
@@ -217,7 +219,7 @@ window.mathBoxSteps = [
       expression: function (i) { return lerp(points[0], points[1], 1/3); },
       color: 0xB040D0,
       pointSize: 20,
-      worldPosition: [0, 0, .002],
+      zIndex: 2,
     }, {
       delay: 1100,
     }],
@@ -263,7 +265,7 @@ window.mathBoxSteps = [
       data: points,
       color: 0x303030,
       pointSize: 20,
-      worldPosition: [0, 0, .001],
+      zIndex: 1,
     }],
     ['animate', 'viewport', {
       rotation: [0, 0, τ/4],
@@ -289,7 +291,7 @@ window.mathBoxSteps = [
       },
       color: 0xB040D0,
       pointSize: 20,
-      worldPosition: [0, 0, .002],
+      zIndex: 2,
     }, {
       delay: 500,
     }],
@@ -309,7 +311,7 @@ window.mathBoxSteps = [
       },
       lineWidth: 4,
       color: 0x20C050,
-      worldPosition: [0, 0, -.002],
+      zIndex: -2,
     }],
     ['add', 'curve', {
       id: 'finalcurve',
@@ -344,7 +346,7 @@ window.mathBoxSteps = [
       },
       pointSize: 20,
       color: 0x20C050,
-      worldPosition: [0, 0, .002],
+      zIndex: 2,
     }],
   ],
 
@@ -373,7 +375,7 @@ window.mathBoxSteps = [
       data: points,
       color: 0x303030,
       pointSize: 20,
-      worldPosition: [0, 0, .001],
+      zIndex: 1,
     }],
     ['animate', 'viewport', {
       position: [-1.2, 0, 0],
@@ -392,7 +394,7 @@ window.mathBoxSteps = [
       },
       color: 0xB040D0,
       pointSize: 20,
-      worldPosition: [0, 0, .002],
+      zIndex: 2,
     }, {
       delay: 500,
     }],
@@ -408,7 +410,7 @@ window.mathBoxSteps = [
       },
       lineWidth: 4,
       color: 0x20C050,
-      worldPosition: [0, 0, -.002],
+      zIndex: -2,
     }, {
       delay: 500,
       duration: 800,
@@ -428,7 +430,7 @@ window.mathBoxSteps = [
       },
       color: 0x20C050,
       pointSize: 20,
-      worldPosition: [0, 0, .003],
+      zIndex: 3,
     }, {
       delay: 500,
       duration: 800,
@@ -451,7 +453,7 @@ window.mathBoxSteps = [
           t);
       },
       lineWidth: 4,
-      worldPosition: [0, 0, -.003],
+      zIndex: -3,
     }],
     ['add', 'curve', {
       id: 'finalcurve',
@@ -496,7 +498,7 @@ window.mathBoxSteps = [
           t);
       },
       pointSize: 20,
-      worldPosition: [0, 0, .003],
+      zIndex: 3,
     }],
   ],
 

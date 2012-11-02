@@ -1,0 +1,40 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-2, 2], [-1, 1]],
+      scale: [2.5, 1.25],
+      polar: 0,
+    });
+
+}
+
+window.mathBoxScript = [
+
+  [
+    ['add', 'vector', {
+      n: 4,
+      live: true,
+      expression: function (i, end) {
+        if (end) {
+          return [i, i + 1, 0];
+        }
+        else {
+          return [i, 0, 0];
+        }
+      },
+    }]
+  ],
+
+  [
+    ['animate', 'viewport', {
+      range: [[-2, 2], [0, 10]],
+    }, { duration: 1000 }]
+  ],
+
+];
+
+</script>

@@ -5,16 +5,184 @@ window.mathBoxSetup = function (mathbox) {
   mathbox
     .viewport({
       type: 'cartesian',
-      range: [[-π, π], [-1, 1]],
-      scale: [1, .5],
+      range: [[-4, 4], [-4, 4]],
+      scale: [1.29, .65],
+      position: [0, -.1, 0]
     });
 
 }
 
-window.mathBoxSteps = [
+function atanDiff(x, end) {
+  x -= 3;
+  if (x >= 0) x += 1;
+  return [x, end ? Math.atan(x) : x];
+}
+
+window.mathBoxScript = [
+
+  [],
 
   [
-    ['add', 'curve']
+    ['add', 'grid', {
+      color: 0xA0A0A0,
+      ticks: [4, 4],
+      zIndex: -1,
+    }],
+    ['add', 'axis', {
+      axis: 0,
+      color: 0x909090,
+      ticks: 4,
+      lineWidth: 4,
+    }],
+    ['add', 'axis', {
+      axis: 1,
+      color: 0x909090,
+      ticks: 4,
+      lineWidth: 4,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'fdots',
+      n: 9,
+      domain: [-4, 4],
+      expression: function (x) {
+        return x;
+      },
+      points: true,
+      line: false,
+      live: true,
+      pointSize: 15,
+      zIndex: 1,
+    }],
+  ],
+
+  [
+    ['remove', 'curve'],
+    ['add', 'curve', {
+      id: 'f',
+      n: 128,
+      domain: [-4, 4],
+      expression: function (x) {
+        return x;
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 6,
+      zIndex: 1,
+    }],
+  ],
+
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return x/2;
+      },
+    }, {
+      duration: 300,
+    }],
+  ],
+
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return x/2 + 1;
+      },
+    }, {
+      duration: 300,
+    }],
+  ],
+
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return Math.atan(x);
+      },
+    }, {
+      duration: 300,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'g',
+      n: 128,
+      domain: [-4, 4],
+      expression: function (x) {
+        return Math.sin(8*x);
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 6,
+      zIndex: 1,
+      color: 0x20C050,
+    }, {
+      duration: 400
+    }],
+  ],
+
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return Math.atan(x)+Math.sin(8*x);
+      },
+      color: 0xC02050,
+    }, {
+      duration: 600,
+    }],
+    ['animate', '#g', {
+      expression: function (x) {
+        return Math.atan(x)+Math.sin(8*x);
+      },
+      color: 0xC02050,
+    }, {
+      duration: 600,
+    }],
+  ],
+
+  [
+    ['animate', 'viewport', {
+      scale: [1.29, 1.3],
+    }],
+    ['add', 'curve', {
+      id: 'i',
+      n: 64,
+      domain: [-4, 4],
+      expression: function (x) {
+        return x;
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 6,
+      zIndex: 1,
+      color: 0x909090,
+    }],
+  ],
+
+  [
+    ['remove', 'curve'],
+    ['add', 'vector', {
+      n: 6,
+      expression: atanDiff,
+      lineWidth: 3,
+    }],
+    ['add', 'curve', {
+      id: 'f',
+      n: 128,
+      domain: [-4, 4],
+      expression: function (x) {
+        return x;
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 6,
+      zIndex: 1,
+    }],
   ],
 
 ];

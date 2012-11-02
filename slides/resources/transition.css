@@ -1,11 +1,56 @@
-.deck-container > .slide .deck-before, .deck-container > .slide .deck-previous {
+.deck-container > .slide .deck-before:not(.solid), .deck-container > .slide .deck-previous:not(.solid) {
   opacity: 0.4;
 }
-.deck-container > .slide .deck-before.temp, .deck-container > .slide .deck-previous.temp {
-  opacity: 0;
+
+.deck-container > .slide.deck-before .up350,
+.deck-container > .slide .deck-before.up350,
+.deck-container > .slide.deck-previous .up350,
+.deck-container > .slide .deck-previous.up350 {
+  -webkit-transform: translate3d(0, -350px, 0);
+
+  -webkit-transition: -webkit-transform 500ms ease-in-out, opacity 500ms ease-in-out;
+  -moz-transition: -moz-transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  -ms-transition: -ms-transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  -o-transition: -o-transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  transition: transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  
+  -webkit-transform-style: preserve-3d;
 }
-.deck-container > .slide .deck-before.temp-delay {
+
+.deck-container > .slide.deck-before .shrinkmath .MathJax_Display,
+.deck-container > .slide .deck-before.shrinkmath .MathJax_Display,
+.deck-container > .slide.deck-previous .shrinkmath .MathJax_Display,
+.deck-container > .slide .deck-previous.shrinkmath .MathJax_Display {
+  -webkit-transform: scale(0.75, 0.75);
+
+  -webkit-transition: -webkit-transform 500ms ease-in-out, opacity 500ms ease-in-out;
+  -moz-transition: -moz-transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  -ms-transition: -ms-transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  -o-transition: -o-transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  transition: transform 500ms ease-in-out, opacity 500ms  ease-in-out;
+  
+  -webkit-transform-style: preserve-3d;
+}
+
+.deck-container > .slide .deck-before.temp, .deck-container > .slide .deck-previous.temp,
+.deck-container > .slide.deck-before .temp:not(.slide), .deck-container > .slide.deck-previous .temp:not(.slide) {
   opacity: 0;
+
+  -webkit-transition: -webkit-transform 300ms ease-in-out, opacity 300ms ease-in-out;
+  -moz-transition: -moz-transform 300ms ease-in-out, opacity 300ms  ease-in-out;
+  -ms-transition: -ms-transform 300ms ease-in-out, opacity 300ms  ease-in-out;
+  -o-transition: -o-transform 300ms ease-in-out, opacity 300ms  ease-in-out;
+  transition: transform 300ms ease-in-out, opacity 300ms  ease-in-out;
+}
+.deck-container > .slide .deck-before.temp-delay,
+.deck-container > .slide.deck-before .temp-delay:not(.slide) {
+  opacity: 0;
+
+  -webkit-transition: -webkit-transform 300ms ease-in-out, opacity 300ms ease-in-out;
+  -moz-transition: -moz-transform 300ms ease-in-out, opacity 300ms  ease-in-out;
+  -ms-transition: -ms-transform 300ms ease-in-out, opacity 300ms  ease-in-out;
+  -o-transition: -o-transform 300ms ease-in-out, opacity 300ms  ease-in-out;
+  transition: transform 300ms ease-in-out, opacity 300ms  ease-in-out;
 }
 
 .csstransitions.csstransforms .deck-container .slide.deck-after + .deck-after {
