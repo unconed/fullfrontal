@@ -38,7 +38,7 @@ DomReady.ready(function() {
       // MathBox boilerplate
       var mathbox = mathBox(_.extend({
         cameraControls: true,
-        stats: false,
+        stats: true,
         scale: 1,
         orbit: 3.5,
         theta: 0//,
@@ -49,10 +49,11 @@ DomReady.ready(function() {
       window.mathbox.push(mathbox);
       window.prim.push(mathbox.primitives);
 
-      setup(mathbox);
-
       var director = new MathBox.Director(mathbox, script);
       window.director.push(director);
+
+      setup(mathbox, director);
+
     });
 
     // Controls for stand-alone

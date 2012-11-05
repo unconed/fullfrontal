@@ -122,12 +122,14 @@ body .deck-container .slide.page-cover h3 {
   position: absolute;
 }
 .csstransitions.csstransforms .deck-container .slide.abs,
-.csstransitions.csstransforms .deck-container .slide-extra.abs {
+.csstransitions.csstransforms .deck-container .abs {
   position: absolute !important;
-  float: left;
-  left: auto;
+  width: 300px;
+  margin-left: -150px;
+  margin-top: -100px;
+  left: 50%;
   right: auto;
-  top: auto;
+  top: 50%;
   bottom: auto;
 }
 .csstransitions.csstransforms .deck-container .slide.abs-r,
@@ -152,7 +154,7 @@ body .deck-container .slide.page-cover h3 {
 }
 .csstransitions.csstransforms .deck-container .slide.abs-tl,
 .csstransitions.csstransforms .deck-container .abs-tl {
-  width: 200px;
+  width: 450px;
   position: absolute !important;
   left: 100px;
   top: 100px;

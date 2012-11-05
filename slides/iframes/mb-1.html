@@ -45,52 +45,6 @@ window.mathBoxScript = [
       opacity: 0.001,
       zIndex: 3,
     }],
-    ['add', 'curve', {
-      id: "spiral",
-      n: 128,
-      live: true,
-      line: true,
-      points: false,
-      domain: [0, 16],
-      expression: function (x) {
-        var t = clock(1), q = clock(2);
-        x = Math.min((q*2-3)*1.8, x);
-        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
-        return [ Math.cos(a), Math.sin(-a) *.5 + .5, x * .5 ];
-      },
-      color: 0x0040A0,
-      lineWidth: 5,
-      worldRotation: [0, -τ/4, 0],
-      opacity: 0.001,
-    }],
-    ['add', 'curve', {
-      id: 'shadow1',
-      n: 128,
-      live: true,
-      line: true,
-      points: false,
-      domain: [0, 16],
-      expression: function (x) {
-        var t = clock(1), q = clock(2);
-        x = Math.min((q*2-3)*1.8, x);
-        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
-        return [ Math.cos(a), (-Math.sin(-a) -2.02) *.5 + .5, x * .5 ];
-      },
-      color: 0x000000,
-      lineWidth: 10,
-      worldRotation: [0, -τ/4, 0],
-      opacity: 0.001,
-    }],
-    ['add', 'curve', {
-      id: 'shadow2',
-      n: 100,
-      domain: [-π, π],
-      expression: function (x) { return [ Math.cos(x), (Math.sin(x) -2.05) *.5 + .5 ] },
-      lineWidth: 10,
-      worldRotation: [0, -τ/4, 0],
-      color: 0x000000,
-      opacity: 0.001,
-    }],
     ['add', 'axis', {
       id: 'axis0',
       axis: 0,
@@ -151,18 +105,55 @@ window.mathBoxScript = [
     }, {
       duration: 500,
     }],
-    ['animate', '#spiral', {
+    ['add', 'curve', {
+      id: "spiral",
+      n: 128,
+      live: true,
+      line: true,
+      points: false,
+      domain: [0, 16],
+      expression: function (x) {
+        var t = clock(1), q = clock(2);
+        x = Math.min((q*2-3)*1.8, x);
+        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), Math.sin(-a) *.5 + .5, x * .5 ];
+      },
+      color: 0x0040A0,
+      lineWidth: 5,
+      worldRotation: [0, -τ/4, 0],
       opacity: 1,
     }, {
       delay: 1500, duration: 500
     }],
-    ['animate', '#shadow1', {
-      opacity: .07,
+    ['add', 'curve', {
+      id: 'shadow1',
+      n: 128,
+      live: true,
+      line: true,
+      points: false,
+      domain: [0, 16],
+      expression: function (x) {
+        var t = clock(1), q = clock(2);
+        x = Math.min((q*2-3)*1.8, x);
+        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), (-Math.sin(-a) -2.02) *.5 + .5, x * .5 ];
+      },
+      color: 0x000000,
+      lineWidth: 10,
+      worldRotation: [0, -τ/4, 0],
+      opacity: 0.07,
     }, {
       delay: 1500, duration: 500
     }],
-    ['animate', '#shadow2', {
-      opacity: .04,
+    ['add', 'curve', {
+      id: 'shadow2',
+      n: 100,
+      domain: [-π, π],
+      expression: function (x) { return [ Math.cos(x), (Math.sin(x) -2.05) *.5 + .5 ] },
+      lineWidth: 10,
+      worldRotation: [0, -τ/4, 0],
+      color: 0x000000,
+      opacity: 0.04,
     }, {
       delay: 1500, duration: 500
     }],
@@ -176,59 +167,46 @@ window.mathBoxScript = [
 
   // Rotate back 90 degrees, show graph
   [
-    ['animate', 'camera', {
-      phi: τ/4-.4,
-      theta: .7,
-    }, {
-      duration: 1000,
-    }],
-    ['animate', 'camera', {
-      phi: τ/4,
-      theta: 0,
-    }, {
-      delay: 1000,
-      duration: 1000,
-    }],
     ['animate', '#circle, #dot, #spiral, #shadow1, #shadow2', {
       worldPosition: [1.8, 0, -3],
       worldScale: [1, 2, 2],
     }, {
-      delay: 2000,
+      delay: 0,
       duration: 2000,
     }],
     ['animate', 'viewport', {
       range: [[-π, π], [0, 1]],
       scale: [1, .5],
     }, {
-      delay: 3200,
+      delay: 1200,
       duration: 900,
     }],
     ['remove', '#circle, #dot, #spiral, #shadow1, #shadow2', {
-      delay: 3100,
+      delay: 1100,
       duration: 2000,
     }],
     ['animate', '#bump', {
       opacity: 1,
     }, {
-      delay: 4200,
+      delay: 2200,
       duration: 600,
     }],
     ['animate', '#axis0', {
       opacity: 1,
     }, {
-      delay: 2800,
+      delay: 800,
       duration: 600,
     }],
     ['animate', '#axis1', {
       opacity: 1,
     }, {
-      delay: 2800,
+      delay: 800,
       duration: 600,
     }],
     ['animate', 'grid', {
       opacity: 1,
     }, {
-      delay: 2800,
+      delay: 800,
       duration: 600,
     }],
   ],
@@ -396,11 +374,11 @@ window.mathBoxScript = [
       polar: 0,
     }, {
       delay: 0,
-      duration: 1000,
+      duration: 700,
     }],
     ['remove', 'curve', {
-      delay: 1500,
-      duration: 1000,
+      delay: 1200,
+      duration: 700,
     }],
     ['add', 'curve', {
       n: 512,
@@ -420,8 +398,8 @@ window.mathBoxScript = [
       },
       zIndex: 5,
     }, {
-      delay: 1500,
-      duration: 1000,
+      delay: 1200,
+      duration: 1700,
     }],
     ['add', 'curve', {
       n: 2,
@@ -435,7 +413,7 @@ window.mathBoxScript = [
       },
       zIndex: 5,
     }, {
-      delay: 3500,
+      delay: 2900,
       duration: 1000,
     }],
     ['add', 'curve', {
@@ -448,7 +426,7 @@ window.mathBoxScript = [
       },
       zIndex: 5,
     }, {
-      delay: 3500,
+      delay: 2900,
       duration: 1000,
     }],
     ['animate', 'viewport', {
@@ -456,7 +434,7 @@ window.mathBoxScript = [
       scale: [1, 1],
       polar: 1,
     }, {
-      delay: 1500,
+      delay: 900,
       duration: 1200,
     }],
   ],

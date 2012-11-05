@@ -20,12 +20,7 @@
 }
 
 /* move down 160px on exit */
-.deck-container > .slide.deck-before .down160,
-.deck-container > .slide .deck-before.down160,
-.deck-container > .slide.deck-previous .down160,
-.deck-container > .slide .deck-previous.down160 {
-  -webkit-transform: translate3d(0, 160px, 0);
-
+.deck-container .down160 {
   -webkit-transition-delay: 66ms;
   -moz-transition-delay: 66ms;
   -o-transition-delay: 66ms;
@@ -38,6 +33,12 @@
   transition: transform 500ms ease-in-out, opacity 500ms  ease-in-out;
   
   -webkit-transform-style: preserve-3d;
+}
+.deck-container > .slide.deck-before .down160,
+.deck-container > .slide .deck-before.down160,
+.deck-container > .slide.deck-previous .down160,
+.deck-container > .slide .deck-previous.down160 {
+  -webkit-transform: translate3d(0, 160px, 0);
 }
 
 /* scale down math on exit */
@@ -230,6 +231,13 @@
   -moz-transition-delay: 100ms;
   -o-transition-delay: 100ms;
   transition-delay: 100ms;
+}
+
+.csstransitions.csstransforms  .deck-container .slide .delay5 {
+  -webkit-transition-delay: 500ms;
+  -moz-transition-delay: 500ms;
+  -o-transition-delay: 500ms;
+  transition-delay: 500ms;
 }
 
 .csstransitions.csstransforms  .deck-container .slide .delay10 {
