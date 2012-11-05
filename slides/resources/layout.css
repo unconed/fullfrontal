@@ -228,11 +228,15 @@ body .deck-container .slide.page-cover h3 {
   white-space: pre-wrap;
 }
 .deck-container .slide blockquote {
-  padding: 1em 2em;
-  border-left: 5px solid #ccc;
+  padding: 1em 1em;
+  font-size: 56px;
 }
 .deck-container .slide blockquote p {
   margin: 0;
+}
+.deck-container .slide p.signature {
+  text-align: right;
+  padding-right: 50px;
 }
 
 /* centerfold layout */
