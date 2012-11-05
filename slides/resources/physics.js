@@ -1,6 +1,11 @@
+// Shitty physics engine
+
+
 window.Physics = window.DemoPhysics || {};
 
 (function (ph) {
+
+
 
 ph.Engine = function (options, particles, constraints) {
 
@@ -21,6 +26,22 @@ ph.Engine.prototype = {
   init: function () {
   },
 
+  semiimplicit: function (particle) {
+    var v = new THREE.Vector3(),
+        a = new THREE.Vector3(),
+        step = this.options.step;
+
+    // Apply acceleration
+    a.copy(particle.acceleration);
+    a.multiplyScalar(step);
+    particle.velocity.addSelf(a);
+
+    // Apply velocity
+    v.copy(particle.velocity);
+    v.multiplyScalar(step);
+    particle.position.addSelf(v);
+  },
+
   euler: function (particle) {
     var v = new THREE.Vector3(),
         a = new THREE.Vector3(),
@@ -35,7 +56,6 @@ ph.Engine.prototype = {
     a.copy(particle.acceleration);
     a.multiplyScalar(step);
     particle.velocity.addSelf(a);
-
   },
 
   verlet: function (particle) {
@@ -72,37 +92,36 @@ ph.Engine.prototype = {
   update: function () {
 
     _.each(this.particles, function (particle) {
-      // Collect all forces
       particle.acceleration.set(0, 0, 0);
-      _.each(this.constraints, function (constraint) {
-        constraint.accelerate(particle, this);
-      }.bind(this));
+    });
 
+    // Collect all forces
+    _.each(this.constraints, function (constraint) {
+      constraint.accelerate(this);
+    }.bind(this));
+
+    _.each(this.particles, function (particle) {
       // Update points
       this[this.options.method](particle);
     }.bind(this));
 
     // Apply constraints
-    _.loop(4, function () {
-      _.each(this.particles, function (particle) {
-        _.each(this.constraints, function (constraint) {
-          constraint.constrain(particle, this);
-        }.bind(this));
+    _.loop(8, function () {
+      _.each(this.constraints, function (constraint) {
+        constraint.constrain(this);
       }.bind(this));
     }.bind(this))
   },
 
   // Helpers for visualization
   position: function (i) {
-    var l = this.particles.length,
-        p = this.particles[i];
+    var l = this.particles.length;
 
     if (l == 0) {
       return [0, 0, 0];
     }
-    if (!p) {
-      p = this.particles[l - 1];
-    }
+
+    p = this.particles[i % l];
 
     p = p.position;
     return [p.x, p.y, p.z];
@@ -154,6 +173,9 @@ ph.Engine.prototype = {
 
 
 
+/**
+ * Dynamic particle
+ */
 ph.Particle = function (x, y, z, vx, vy, vz, radius, mass) {
   x = x || 0;
   y = y || 0;
@@ -173,33 +195,47 @@ ph.Particle = function (x, y, z, vx, vy, vz, radius, mass) {
 
 
 
+// Constraint base class
 ph.Constraint = function () {
 }
 
 ph.Constraint.prototype = {
 
-  accelerate: function (particle, physics) {
+  accelerate: function (physics) {
   },
 
-  constrain: function (particle, physics, atRest) {
+  constrain: function (physics) {
   },
 
 }
 
 
+
+/**
+ * Simple gravity, always points down.
+ */
 ph.Gravity = function (g) {
   this.g = g || 1;
 }
 
 ph.Gravity.prototype = _.extend(new ph.Constraint(), {
 
-  accelerate: function (particle, physics) {
-    particle.acceleration.y -= this.g;
+  accelerate: function (physics) {
+    var g = this.g;
+
+    _.each(physics.particles, function (particle) {
+      if (!particle.mass) return;
+      particle.acceleration.y -= g;
+    });
   },
 
 });
 
 
+
+/**
+ * Fake air friction, reduces velocity by a given factor every frame.
+ */
 ph.Friction = function (f) {
   this.f = f || .99;
 }
@@ -208,25 +244,186 @@ ph.Friction.v = new THREE.Vector3();
 
 ph.Friction.prototype = _.extend(new ph.Constraint(), {
 
-  accelerate: function (particle, physics) {
-    var v = ph.Friction.v;
+  accelerate: function (physics) {
+    var v = ph.Friction.v,
+        f = this.f;
 
-    if (physics.options.method == 'verlet') {
-      if (particle.last) {
-        v.sub(particle.position, particle.last);
-        v.multiplyScalar(1 - this.f);
-        particle.last.addSelf(v);
+    _.each(physics.particles, function (particle) {
+      if (physics.options.method == 'verlet') {
+        if (particle.last) {
+          v.sub(particle.position, particle.last);
+          v.multiplyScalar(1 - f);
+          particle.last.addSelf(v);
+        }
       }
+      else {
+        particle.velocity.multiplyScalar(f);
+      }
+    });
+  },
+
+});
+
+
+/**
+ * Spring enforces distance between two particles.
+ */
+ph.SpringConstraint = function (a, b, force, separation) {
+  var p = ph.SpringConstraint.p;
+
+  // Initialize to current distance
+  if (separation === undefined) {
+    p.sub(a.position, b.position);
+    separation = p.length();
+  }
+
+  this.a = a;
+  this.b = b;
+  this.force = force || 1;
+  this.separation = separation;
+}
+
+ph.SpringConstraint.p = new THREE.Vector3();
+ph.SpringConstraint.v = new THREE.Vector3();
+
+ph.SpringConstraint.prototype = _.extend(new ph.Constraint(), {
+
+  accelerate: function (physics) {
+
+    var a = this.a,
+        b = this.b,
+        m1 = this.a.mass,
+        m2 = this.b.mass,
+        separation = this.separation,
+        p = ph.SpringConstraint.p,
+        v = ph.SpringConstraint.v,
+        force = this.force,
+        method = physics.options.method,
+        step = physics.options.step;
+
+    p.sub(b.position, a.position);
+    var distance = p.length();
+
+    // Threshold
+//    if (Math.abs(separation - distance) < (separation*.000001)) return;
+
+    // Move objects towards/away from each other so they are at the right distance.
+    p.normalize();
+    p.multiplyScalar((separation - distance) * force);
+
+    // Mass 0 = immovable object
+    if (m1 > 0 && m2 > 0) {
+      p.multiplyScalar(0.5);
+      b.acceleration.addSelf(p);
+      a.acceleration.subSelf(p);
     }
-    else {
-      particle.velocity.multiplyScalar(this.f);
+    else if (m1 > 0) {
+      a.acceleration.subSelf(p);
+    }
+    else if (m2 > 0) {
+      b.acceleration.addSelf(p);
     }
   },
 
 });
 
 
+/**
+ * Rigid stick enforces distance between two particles.
+ */
+ph.StickConstraint = function (a, b, separation) {
+  var p = ph.StickConstraint.p;
 
+  // Initialize to current distance
+  if (separation === undefined) {
+    p.sub(a.position, b.position);
+    separation = p.length();
+  }
+
+  this.a = a;
+  this.b = b;
+  this.separation = separation;
+}
+
+ph.StickConstraint.p = new THREE.Vector3();
+ph.StickConstraint.v = new THREE.Vector3();
+
+ph.StickConstraint.prototype = _.extend(new ph.Constraint(), {
+
+  constrain: function (physics) {
+
+    var a = this.a,
+        b = this.b,
+        m1 = this.a.mass,
+        m2 = this.b.mass,
+        separation = this.separation,
+        p = ph.StickConstraint.p,
+        v = ph.StickConstraint.v,
+        method = physics.options.method,
+        step = physics.options.step;
+
+    // Only applies to one pair of particles, apply from A side.
+    p.sub(b.position, a.position);
+    var distance = p.length();
+
+    // Move objects towards/away from each other so they are at the right distance.
+    p.normalize();
+    p.multiplyScalar(separation - distance);
+
+    // Mass 0 = immovable object
+    if (m1 > 0 && m2 > 0) {
+      p.multiplyScalar(0.5);
+      b.position.addSelf(p);
+
+      p.multiplyScalar(-1);
+      a.position.addSelf(p);
+
+      if (method == 'verlet') {
+        a.last.addSelf(p);
+      }
+    }
+    else if (m1 > 0) {
+      p.multiplyScalar(-1);
+      a.position.addSelf(p);
+
+    }
+    else if (m2 > 0) {
+      b.position.addSelf(p);
+      p.multiplyScalar(-1);
+    }
+
+    var projection;
+
+    p.normalize();
+  },
+
+  /*
+  satisfy: function (physics) {
+    // Only applies to one pair of particles, apply from A side.
+    if (particle != this.a) return;
+
+    var a = this.a,
+        b = this.b;
+
+    if (method == 'euler') {
+      projection = p.dot(a.velocity);
+      v.copy(p).multiplyScalar(-projection);
+      a.velocity.addSelf(v);
+
+      projection = p.dot(b.velocity);
+      v.copy(p).multiplyScalar(-projection);
+      b.velocity.addSelf(v);
+    }
+  },
+  */
+
+});
+
+
+
+/**
+ * Gravity well at given position with given mass.
+ */
 ph.GravityWell = function (x, y, z, mass) {
   this.position = new THREE.Vector3(x, y, z);
   this.mass = mass || 1;
@@ -237,26 +434,33 @@ ph.GravityWell.p = new THREE.Vector3();
 
 ph.GravityWell.prototype = _.extend(new ph.Constraint(), {
 
-  accelerate: function (particle, physics) {
-    var p = ph.GravityWell.p;
+  accelerate: function (physics) {
+    var p = ph.GravityWell.p,
+        position = this.position,
+        mass = this.mass,
+        g = this.g;
 
-    if (!particle.mass) return;
+    _.each(physics.particles, function (particle) {
+      if (!particle.mass) return;
 
-    p.sub(this.position, particle.position);
-    var r = p.length();
-    if (r > 0) {
-      var a = this.mass * this.g / (r*r);
+      p.sub(position, particle.position);
+      var r = p.length();
+      if (r > 0) {
+        var a = mass * g / (r*r);
 
-      p.normalize().multiplyScalar(a);
-      particle.acceleration.addSelf(p);
-    }
+        p.normalize().multiplyScalar(a);
+        particle.acceleration.addSelf(p);
+      }
+    });
   },
 
 });
 
 
 
-
+/**
+ * Collides particles against a box of given width/height/depth around the origin.
+ */
 ph.BoxCollider = function (width, height, depth, elasticity) {
   this.width = width || 2;
   this.height = height || 2;
@@ -266,7 +470,7 @@ ph.BoxCollider = function (width, height, depth, elasticity) {
 
 ph.BoxCollider.prototype = _.extend(new ph.Constraint(), {
 
-  constrain: function (particle, physics, atRest) {
+  constrain: function (physics) {
     var right = this.width / 2,
         down = this.height / 2,
         back = this.depth / 2,
@@ -275,7 +479,7 @@ ph.BoxCollider.prototype = _.extend(new ph.Constraint(), {
         front = -back,
         elasticity = this.elasticity;
 
-    function constrain(axis, a, b) {
+    function constrain(particle, axis, a, b) {
       if (particle.position[axis] - particle.radius < a) {
         // Flip position around edge.
         particle.position[axis] = (a + particle.radius)*2 - particle.position[axis];
@@ -306,14 +510,20 @@ ph.BoxCollider.prototype = _.extend(new ph.Constraint(), {
       }
     }
 
-    constrain('x', left, right);
-    constrain('y', up, down);
-    constrain('z', front, back);
+    _.each(physics.particles, function (particle) {
+      constrain(particle, 'x', left, right);
+      constrain(particle, 'y', up, down);
+      constrain(particle, 'z', front, back);
+    });
   },
 
 });
 
 
+
+/**
+ * Does particle-particle collision, treating them as solid balls
+ */
 ph.ParticleCollider = function (elasticity) {
   this.elasticity = elasticity || 1;
 }
@@ -324,7 +534,7 @@ ph.ParticleCollider.i = new THREE.Vector3();
 
 ph.ParticleCollider.prototype = _.extend(new ph.Constraint(), {
 
-  constrain: function (particle, physics, atRest) {
+  constrain: function (physics) {
     var elasticity = this.elasticity,
         step = physics.options.step,
         method = physics.options.method,
@@ -332,109 +542,111 @@ ph.ParticleCollider.prototype = _.extend(new ph.Constraint(), {
         v = ph.ParticleCollider.v,
         i = ph.ParticleCollider.i;
 
-    var found = false;
-    _.each(physics.particles, function (other) {
-      // Only iterate each pair once
-      if (other == particle) {
-        found = true;
-        return;
-      }
-      if (!found) {
-        return;
-      }
-
-      // Get difference of positions
-      p.sub(particle.position, other.position);
-
-      // Check separation distance
-      var distance = p.length();
-      var separation = particle.radius + other.radius;
-      if (distance < separation) {
-
-        // Collision
-        var m1 = other.mass,
-            m2 = particle.mass;
-
-        // Move objects away from each other so they don't penetrate
-        p.normalize();
-        p.multiplyScalar(separation - distance);
-
-        // Estimate velocity for verlet
-        if (method == 'verlet') {
-          particle.velocity.sub(particle.position, particle.last);
-          particle.velocity.multiplyScalar(1 / step);
-
-          other.velocity.sub(other.position, other.last);
-          other.velocity.multiplyScalar(1 / step);
+    _.each(physics.particles, function (particle) {
+      var found = false;
+      _.each(physics.particles, function (other) {
+        // Only iterate each pair once
+        if (other == particle) {
+          found = true;
+          return;
+        }
+        if (!found) {
+          return;
         }
 
-        // Mass 0 = immovable object
-        if (m1 > 0 && m2 > 0) {
-          p.multiplyScalar(0.5);
-          particle.position.addSelf(p);
+        // Get difference of positions
+        p.sub(particle.position, other.position);
 
+        // Check separation distance
+        var distance = p.length();
+        var separation = particle.radius + other.radius;
+        if (distance < separation) {
+
+          // Collision
+          var m1 = other.mass,
+              m2 = particle.mass;
+
+          // Estimate velocity for verlet
           if (method == 'verlet') {
-            particle.last.addSelf(p);
+            particle.velocity.sub(particle.position, particle.last);
+            particle.velocity.multiplyScalar(1 / step);
+
+            other.velocity.sub(other.position, other.last);
+            other.velocity.multiplyScalar(1 / step);
           }
 
-          p.multiplyScalar(-1);
-          other.position.addSelf(p);
+          // Move objects away from each other so they don't penetrate
+          p.normalize();
+          p.multiplyScalar(separation - distance);
 
+          // Mass 0 = immovable object
+          if (m1 > 0 && m2 > 0) {
+            p.multiplyScalar(0.5);
+            particle.position.addSelf(p);
+
+            if (method == 'verlet') {
+              particle.last.addSelf(p);
+            }
+
+            p.multiplyScalar(-1);
+            other.position.addSelf(p);
+
+            if (method == 'verlet') {
+              other.last && other.last.addSelf(p);
+            }
+          }
+          else if (m1 > 0) {
+            p.multiplyScalar(-1);
+            other.position.addSelf(p);
+
+            if (method == 'verlet') {
+              other.last.addSelf(p);
+            }
+          }
+          else if (m2 > 0) {
+            particle.position.addSelf(p);
+
+            if (method == 'verlet') {
+              particle.last.addSelf(p);
+            }
+          }
+
+          // Calculate relative velocity of objects
+          p.normalize();
+          v.sub(other.velocity, particle.velocity);
+
+          // Calculate velocity vector to add to reflect velocities
+          i.copy(p).multiplyScalar(p.dot(v) * (1 + elasticity));
+
+          // Add velocity to each object, divided according to their masses
+          var total = m1 + m2;
+
+          // Mass 0 = immovable object
+          if (m1 > 0 && m2 > 0) {
+            v.copy(i).multiplyScalar(m2 / total);
+            particle.velocity.addSelf(v);
+
+            v.copy(i).multiplyScalar(m1 / total);
+            other.velocity.subSelf(v);
+          }
+          else if (m1 > 0) {
+            other.velocity.subSelf(i);
+          }
+          else if (m2 > 0) {
+            particle.velocity.addSelf(i);
+          }
+
+          // If using verlet, apply velocity to reconstruct new last position
           if (method == 'verlet') {
-            other.last && other.last.addSelf(p);
+            v.copy(other.velocity).multiplyScalar(step);
+            other.last.sub(other.position, v);
+
+            v.copy(particle.velocity).multiplyScalar(step);
+            particle.last.sub(particle.position, v);
           }
         }
-        else if (m1 > 0) {
-          p.multiplyScalar(-1);
-          other.position.addSelf(p);
 
-          if (method == 'verlet') {
-            other.last.addSelf(p);
-          }
-        }
-        else if (m2 > 0) {
-          particle.position.addSelf(p);
-
-          if (method == 'verlet') {
-            particle.last.addSelf(p);
-          }
-        }
-
-        // Calculate relative velocity of objects
-        p.normalize();
-        v.sub(other.velocity, particle.velocity);
-
-        // Calculate velocity vector to add to reflect velocities
-        i.copy(p).multiplyScalar(p.dot(v) * (1 + elasticity));
-
-        // Add velocity to each object, divided according to their masses
-        var total = m1 + m2;
-
-        // Mass 0 = immovable object
-        if (m1 > 0 && m2 > 0) {
-          v.copy(i).multiplyScalar(m2 / total);
-          particle.velocity.addSelf(v);
-
-          v.copy(i).multiplyScalar(m1 / total);
-          other.velocity.subSelf(v);
-        }
-        else if (m1 > 0) {
-          other.velocity.subSelf(i);
-        }
-        else if (m2 > 0) {
-          particle.velocity.addSelf(i);
-        }
-
-        // If using verlet, apply velocity to reconstruct new last position
-        if (method == 'verlet') {
-          v.copy(other.velocity).multiplyScalar(step);
-          other.last.sub(other.position, v);
-
-          v.copy(particle.velocity).multiplyScalar(step);
-          particle.last.sub(particle.position, v);
-        }
-      }
-
+      });
     });
   },
 

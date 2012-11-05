@@ -1,0 +1,406 @@
+<script type="text/javascript" charset="utf-8">
+
+var particles = [
+  new Physics.Particle( 1, -1, 0, 0, 0, 0, .09, 1),
+  new Physics.Particle( 1.4, 0, 0, 0, 0, 0, .09, 1),
+  new Physics.Particle( 1,  1, 0, 0, 0, 0, .09, 1),
+  new Physics.Particle( 0, 1.4, 0, 0, 0, 0, .09, 1),
+  new Physics.Particle(-1,  1, 0, 0, 0, 0, .09, 1),
+  new Physics.Particle(-1.4, 0, 0, 0, 0, 0, .09, 1),
+  new Physics.Particle(-1, -1, 0, 0, 0, 0, .09, 1),
+  new Physics.Particle( 0, -1.4, 0, 0, 0, 0, .09, 1),
+
+];
+//*/
+
+var npart = particles.length;
+
+var constraints = [
+  new Physics.BoxCollider(6, 4, 4, .8),
+  new Physics.Friction(.99),
+  new Physics.Gravity(.5),
+
+  new Physics.SpringConstraint(particles[0], particles[1], 20),
+  new Physics.SpringConstraint(particles[1], particles[2], 20),
+  new Physics.SpringConstraint(particles[2], particles[3], 20),
+  new Physics.SpringConstraint(particles[3], particles[4], 20),
+  new Physics.SpringConstraint(particles[4], particles[5], 20),
+  new Physics.SpringConstraint(particles[5], particles[6], 20),
+  new Physics.SpringConstraint(particles[6], particles[7], 20),
+  new Physics.SpringConstraint(particles[7], particles[0], 20),
+
+  new Physics.SpringConstraint(particles[0], particles[3], 10),
+  new Physics.SpringConstraint(particles[1], particles[4], 10),
+  new Physics.SpringConstraint(particles[2], particles[5], 10),
+  new Physics.SpringConstraint(particles[3], particles[6], 10),
+  new Physics.SpringConstraint(particles[4], particles[7], 10),
+  new Physics.SpringConstraint(particles[5], particles[0], 10),
+  new Physics.SpringConstraint(particles[6], particles[1], 10),
+  new Physics.SpringConstraint(particles[7], particles[2], 10),
+
+
+];
+
+var physics = window.physics = new Physics.Engine({
+  method: 'verlet',
+  step: 1/60,
+}, particles, constraints);
+
+var activePhysics = [1, 2, 3];
+
+window.requestAnimationFrame(function loop() {
+  window.requestAnimationFrame(loop);
+
+  if (window.director && (activePhysics.indexOf(window.director[0].step) != -1)) {
+    physics.update();
+    physics.update();
+    physics.update();
+    physics.update();
+  }
+});
+
+var positionCache = {};
+var velocityCache = {};
+var accelerationCache = {};
+
+function snapshotPosition(sample, i) {
+  var cache = positionCache[sample];
+  if (cache == null) {
+    cache = positionCache[sample] = {};
+  }
+  return (cache[i] = cache[i] || physics.position(i));
+}
+
+function snapshotVelocity(sample, i, end, scale) {
+  var cache = velocityCache[sample];
+  if (cache == null) {
+    cache = velocityCache[sample] = {};
+  }
+  var key = i +','+ end +','+ scale;
+  return (cache[key] = cache[key] || physics.velocity(i, end, scale));
+}
+
+function snapshotAcceleration(sample, i, end, vScale, aScale) {
+  var cache = accelerationCache[sample];
+  if (cache == null) {
+    cache = accelerationCache[sample] = {};
+  }
+  var key = i +','+ end +','+ vScale + ',' + aScale;
+  return (cache[key] = cache[key] || physics.acceleration(i, end, vScale, aScale));
+}
+
+function bigparticle(index) {
+  return function (x, i) {
+    var p = physics.point(index);
+    var r = physics.particles[index].radius;
+    return [p[0] + Math.cos(x) * r, p[1] + Math.sin(x) * r];
+  }
+}
+
+window.mathBoxSetup = function (mathbox, director) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-3, 3], [-2, 2]],
+      scale: [1.5, 1],
+    })
+    .grid({
+      ticks: [3, 2],
+      zIndex: -9,
+    })
+    .curve({
+      n: 5,
+      points: false,
+      line: true,
+      live: true,
+      expression: function (x, i) {
+        return [Math.cos(x*τ+τ/8)/0.707*3, Math.sin(x*τ+τ/8)/0.707*2, 0];
+      },
+      color: 0x000000,
+      opacity: 0.5,
+      zIndex: -10,
+    });
+
+  director.on('go', function (step, direction) {
+    var laststep = physics.options.step,
+        timestep = null;
+
+        /*
+    if (step == 1 && direction > 0) {
+      timestep = 0;
+    }
+
+    if ((step == 4 || (step > 6 && step <= 11)) && direction > 0) {
+      timestep = .333;
+    }
+    if ((step == 5 || (step >= 6 && step < 11)) && direction < 0) {
+      timestep = -.333;
+    }
+    */
+
+    if (timestep !== null) {
+      physics.options.step = timestep;
+      physics.update();
+      physics.options.step = laststep;
+    }
+  });
+}
+
+window.mathBoxScript = [
+
+  // TODO: spring forces
+
+  // Add points + constraint lines
+  [
+    ['add', 'curve', {
+      id: "points",
+      n: npart + 1,
+      points: true,
+      line: false,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        return physics.position(i);
+      },
+      pointSize: 15,
+      zIndex: 20,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[3].a.position;
+        var b = constraints[3].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[4].a.position;
+        var b = constraints[4].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[5].a.position;
+        var b = constraints[5].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[6].a.position;
+        var b = constraints[6].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[7].a.position;
+        var b = constraints[7].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[8].a.position;
+        var b = constraints[8].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[9].a.position;
+        var b = constraints[9].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[10].a.position;
+        var b = constraints[10].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[11].a.position;
+        var b = constraints[11].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+      color: 0x20C050,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[12].a.position;
+        var b = constraints[12].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+      color: 0x20C050,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[13].a.position;
+        var b = constraints[13].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+      color: 0x20C050,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[14].a.position;
+        var b = constraints[14].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+      color: 0x20C050,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[15].a.position;
+        var b = constraints[15].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+      color: 0x20C050,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[16].a.position;
+        var b = constraints[16].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+      color: 0x20C050,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[17].a.position;
+        var b = constraints[17].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+      color: 0x20C050,
+    }],
+
+    ['add', 'curve', {
+      n: 2,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (x, i) {
+        var a = constraints[18].a.position;
+        var b = constraints[18].b.position;
+        return x ? [a.x, a.y] : [b.x, b.y];
+      },
+      zIndex: 20,
+      color: 0x20C050,
+    }],
+  ],
+
+];
+
+
+</script>
