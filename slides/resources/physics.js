@@ -123,6 +123,32 @@ ph.Engine.prototype = {
 
     return end ? [p.x + v.x * scale, p.y + v.y * scale, p.z + v.z * scale] : [p.x, p.y, p.z];
   },
+
+  acceleration: function (i, end, scale) {
+    var l = this.particles.length,
+        p = this.particles[i];
+
+    if (l == 0) {
+      return [0, 0, 0];
+    }
+    if (!p) {
+      p = this.particles[l - 1];
+    }
+
+    var v = p.velocity;
+    var a = p.acceleration;
+    p = p.position;
+
+    var out = [p.x + v.x * scale, p.y + v.y * scale, p.z + v.z * scale];
+
+    if (end) {
+      out[0] += a.x;
+      out[1] += a.y;
+      out[2] += a.z;
+    }
+
+    return out;
+  },
 }
 
 
@@ -299,6 +325,8 @@ ph.ParticleCollider.prototype = _.extend(new ph.Constraint(), {
 
   constrain: function (particle, physics, atRest) {
     var elasticity = this.elasticity,
+        step = physics.options.step,
+        method = physics.options.method,
         p = ph.ParticleCollider.p,
         v = ph.ParticleCollider.v,
         i = ph.ParticleCollider.i;
@@ -330,19 +358,28 @@ ph.ParticleCollider.prototype = _.extend(new ph.Constraint(), {
         p.normalize();
         p.multiplyScalar(separation - distance);
 
+        // Estimate velocity for verlet
+        if (method == 'verlet') {
+          particle.velocity.sub(particle.position, particle.last);
+          particle.velocity.multiplyScalar(1 / step);
+
+          other.velocity.sub(other.position, other.last);
+          other.velocity.multiplyScalar(1 / step);
+        }
+
         // Mass 0 = immovable object
         if (m1 > 0 && m2 > 0) {
           p.multiplyScalar(0.5);
           particle.position.addSelf(p);
 
-          if (physics.options.method == 'verlet') {
+          if (method == 'verlet') {
             particle.last.addSelf(p);
           }
 
           p.multiplyScalar(-1);
           other.position.addSelf(p);
 
-          if (physics.options.method == 'verlet') {
+          if (method == 'verlet') {
             other.last && other.last.addSelf(p);
           }
         }
@@ -350,14 +387,14 @@ ph.ParticleCollider.prototype = _.extend(new ph.Constraint(), {
           p.multiplyScalar(-1);
           other.position.addSelf(p);
 
-          if (physics.options.method == 'verlet') {
+          if (method == 'verlet') {
             other.last.addSelf(p);
           }
         }
         else if (m2 > 0) {
           particle.position.addSelf(p);
 
-          if (physics.options.method == 'verlet') {
+          if (method == 'verlet') {
             particle.last.addSelf(p);
           }
         }
@@ -388,11 +425,11 @@ ph.ParticleCollider.prototype = _.extend(new ph.Constraint(), {
         }
 
         // If using verlet, apply velocity to reconstruct new last position
-        if (physics.options.method == 'verlet') {
-          v.copy(other.velocity).multiplyScalar(physics.options.step);
+        if (method == 'verlet') {
+          v.copy(other.velocity).multiplyScalar(step);
           other.last.sub(other.position, v);
 
-          v.copy(particle.velocity).multiplyScalar(physics.options.step);
+          v.copy(particle.velocity).multiplyScalar(step);
           particle.last.sub(particle.position, v);
         }
       }

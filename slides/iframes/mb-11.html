@@ -9,6 +9,7 @@ var npart = particles.length;
 var constraints = [
   new Physics.BoxCollider(4, 4, 4, 1),
   new Physics.ParticleCollider(1),
+  new Physics.Gravity(1),
 ];
 
 var physics = window.physics = new Physics.Engine({
@@ -28,11 +29,12 @@ window.requestAnimationFrame(function loop() {
 
 var positionCache = {};
 var velocityCache = {};
+var accelerationCache = {};
 
 function snapshotPosition(sample, i) {
   var cache = positionCache[sample];
   if (cache == null) {
-    cache = positionCache[sample] = [];
+    cache = positionCache[sample] = {};
   }
   return (cache[i] = cache[i] || physics.position(i));
 }
@@ -40,10 +42,19 @@ function snapshotPosition(sample, i) {
 function snapshotVelocity(sample, i, end, scale) {
   var cache = velocityCache[sample];
   if (cache == null) {
-    cache = velocityCache[sample] = [];
+    cache = velocityCache[sample] = {};
   }
   var key = i +','+ end +','+ scale;
   return (cache[key] = cache[key] || physics.velocity(i, end, scale));
+}
+
+function snapshotAcceleration(sample, i, end, scale) {
+  var cache = accelerationCache[sample];
+  if (cache == null) {
+    cache = accelerationCache[sample] = {};
+  }
+  var key = i +','+ end +','+ scale;
+  return (cache[key] = cache[key] || physics.acceleration(i, end, scale));
 }
 
 function bigparticle(index) {
@@ -81,7 +92,11 @@ window.mathBoxSetup = function (mathbox, director) {
 
   director.on('go', function (step, direction) {
     var laststep = physics.options.step,
-        timestep = 0;
+        timestep = null;
+
+    if (step == 1 && direction > 0) {
+      timestep = 0;
+    }
 
     if (step == 4 && direction > 0) {
       timestep = 1;
@@ -97,7 +112,7 @@ window.mathBoxSetup = function (mathbox, director) {
       timestep = -.5;
     }
 
-    if (timestep) {
+    if (timestep !== null) {
       physics.options.step = timestep;
       physics.update();
       physics.options.step = laststep;
@@ -121,9 +136,6 @@ window.mathBoxScript = [
       pointSize: 20,
       zIndex: 20,
     }],
-  ],
-
-  [
     ['add', 'vector', {
       id: "pos",
       n: 2,
@@ -134,9 +146,6 @@ window.mathBoxScript = [
       lineWidth: 6,
       size: .1,
     }],
-  ],
-
-  [
     ['add', 'vector', {
       id: "vel",
       n: 2,
@@ -152,113 +161,28 @@ window.mathBoxScript = [
   ],
 
   [
-    ['add', 'curve', {
-      id: "shadow",
-      n: npart,
-      points: true,
-      line: false,
-      live: true,
-      expression: function (x, i) {
-        return snapshotPosition(1, i);
-      },
-      color: 0x000000,
-      opacity: .3,
-      pointSize: 20,
-      zIndex: 18,
-    }],
-    ['animate', '#pos', {
+    ['add', 'vector', {
+      id: "accel",
+      n: 1,
       expression: function (i, end) {
-        return end ? snapshotPosition(2, i) : [-2, -2, 0];
+        var p = snapshotPosition(1, i).slice();
+        var a = physics.particles[i].acceleration;
+        console.log('a', a.x, a.y)
+        if (end) {
+          p[0] += a.x;
+          p[1] += a.y;
+          p[2] += a.z;
+        }
+        return p;
       },
-    }, {
-      duration: 1000,
-    }],
-    ['animate', '#point', {
-      expression: function (i) {
-        return snapshotPosition(2, i);
-      },
-    }, {
-      duration: 1000,
-    }],
-  ],
-
-  [
-    ['animate', '#vel', {
-      expression: function (i, end) {
-        return snapshotVelocity(2, i, end, 1);
-      },
-    }, {
-      duration: 500,
-    }],
-  ],
-
-  [
-    ['animate', '#vel', {
-      expression: function (i, end) {
-        return snapshotVelocity(2, i, end, .5);
-      },
+      color: 0xC02050,
+      lineWidth: 6,
+      size: .1,
     }, {
       duration: 300,
     }],
   ],
 
-  [
-    ['add', 'curve', {
-      id: "shadow",
-      n: npart,
-      points: true,
-      line: false,
-      live: true,
-      expression: function (x, i) {
-        return snapshotPosition(2, i);
-      },
-      color: 0x000000,
-      opacity: .3,
-      pointSize: 20,
-      zIndex: 18,
-    }],
-    ['animate', '#pos', {
-      expression: function (i, end) {
-        return end ? snapshotPosition(3, i) : [-2, -2, 0];
-      },
-    }, {
-      duration: 500,
-    }],
-    ['animate', '#point', {
-      expression: function (i) {
-        return snapshotPosition(3, i);
-      },
-    }, {
-      duration: 500,
-    }],
-    ['animate', '#vel', {
-      expression: function (i, end) {
-        return snapshotVelocity(3, i, end, 1);
-      },
-    }, {
-      delay: 1000,
-      duration: 500,
-    }],
-  ],
-
-  [
-    ['remove', '#shadow'],
-    ['set', '#pos', {
-      expression: function (i, end) {
-        return end ? physics.position(i) : [-2, -2, 0];
-      }
-    }],
-    ['set', '#point', {
-      expression: function (i) {
-        return physics.position(i);
-      },
-    }],
-    ['set', '#vel', {
-      expression: function (i, end) {
-        return physics.velocity(i, end, 1);
-      },
-    }],
-  ]
 ];
 
 
