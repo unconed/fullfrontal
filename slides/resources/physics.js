@@ -35,6 +35,7 @@ ph.Engine.prototype = {
     a.copy(particle.acceleration);
     a.multiplyScalar(step);
     particle.velocity.addSelf(a);
+
   },
 
   verlet: function (particle) {
@@ -45,7 +46,7 @@ ph.Engine.prototype = {
     // Initialize last position if needed
     if (!particle.last) {
       particle.last = new THREE.Vector3();
-      particle.velocity.multiplyScalar(step);
+      particle.velocity.multiplyScalar(step || 1);
       particle.last.sub(particle.position, particle.velocity);
     }
 
@@ -65,7 +66,7 @@ ph.Engine.prototype = {
 
     // Estimate velocity for visualization purposes
     particle.velocity.sub(particle.position, particle.last);
-    particle.velocity.multiplyScalar(1 / step);
+    particle.velocity.multiplyScalar(step ? (1 / step) : 1);
   },
 
   update: function () {
@@ -124,7 +125,7 @@ ph.Engine.prototype = {
     return end ? [p.x + v.x * scale, p.y + v.y * scale, p.z + v.z * scale] : [p.x, p.y, p.z];
   },
 
-  acceleration: function (i, end, scale) {
+  acceleration: function (i, end, vScale, aScale) {
     var l = this.particles.length,
         p = this.particles[i];
 
@@ -139,12 +140,12 @@ ph.Engine.prototype = {
     var a = p.acceleration;
     p = p.position;
 
-    var out = [p.x + v.x * scale, p.y + v.y * scale, p.z + v.z * scale];
+    var out = [p.x + v.x * vScale, p.y + v.y * vScale, p.z + v.z * vScale];
 
     if (end) {
-      out[0] += a.x;
-      out[1] += a.y;
-      out[2] += a.z;
+      out[0] += a.x * aScale;
+      out[1] += a.y * aScale;
+      out[2] += a.z * aScale;
     }
 
     return out;

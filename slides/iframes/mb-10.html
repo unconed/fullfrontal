@@ -16,7 +16,7 @@ var physics = window.physics = new Physics.Engine({
   step: 1/60,
 }, particles, constraints);
 
-var activePhysics = [8];
+var activePhysics = [7];
 
 window.requestAnimationFrame(function loop() {
   window.requestAnimationFrame(loop);
@@ -90,10 +90,10 @@ window.mathBoxSetup = function (mathbox, director) {
       timestep = -1;
     }
 
-    if (step == 7 && direction > 0) {
+    if (step == 6 && direction > 0) {
       timestep = .5;
     }
-    else if (step == 6 && direction < 0) {
+    else if (step == 7 && direction < 0) {
       timestep = -.5;
     }
 
@@ -107,6 +107,7 @@ window.mathBoxSetup = function (mathbox, director) {
 
 window.mathBoxScript = [
 
+  // Add point
   [
     ['add', 'curve', {
       id: "point",
@@ -123,10 +124,11 @@ window.mathBoxScript = [
     }],
   ],
 
+  // Add position vector
   [
     ['add', 'vector', {
       id: "pos",
-      n: 2,
+      n: 1,
       live: true,
       expression: function (i, end) {
         return end ? snapshotPosition(1, i) : [-2, -2, 0];
@@ -136,10 +138,11 @@ window.mathBoxScript = [
     }],
   ],
 
+  // Add velocity vector
   [
     ['add', 'vector', {
       id: "vel",
-      n: 2,
+      n: 1,
       live: true,
       expression: function (i, end) {
         return snapshotVelocity(1, i, end, 1);
@@ -151,6 +154,7 @@ window.mathBoxScript = [
     }],
   ],
 
+  // Move position ahead 1s
   [
     ['add', 'curve', {
       id: "shadow",
@@ -180,18 +184,17 @@ window.mathBoxScript = [
     }, {
       duration: 1000,
     }],
-  ],
-
-  [
     ['animate', '#vel', {
       expression: function (i, end) {
         return snapshotVelocity(2, i, end, 1);
       },
     }, {
+      delay: 1200,
       duration: 500,
     }],
   ],
 
+  // Scale velocity by 0.5
   [
     ['animate', '#vel', {
       expression: function (i, end) {
@@ -202,6 +205,7 @@ window.mathBoxScript = [
     }],
   ],
 
+  // Move position ahead 0.5s
   [
     ['add', 'curve', {
       id: "shadow",
@@ -236,11 +240,12 @@ window.mathBoxScript = [
         return snapshotVelocity(3, i, end, 1);
       },
     }, {
-      delay: 1000,
+      delay: 700,
       duration: 500,
     }],
   ],
 
+  // Turn on realtime physics
   [
     ['remove', '#shadow'],
     ['set', '#pos', {
