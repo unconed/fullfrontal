@@ -10,6 +10,7 @@ var constraints = [
   new Physics.BoxCollider(4, 4, 4, 1),
   new Physics.ParticleCollider(1),
   new Physics.Gravity(1),
+  new Physics.Friction(.9998),
 ];
 
 var physics = window.physics = new Physics.Engine({
@@ -476,6 +477,12 @@ window.mathBoxScript = [
       expression: function (i, end) {
         return physics.acceleration(i, end, 1, 1);
       },
+    }],
+  ],
+
+  [
+    ['remove', 'vector, curve', {
+      duration: 500,
     }],
   ],
 ];

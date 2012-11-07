@@ -38,7 +38,7 @@ DomReady.ready(function() {
       // MathBox boilerplate
       var mathbox = mathBox(_.extend({
         cameraControls: true,
-        stats: true,
+        stats: false,
         scale: 1,
         orbit: 3.5,
         theta: 0//,

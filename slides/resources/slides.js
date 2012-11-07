@@ -6,6 +6,8 @@ $(function() {
   }
   $(document).keydown(slomo).keyup(slomo);
 
+  window.iframes = [];
+
   // Pre-load and unload iframes one frame before/after
   var $iframes = {};
   $('.slide').each(function (i) {
@@ -25,6 +27,8 @@ $(function() {
       $(iframe).data('src', src);
       iframe.onload = null;
       iframe.src = 'about:blank';
+
+      iframes.splice(iframes.indexOf(iframe), 1);
     }
   }
 
@@ -37,6 +41,8 @@ $(function() {
       }
       iframe.src = src;
       $(iframe).data('src', null);
+
+      iframes.push(iframe);
     }
   }
 

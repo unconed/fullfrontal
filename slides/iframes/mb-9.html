@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <script type="text/javascript" charset="utf-8">
 
 var particles = [
@@ -38,7 +39,7 @@ var physics = window.physics = new Physics.Engine({
   step: 1/60/4,
 }, particles, constraints);
 
-var activePhysics = [1, 2, 3];
+var activePhysics = [2, 3, 4, 5];
 
 window.requestAnimationFrame(function loop() {
   window.requestAnimationFrame(loop);
@@ -84,15 +85,15 @@ window.mathBoxSetup = function (mathbox, director) {
     });
 
   director.on('go', function (step, direction) {
-    if (step == 1) {
+    if (step == 2) {
       constraints.pop();
       constraints.push(gravityDown);
     }
-    if (step == 2) {
+    if (step == 3) {
       constraints.pop();
       constraints.push(gravityUp);
     }
-    if (step == 3) {
+    if (step == 4) {
       constraints.pop();
       constraints.push(gravityDown);
     }
@@ -177,6 +178,8 @@ window.mathBoxScript = [
 
   ],
 
+  [],
+  [],
   [],
   [],
 ];

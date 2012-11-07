@@ -107,6 +107,7 @@ body .deck-container .slide h1 {
   right: 0;
   top: 610px;
   padding: 0 50px 0 0;
+  opacity: .5;
 }
 
 body .deck-container .slide.page-cover h3 {
@@ -115,6 +116,11 @@ body .deck-container .slide.page-cover h3 {
   right: 0;
   top: 580px;
   padding-left: 50px;
+}
+
+/* reference page layout */
+.deck-container .slide.page-ref h3 {
+  text-align: center;
 }
 
 /* manual layout adjustments */
@@ -159,6 +165,17 @@ body .deck-container .slide.page-cover h3 {
   left: 100px;
   top: 100px;
   z-index: 20;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-br,
+.csstransitions.csstransforms .deck-container .abs-br {
+  width: 450px;
+  position: absolute !important;
+  top: auto;
+  left: auto;
+  right: 100px;
+  bottom: 50px;
+  z-index: 20;
+  font-size: 28px;
 }
 .csstransitions.csstransforms .deck-container .slide.abs-bc,
 .csstransitions.csstransforms .deck-container .abs-bc {
