@@ -1,0 +1,279 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-1, 1], [-1, 1], [-1, 1]],
+      scale: [.7, .7, .7],
+      polar: 0,
+    })
+    .camera({
+      phi: τ/4,
+    });
+
+}
+
+window.mathBoxScript = [
+
+  [
+    ['add', 'curve', {
+      id: 'sun',
+      points: true,
+      line: false,
+      expression: function (x) {
+        return [0, 0];
+      },
+      color: 0xF0A020,
+      pointSize: 50,
+    }],
+
+    ['add', 'curve', {
+      id: 'point',
+      n: 1,
+      points: true,
+      line: false,
+      live: true,
+      expression: function (x) {
+        return [1, 0];
+      },
+      pointSize: 25,
+      zIndex: 5,
+    }],
+
+    ['add', 'curve', {
+      id: 'circle',
+      n: 128,
+      live: true,
+      line: true,
+      points: false,
+      domain: [0, τ],
+      expression: function (x) {
+        return [Math.cos(x), Math.sin(x), 0];
+      },
+      lineWidth: 4,
+      color: 0xB0B0B0,
+    }],
+
+  ],
+
+  [
+    ['add', 'vector', {
+      id: 'v1',
+      zIndex: 3,
+      n: 1,
+      color: 0x20C050,
+      lineWidth: 5,
+      size: .1,
+      live: true,
+      expression: function (i, end) {
+        if (end) {
+          return [1, .5, 0];
+        }
+        else {
+          return [1, 0, 0];
+        }
+      },
+    }]
+  ],
+
+  [
+    ['animate', '#point', {
+      expression: function (x) {
+        return [1, .5];
+      },
+    }],
+  ],
+
+  [
+    ['add', 'vector', {
+      id: 'v2',
+      zIndex: 3,
+      n: 1,
+      color: 0x20C050,
+      lineWidth: 5,
+      size: .1,
+      live: true,
+      expression: function (i, end) {
+        var s = 30 / 360 * τ;
+        if (end) {
+          return [1 - Math.sin(s) * .5, .5 + Math.cos(s) * .5, 0];
+        }
+        else {
+          return [1, .5, 0];
+        }
+      },
+    }, {
+      delay: 200,
+    }],
+
+    ['add', 'vector', {
+      id: 'v3',
+      zIndex: 3,
+      n: 1,
+      color: 0x20C050,
+      lineWidth: 5,
+      size: .1,
+      live: true,
+      expression: function (i, end) {
+        var s = 30 / 360 * τ;
+        if (end) {
+          return [1 - Math.sin(s) * .5 - Math.sin(s*2) * .6, .5 + Math.cos(s) * .5 + Math.cos(s*2) * .6, 0];
+        }
+        else {
+          return [1 - Math.sin(s) * .5, .5 + Math.cos(s) * .5, 0];
+        }
+      },
+    }, {
+      delay: 400,
+    }],
+
+    ['add', 'vector', {
+      id: 'v4',
+      zIndex: 3,
+      n: 1,
+      color: 0x20C050,
+      lineWidth: 5,
+      size: .1,
+      live: true,
+      expression: function (i, end) {
+        var s = 30 / 360 * τ;
+        if (end) {
+          return [1 - Math.sin(s) * .5 - Math.sin(s*2) * .6 - Math.sin(s*3) * .7, .5 + Math.cos(s) * .5 + Math.cos(s*2) * .6 + Math.cos(s*3) * .7, 0];
+        }
+        else {
+          return [1 - Math.sin(s) * .5 - Math.sin(s*2) * .6, .5 + Math.cos(s) * .5 + Math.cos(s*2) * .6, 0];
+        }
+      },
+    }, {
+      delay: 600,
+    }],
+
+    ['add', 'vector', {
+      id: 'v5',
+      zIndex: 3,
+      n: 1,
+      color: 0x20C050,
+      lineWidth: 5,
+      size: .1,
+      live: true,
+      expression: function (i, end) {
+        var s = 30 / 360 * τ;
+        if (end) {
+          return [1 - Math.sin(s) * .5 - Math.sin(s*2) * .6 - Math.sin(s*3) * .7 - Math.sin(s*4) * .8, .5 + Math.cos(s) * .5 + Math.cos(s*2) * .6 + Math.cos(s*3) * .7 + Math.cos(s*4) * .8, 0];
+        }
+        else {
+          return [1 - Math.sin(s) * .5 - Math.sin(s*2) * .6 - Math.sin(s*3) * .7, .5 + Math.cos(s) * .5 + Math.cos(s*2) * .6 + Math.cos(s*3) * .7, 0];
+        }
+      },
+    }, {
+      delay: 800,
+    }],
+  ],
+
+  [
+    ['remove', '#spiral'],
+    ['animate', '#sun', {
+      pointSize: 200,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', 'viewport', {
+      range: [[.75, 1.25], [-.05, .5], [-1, 1]],
+    }, {
+      duration: 1000,
+    }],
+
+    ['animate', '#v1', {
+      expression: function (i, end) {
+        if (end) {
+          return [1, .125, 0];
+        }
+        else {
+          return [1, 0, 0];
+        }
+      },
+    }, {
+      delay: 1200,
+      duration: 500,
+    }],
+    ['animate', '#point', {
+      style: {
+        pointSize: 15,
+      }
+    }, {
+      delay: 1200,
+      duration: 300,
+    }],
+    ['animate', '#point', {
+      expression: function (x) {
+        return [1, .125];
+      },
+    }, {
+      delay: 1200,
+      duration: 500,
+    }],
+    ['animate', '#v2', {
+      expression: function (i, end) {
+        var s = 30 / 4 / 360 * τ;
+        if (end) {
+          return [1 - Math.sin(s) * .125, .125 + Math.cos(s) * .125, 0];
+        }
+        else {
+          return [1, .125, 0];
+        }
+      },
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+
+    ['animate', '#v3', {
+      expression: function (i, end) {
+        var s = 30 / 4 / 360 * τ;
+        if (end) {
+          return [1 - Math.sin(s) * .125 - Math.sin(s*2) * .13, .125 + Math.cos(s) * .125 + Math.cos(s*2) * .13, 0];
+        }
+        else {
+          return [1 - Math.sin(s) * .125, .125 + Math.cos(s) * .125, 0];
+        }
+      },
+    }, {
+      delay: 1600,
+      duration: 500,
+    }],
+
+    ['animate', '#v4', {
+      expression: function (i, end) {
+        var s = 30 / 4 / 360 * τ;
+        if (end) {
+          return [1 - Math.sin(s) * .125 - Math.sin(s*2) * .13 - Math.sin(s*3) * .135, .125 + Math.cos(s) * .125 + Math.cos(s*2) * .13 + Math.cos(s*3) * .135, 0];
+        }
+        else {
+          return [1 - Math.sin(s) * .125 - Math.sin(s*2) * .13, .125 + Math.cos(s) * .125 + Math.cos(s*2) * .13, 0];
+        }
+      },
+    }, {
+      delay: 1800,
+      duration: 500,
+    }],
+
+    ['animate', '#v5', {
+      expression: function (i, end) {
+        var s = 30 / 4 / 360 * τ;
+        if (end) {
+          return [1 - Math.sin(s) * .125 - Math.sin(s*2) * .13 - Math.sin(s*3) * .135 - Math.sin(s*4) * .14, .125 + Math.cos(s) * .125 + Math.cos(s*2) * .13 + Math.cos(s*3) * .135 + Math.cos(s*4) * .14, 0];
+        }
+        else {
+          return [1 - Math.sin(s) * .125 - Math.sin(s*2) * .13 - Math.sin(s*3) * .135, .125 + Math.cos(s) * .125 + Math.cos(s*2) * .13 + Math.cos(s*3) * .135, 0];
+        }
+      },
+    }, {
+      delay: 2000,
+      duration: 500,
+    }],
+  ],
+];
+
+</script>
