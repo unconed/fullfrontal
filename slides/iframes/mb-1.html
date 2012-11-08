@@ -5,7 +5,7 @@ window.mathBoxSetup = function (mathbox) {
   mathbox
     .viewport({
       type: 'polar',
-      range: [[-2, 2], [0, 1]],
+      range: [[-2, 2], [0, 1], [-2, 2]],
       scale: [1, .5],
       polar: 0,
     })
@@ -175,7 +175,7 @@ window.mathBoxScript = [
       duration: 2000,
     }],
     ['animate', 'viewport', {
-      range: [[-π, π], [0, 1]],
+      range: [[-π, π], [0, 1], [-2, 2]],
       scale: [1, .5],
     }, {
       delay: 1200,
@@ -225,7 +225,7 @@ window.mathBoxScript = [
       duration: 1700,
     }],
     ['animate', 'viewport', {
-      range: [[-π, π], [-1, 1]],
+      range: [[-π, π], [-1, 1], [-2, 2]],
       scale: [1.1, 1.1],
       polar: 1,
     }, {

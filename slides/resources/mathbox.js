@@ -19,6 +19,15 @@ DomReady.ready(function() {
 
   ThreeBox.preload(preload, function () {
 
+    // Force FPS
+    var fps = 60;
+    if (fps < 60) {
+      var raf = window.requestAnimationFrame;
+      window.requestAnimationFrame = function (x) {
+        setTimeout(x, 1000 / (fps + 1));
+      }
+    }
+
     // Single or multiple mathboxen
     if (window.mathBoxSetup.constructor != Array) {
       window.mathBoxOptions = [window.mathBoxOptions || {}];

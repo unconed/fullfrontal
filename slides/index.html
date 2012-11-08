@@ -55,6 +55,8 @@
   <h3>github / twitter &nbsp;<span>unconed</span><br>http:// <span>acko.net</span></h3>
 </section>
 
+<!-- -->
+
 <section class="slide">
   <div class="box t2">
     <blockquote>“The power to <strong>understand and predict</strong><br> the quantities of the world should not be restricted to those with a <strong>freakish knack</strong> for manipulating abstract symbols.”</blockquote>
@@ -69,7 +71,6 @@
   </div>
 </section>
 
-<!-- - ->
 <section class="slide">
   <div class="box images t4">
     <div><img src="images/threejs.png" alt="three.js"><br>WebGL</div>
@@ -435,9 +436,6 @@ f=Math; e=document.body.children[$=0]; G="globalCompositeOperation"; Q=.43; P=.0
   <div class="slide"></div>
   <div class="slide"></div>
 </section>
-<!- - -->
-
-
 
 <section class="slide">
   <iframe src="iframes/mathbox.html#10" class="mathbox"></iframe>
@@ -475,6 +473,7 @@ f=Math; e=document.body.children[$=0]; G="globalCompositeOperation"; Q=.43; P=.0
   <div class="slide solid abs-bc">
     $$ \class{mj-blue}{\vec p_{i+1}} = \class{mj-blue}{\vec p_i} + \class{mj-green}{\vec v_i} \cdot \Delta t $$
     $$ \class{mj-green}{\vec v_{i+1}} = \class{mj-green}{\vec v_i} + \class{mj-red}{\vec a_i} \cdot \Delta t $$
+    Euler integration
   </div>
   <div class="slide"></div>
   <div class="slide"></div>
@@ -492,10 +491,11 @@ f=Math; e=document.body.children[$=0]; G="globalCompositeOperation"; Q=.43; P=.0
   <iframe src="iframes/mathbox.html#12" class="mathbox"></iframe>
 
   <div class="slide solid abs-bc">
-    $$ |f| = | \vec p_a - \vec p_b | - {l}_{rest} $$
-    $$ \class{mj-red}{\vec a} = \frac{\vec f}{m} $$
+    $$ f = -k \cdot x $$
   </div>
 </section>
+
+<!-- -->
 
 <section class="slide">
   <iframe src="iframes/mathbox.html#13" class="mathbox"></iframe>
@@ -509,8 +509,13 @@ f=Math; e=document.body.children[$=0]; G="globalCompositeOperation"; Q=.43; P=.0
   <iframe src="iframes/mathbox.html#14" class="mathbox"></iframe>
 
   <div class="slide"></div>
-  <div class="slide"></div>
-  <div class="slide"></div>
+  <div class="slide temp-delay abs-bc">
+    $$ \class{mj-blue}{\vec p_{i+1}} = \class{mj-blue}{\vec p_i} + \class{mj-green}{\vec v_i} \cdot \Delta t \\
+    \class{mj-green}{\vec v_{i+1}} = \class{mj-green}{\vec v_i} + \class{mj-red}{\vec a_i} \cdot \Delta t $$
+  </div>
+  <div class="slide temp-delay abs-bc">
+    $$ \vec p_{i+1} = \vec p_{i} + \int_t^{t+1}{\vec v(t) \cdot dt} $$
+  </div>
   <div class="slide"></div>
 </section>
 
