@@ -166,6 +166,15 @@ body .deck-container .slide.page-cover h3 {
   top: 100px;
   z-index: 20;
 }
+.csstransitions.csstransforms .deck-container .slide.abs-tr,
+.csstransitions.csstransforms .deck-container .abs-tr {
+  width: 450px;
+  position: absolute !important;
+  left: auto;
+  right: 100px;
+  top: 100px;
+  z-index: 20;
+}
 .csstransitions.csstransforms .deck-container .slide.abs-br,
 .csstransitions.csstransforms .deck-container .abs-br {
   width: 450px;

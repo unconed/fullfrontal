@@ -91,6 +91,21 @@ window.mathBoxScript = [
       lineWidth: 6,
     }],
   ],
+
+  [
+    ['add', 'vector', {
+      n: 2,
+      color: 0xC02050,
+      expression: function (i, end) {
+        var x = (i*.6666 - .3333);
+        return [x, .25 - x*x*.5 - (end ? .25 : 0)];
+      },
+      lineWidth: 6,
+    }],
+  ],
+
+  [],
+  [],
 ];
 
 </script>

@@ -55,7 +55,7 @@
   <h3>github / twitter &nbsp;<span>unconed</span><br>http:// <span>acko.net</span></h3>
 </section>
 
-<!-- -->
+<!-- - ->
 
 <section class="slide">
   <div class="box t2">
@@ -495,8 +495,6 @@ f=Math; e=document.body.children[$=0]; G="globalCompositeOperation"; Q=.43; P=.0
   </div>
 </section>
 
-<!-- -->
-
 <section class="slide">
   <iframe src="iframes/mathbox.html#13" class="mathbox"></iframe>
 
@@ -513,19 +511,30 @@ f=Math; e=document.body.children[$=0]; G="globalCompositeOperation"; Q=.43; P=.0
     $$ \class{mj-blue}{\vec p_{i+1}} = \class{mj-blue}{\vec p_i} + \class{mj-green}{\vec v_i} \cdot \Delta t \\
     \class{mj-green}{\vec v_{i+1}} = \class{mj-green}{\vec v_i} + \class{mj-red}{\vec a_i} \cdot \Delta t $$
   </div>
-  <div class="slide temp-delay abs-bc">
-    $$ \vec p_{i+1} = \vec p_{i} + \int_t^{t+1}{\vec v(t) \cdot dt} $$
-  </div>
   <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide temp abs-tr">
+    $$ \vec p_{i+1} = \vec p_{i} + \int_t^{t + \Delta t}{\vec v(t) \cdot dt} $$
+    <br><br>
+    $$ ????? $$
+  </div>
+  <div class="slide zoom overlay temp abs-tc"><img style="opacity: .9" class="t2" src="images/zeno.jpg" width="600"></div>
 </section>
+
+<! -- -->
+
 
 <section class="slide">
   <iframe src="iframes/mathbox.html#15" class="mathbox"></iframe>
 
   <div class="slide"></div>
   <div class="slide"></div>
-  <div class="slide"></div>
-  <div class="slide"></div>
+
+  <div class="slide solid abs-bc">
+    $$ \class{mj-blue}{\vec p_{i+1}} = \class{mj-blue}{\vec p_i} + (\class{mj-purple}{\vec p_i - \vec p_{i-1}}) + \vec a \cdot \Delta t^2 $$
+    Verlet integration
+  </div>
+
 </section>
 <!-- -->
 
