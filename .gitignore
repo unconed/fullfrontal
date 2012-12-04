@@ -1,4 +1,5 @@
-/slides/videos/*
+/slides-net/videos/*
+/slides-local/videos/*
 /deck.js
 /mathjax
 /mathbox
