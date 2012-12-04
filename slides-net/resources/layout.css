@@ -403,11 +403,12 @@ div.spotlight img {
   font-style: normal;
   position: absolute;
   top: 50%;
-  left: 0;
-  margin-left: 180px;
-  margin-top: 385px;
+  right: 0;
+  margin-right: 200px;
+  margin-top: 375px;
   color: #999;
   width: 300px;
+  text-align: center;
 }
 #context a {
   color: #808080;
@@ -418,8 +419,8 @@ div.spotlight img {
   font-style: normal;
   position: absolute;
   top: 50%;
-  right: 0;
-  margin-right: 100px;
+  left: 0;
+  margin-left: 200px;
   margin-top: 385px;
   color: #999;
   width: 300px;
@@ -431,6 +432,28 @@ div.spotlight img {
 #video a {
   text-decoration: none;
   color: #808080;
+  padding: 5px 10px;
+  background: #ffffff;
+  background-image: linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
+  background-image: -o-linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
+  background-image: -moz-linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
+  background-image: -webkit-linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
+  background-image: -ms-linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
+
+  background-image: -webkit-gradient(
+  	linear,
+  	left top,
+  	left bottom,
+  	color-stop(0.09, rgb(255,255,255)),
+  	color-stop(0.55, rgb(237,237,237))
+  );
+  -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, .2);
+  -moz-box-shadow: 0 1px 5px rgba(0, 0, 0, .2);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, .2);
+}
+#video a, #context {
+  -webkit-text-shadow: 0 1px 0 rgba(255, 255, 255, 1);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 1);
 }
 #controls {
   position: absolute;
