@@ -1,12 +1,29 @@
 $(function() {
 	$.deck('.slide');
 
-  function slomo (e) {
+  function slomo(e) {
     $('body')[e.shiftKey ? 'addClass' : 'removeClass']('slomo');
+
+    // Sync up iframe mathboxes to correct step
+    window.$frames = $frames;
+    $frames && $frames.each(function () {
+      mathboxSpeed(this, e.shiftKey ? .2 : 1);
+    });
+
   }
   $(document).keydown(slomo).keyup(slomo);
 
   window.iframes = [];
+
+  // Go to specific step
+  function mathboxGo(iframe, step) {
+    iframe.contentWindow && iframe.contentWindow.postMessage({ mathBoxDirector: { method: 'go', args: [step] }}, '*');
+  }
+
+  // Set speed
+  function mathboxSpeed(iframe, speed) {
+    iframe.contentWindow && iframe.contentWindow.postMessage({ mathBox: { method: 'speed', args: [speed] }}, '*');
+  }
 
   // Pre-load and unload iframes one frame before/after
   var $iframes = {};
@@ -51,10 +68,6 @@ $(function() {
     disable(this);
   });
 
-  function mathboxGo(iframe, step) {
-    iframe.contentWindow && iframe.contentWindow.postMessage({ mathBoxDirector: { method: 'go', args: [step] }}, '*');
-  }
-
   // Interface with websocket for remote navigation commands
   (function () {
     var host = window.document.location.host.replace(/:.*/, '');
@@ -75,6 +88,8 @@ $(function() {
   })();
 
   // Respond to presentation deck navigation
+  var $frames = null;
+
 	$(document).bind('deck.change', function (e, from, to) {
     var out = [];
 
@@ -96,7 +111,8 @@ $(function() {
     var step = $slide.find('.slide').index($subslide) + 2;
 
     // Sync up iframe mathboxes to correct step
-    $slide.find('iframe').each(function () {
+    $frames = $slide.find('iframe');
+    $frames.each(function () {
       mathboxGo(this, step);
     });
 

@@ -12,10 +12,23 @@ DomReady.ready(function() {
 
   // Clock that starts as soon as it is first called (per id).
   var clocks = {};
+  var time = 0;
   window.clock = function (id) {
-    if (!clocks[id]) clocks[id] = +new Date();
-    return (+new Date() - clocks[id]) * .001;
+    if (!clocks[id]) clocks[id] = time;
+    return (time - clocks[id]) * .001;
   }
+  var speed = 1, temp = 1;
+  window.requestAnimationFrame(function loop() {
+    window.requestAnimationFrame(loop);
+    if (window.mathbox && window.mathbox[0]) {
+      // smooth out transition
+      temp = temp + (mathbox[0].speed() - temp) * .3;
+      speed = speed + (temp - speed) * .3;
+
+      // variable clock
+      time += (1000 / 60) * speed;
+    }
+  });
 
   ThreeBox.preload(preload, function () {
 
@@ -79,13 +92,28 @@ DomReady.ready(function() {
 
     // Receive navigation commands from parent frame
     window.addEventListener("message", function (e) {
-      var data = e.data && e.data.mathBoxDirector;
-      var method = data.method, args = data.args || [];
-      _.each(window.director, function (director) {
-        if (director[method]) {
-          director[method].apply(director, args);
-        }
-      });
+      var data, method, args;
+
+      if (data = e.data.mathBoxDirector) {
+        method = data.method;
+        args = data.args || [];
+        _.each(window.director, function (director) {
+          if (director[method]) {
+            director[method].apply(director, args);
+          }
+        });
+      }
+
+      if (data = e.data.mathBox) {
+        method = data.method;
+        args = data.args || [];
+        _.each(window.mathbox, function (mathbox) {
+          if (mathbox[method]) {
+            mathbox[method].apply(mathbox, args);
+          }
+        })
+      }
+
     }, false);
 
   });

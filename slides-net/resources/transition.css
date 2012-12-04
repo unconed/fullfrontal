@@ -4,6 +4,11 @@
 }
 
 /* hide extra sections for slide */
+.slomo .deck-container > .slide .slide-extra {
+  -webkit-transition: -webkit-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+  -moz-transition: -moz-transform 1500ms ease-in-out, opacity 1500ms  ease-in-out;
+  transition: transform 1500ms ease-in-out, opacity 1500ms  ease-in-out;
+}
 .deck-container > .slide .slide-extra {
   -webkit-transition: -webkit-transform 300ms ease-in-out, opacity 300ms ease-in-out;
   -moz-transition: -moz-transform 300ms ease-in-out, opacity 300ms  ease-in-out;
@@ -18,6 +23,15 @@
 }
 
 /* move down 160px on exit */
+.slomo .deck-container .down160 {
+  -webkit-transition-delay: 330ms;
+  -moz-transition-delay: 330ms;
+  transition-delay: 330ms;
+
+  -webkit-transition: -webkit-transform 2500ms ease-in-out, opacity 2500ms ease-in-out;
+  -moz-transition: -moz-transform 2500ms ease-in-out, opacity 2500ms  ease-in-out;
+  transition: transform 2500ms ease-in-out, opacity 2500ms  ease-in-out;
+}
 .deck-container .down160 {
   -webkit-transition-delay: 66ms;
   -moz-transition-delay: 66ms;
@@ -41,6 +55,15 @@
 }
 
 /* scale down math on exit */
+.slomo .deck-container > .slide.deck-before .shrinkmath .MathJax_Display,
+.slomo .deck-container > .slide .deck-before.shrinkmath .MathJax_Display,
+.slomo .deck-container > .slide.deck-previous .shrinkmath .MathJax_Display,
+.slomo .deck-container > .slide .deck-previous.shrinkmath .MathJax_Display {
+
+  -webkit-transition: -webkit-transform 2500ms ease-in-out, opacity 2500ms ease-in-out;
+  -moz-transition: -moz-transform 2500ms ease-in-out, opacity 2500ms  ease-in-out;
+  transition: transform 2500ms ease-in-out, opacity 2500ms  ease-in-out;
+}
 .deck-container > .slide.deck-before .shrinkmath .MathJax_Display,
 .deck-container > .slide .deck-before.shrinkmath .MathJax_Display,
 .deck-container > .slide.deck-previous .shrinkmath .MathJax_Display,
@@ -59,8 +82,18 @@
 }
 
 /* hide past subitem if marked */
-.deck-container > .slide .deck-before.temp, .deck-container > .slide .deck-previous.temp,
-.deck-container > .slide.deck-before .temp:not(.slide), .deck-container > .slide.deck-previous .temp:not(.slide) {
+.slomo .deck-container > .slide .deck-before.temp,
+.slomo .deck-container > .slide .deck-previous.temp,
+.slomo .deck-container > .slide.deck-before .temp:not(.slide),
+.slomo .deck-container > .slide.deck-previous .temp:not(.slide) {
+  -webkit-transition: -webkit-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+  -moz-transition: -moz-transform 1500ms ease-in-out, opacity 1500ms  ease-in-out;
+  transition: transform 1500ms ease-in-out, opacity 1500ms  ease-in-out;
+}
+.deck-container > .slide .deck-before.temp,
+.deck-container > .slide .deck-previous.temp,
+.deck-container > .slide.deck-before .temp:not(.slide),
+.deck-container > .slide.deck-previous .temp:not(.slide) {
   opacity: 0;
 
   -webkit-transition: -webkit-transform 300ms ease-in-out, opacity 300ms ease-in-out;
@@ -69,6 +102,14 @@
 }
 
 /* hide past subitem one frame late if marked */
+.slomo .deck-container > .slide .deck-before.temp-delay,
+.slomo .deck-container > .slide.deck-before .temp-delay:not(.slide) {
+  opacity: 0;
+
+  -webkit-transition: -webkit-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+  -moz-transition: -moz-transform 1500ms ease-in-out, opacity 1500ms  ease-in-out;
+  transition: transform 1500ms ease-in-out, opacity 1500ms  ease-in-out;
+}
 .deck-container > .slide .deck-before.temp-delay,
 .deck-container > .slide.deck-before .temp-delay:not(.slide) {
   opacity: 0;
@@ -118,6 +159,15 @@
 }
 
 /* slide transition */
+.csstransitions.csstransforms .slomo .deck-container > .slide {
+  -webkit-transition-delay: 330ms;
+  -moz-transition-delay: 330ms;
+  transition-delay: 330ms;
+
+  -webkit-transition: -webkit-transform 2500ms ease-in-out, opacity 2500ms ease-in-out;
+  -moz-transition: -moz-transform 2500ms ease-in-out, opacity 2500ms  ease-in-out;
+  transition: transform 2500ms ease-in-out, opacity 2500ms  ease-in-out;
+}  
 .csstransitions.csstransforms .deck-container > .slide {
   -webkit-transition-delay: 66ms;
   -moz-transition-delay: 66ms;
@@ -144,6 +194,11 @@
 }
 
 /* subslide positioning */
+.csstransitions.csstransforms .slomo .deck-container > .slide .slide {
+  -webkit-transition: -webkit-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+  -moz-transition: -moz-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+  transition: -webkit-transform 1500ms ease-in-out, opacity 1500ms ease-in-out;
+}
 .csstransitions.csstransforms .deck-container > .slide .slide {
   position: relative;
   left: 0;
@@ -228,14 +283,56 @@
 }
 
 /* slow extra slide */
-.csstransitions.csstransforms  .deck-container > .slide .slow,
-.csstransitions.csstransforms  .deck-container > .slide + .slide-extra.slow {
+.csstransitions.csstransforms .slomo .deck-container > .slide .slow,
+.csstransitions.csstransforms .slomo .deck-container > .slide + .slide-extra.slow {
+  -webkit-transition: -webkit-transform 2500ms ease-in-out, opacity 2500ms ease-in-out;
+  -moz-transition: -moz-transform 2500ms ease-in-out, opacity 2500ms ease-in-out;
+  transition: -webkit-transform 2500ms ease-in-out, opacity 2500ms ease-in-out;
+}
+.csstransitions.csstransforms .slomo .deck-container > .slide .slow,
+.csstransitions.csstransforms .slomo .deck-container > .slide + .slide-extra.slow {
   -webkit-transition: -webkit-transform 500ms ease-in-out, opacity 500ms ease-in-out;
   -moz-transition: -moz-transform 500ms ease-in-out, opacity 500ms ease-in-out;
   transition: -webkit-transform 500ms ease-in-out, opacity 500ms ease-in-out;
 }
 
 /* reusable delays */
+.csstransitions.csstransforms .slomo .deck-container .slide .delay1 {
+  -webkit-transition-delay: 500ms;
+  -moz-transition-delay: 500ms;
+  transition-delay: 500ms;
+}
+
+.csstransitions.csstransforms .slomo .deck-container .slide .delay5 {
+  -webkit-transition-delay: 2500ms;
+  -moz-transition-delay: 2500ms;
+  transition-delay: 2500ms;
+}
+
+.csstransitions.csstransforms .slomo .deck-container .slide .delay10 {
+  -webkit-transition-delay: 5000ms;
+  -moz-transition-delay: 5000ms;
+  transition-delay: 5000ms;
+}
+
+.csstransitions.csstransforms .slomo .deck-container .slide .delay20 {
+  -webkit-transition-delay: 10000ms;
+  -moz-transition-delay: 10000ms;
+  transition-delay: 10000ms;
+}
+
+.csstransitions.csstransforms .slomo .deck-container .slide .delay30 {
+  -webkit-transition-delay: 15000ms;
+  -moz-transition-delay: 15000ms;
+  transition-delay: 15000ms;
+}
+
+.csstransitions.csstransforms .slomo .deck-container .slide .delay40 {
+  -webkit-transition-delay: 20000ms;
+  -moz-transition-delay: 20000ms;
+  transition-delay: 20000ms;
+}
+
 .csstransitions.csstransforms  .deck-container .slide .delay1 {
   -webkit-transition-delay: 100ms;
   -moz-transition-delay: 100ms;
@@ -277,7 +374,7 @@
 .csstransitions.csstransforms  .deck-container .slide .deck-previous.delay20,
 .csstransitions.csstransforms  .deck-container .slide .deck-previous.delay30,
 .csstransitions.csstransforms  .deck-container .slide .deck-previous.delay40 {
-  -webkit-transition-delay: 0;
-  -moz-transition-delay: 0;
-  transition-delay: 0;
+  -webkit-transition-delay: 0 !important;
+  -moz-transition-delay: 0 !important;
+  transition-delay: 0 !important;
 }
