@@ -1,0 +1,111 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-1, 1], [-.3333, .5], [-1, 1]],
+      scale: [1.4, 1.2, 1.2],
+      polar: 0,
+    })
+    .camera({
+      phi: τ/4,
+    });
+
+}
+
+var euler = [
+  [-1, -.25],
+  [-1 + .25, -.25 + .25],
+  [-.3333, .1944],
+  [-.3333 + .25, .1944 + .0833],
+  [.3333, .1944],
+  [.3333 + .25, .1944 - .0833],
+];
+
+var verlet = [
+  [-.6666, .028],
+  [-.6666 + .25, .028 + .6666*.25],
+  [0, .25],
+  [0 + .25, .25],
+  [.6666, .028],
+  [.6666 + .25, .028 - .6666*.25],
+];
+
+window.mathBoxScript = [
+
+  [
+    ['add', 'curve', {
+      id: 'arc',
+      points: false,
+      line: true,
+      domain: [-1, 1],
+      expression: function (x) {
+        return [x, .25 - x*x*.5];
+      },
+      color: 0xA0A0A0,
+      lineWidth: 3,
+    }],
+
+    ['add', 'curve', {
+      n: 4,
+      id: 'points',
+      points: true,
+      line: false,
+      domain: [-1, 1],
+      expression: function (x) {
+        return [x, .25 - x*x*.5];
+      },
+      pointSize: 15,
+      zIndex: 5,
+    }],
+
+    ['add', 'vector', {
+      n: 3,
+      live: true,
+      data: euler,
+      color: 0x20C050,
+      lineWidth: 6,
+      size: .1,
+      zIndex: 3,
+    }],
+  ],
+
+  [
+    ['animate', 'vector', {
+      data: verlet,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['add', 'vector', {
+      n: 3,
+      color: 0xB040D0,
+      expression: function (i, end) {
+        var x = (i*.6666 - 1) + (end ? .6666 : 0);
+        return [x, .25 - x*x*.5];
+      },
+      lineWidth: 6,
+    }],
+  ],
+
+  [
+    ['add', 'vector', {
+      n: 2,
+      color: 0xC02050,
+      expression: function (i, end) {
+        var x = (i*.6666 - .3333);
+        return [x, .25 - x*x*.5 - (end ? .25 : 0)];
+      },
+      lineWidth: 6,
+    }],
+  ],
+
+  [],
+  [],
+];
+
+</script>

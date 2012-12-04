@@ -1,0 +1,598 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-2, 2], [0, 1]],
+      scale: [1.6, .8],
+    })
+
+}
+
+var points = [
+  [-1, 0.5],
+  [1, 0.5],
+  [1.5, -.5],
+  [-1, -.9],
+];
+
+var vector1 = [
+  [-1.4, .25, 0], [-1, .5, 0],
+];
+var vector2 = [
+  [-1.4, .25, 0], [1, .5, 0],
+];
+var vector3 = [
+  [-1.7, .15, 0], [-1, .5, 0],
+];
+var vector4 = [
+  [-1.7, .15, 0], [1, .5, 0],
+];
+var vector5 = [
+  [-1, .5, 0], [1, .5, 0],
+];
+
+function set(points, values) {
+  _.each(values, function (value, i) {
+    points[i][0] = value[0] || 0;
+    points[i][1] = value[1] || 0;
+    points[i][2] = value[2] || 0;
+  })
+}
+
+function lerp(a, b, t) {
+  return [ a[0]+(b[0]-a[0])*t || 0, a[1]+(b[1]-a[1])*t || 0,  a[2]+(b[2]-a[2])*t || 0 ];
+}
+
+function lerptime(t) {
+  t = t*.33-.5;
+  t = Math.sin(Math.min(1, Math.max(-1, .7*Math.asin(Math.sin(π*t))))*τ/4);
+  return t*.5+.5;
+}
+
+window.mathBoxScript = [
+
+  // Line
+  [
+    ['add', 'curve', {
+      id: 'controlline',
+      n: 2,
+      line: true,
+      points: false,
+      live: true,
+      data: points,
+      color: 0xA0A0A0,
+      lineWidth: 4,
+      opacity: 0,
+      zIndex: -1,
+    }],
+    ['add', 'curve', {
+      id: 'controlpoints',
+      n: 2,
+      line: false,
+      points: true,
+      live: true,
+      data: points,
+      color: 0x303030,
+      pointSize: 20,
+      zIndex: 1,
+    }],
+  ],
+
+  // Add axes + vectors
+  [
+    ['add', 'axis', {
+      id: 'a0',
+      axis: 0,
+      n: 2,
+      line: true,
+      points: false,
+      color: 0x909090,
+      offset: [0, .25, 0],
+      ticks: 0,
+    }, {
+      duration: 300,
+    }],
+    ['add', 'axis', {
+      id: 'a1',
+      axis: 1,
+      n: 2,
+      line: true,
+      points: false,
+      color: 0x909090,
+      offset: [-1.4, 0, 0],
+      ticks: 0,
+    }, {
+      duration: 300,
+    }],
+    ['add', 'vector', {
+      id: 'a',
+      live: true,
+      data: vector1,
+      lineWidth: 6,
+      size: .1,
+    }, {
+      delay: 1000,
+      duration: 300,
+    }],
+    ['add', 'vector', {
+      id: 'b',
+      live: true,
+      data: vector2,
+      lineWidth: 6,
+      color: 0xC02050,
+      size: .1,
+    }, {
+      delay: 1000,
+      duration: 300,
+    }],
+  ],
+
+  // Grid on
+  [
+    ['add', 'grid', {
+      offset: [.6, .25, 0],
+    }, {
+      duration: 400,
+    }],
+  ],
+
+  // Move origin
+  [
+    ['animate', '#a0', {
+      offset: [0, .15, 0],
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#a1', {
+      offset: [-1.7, 0, 0],
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#a', {
+      data: vector3,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#b', {
+      data: vector4,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', 'grid', {
+      offset: [.3, .15, 0]
+    }, {
+      duration: 1000,
+    }]
+  ],
+
+  // Difference vector
+  [
+    ['remove', 'grid'],
+    ['add', 'vector', {
+      size: .1,
+      id: 'c',
+      live: true,
+      expression: function (i, end) { return vector5[+end]; },
+      lineWidth: 6,
+      color: 0x20C050,
+      zIndex: 3,
+    }, {
+      delay: 300,
+      duration: 300,
+    }],
+  ],
+
+  // Interpolate
+  [
+    ['animate', '#b', {
+      opacity: .5,
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#controlline', {
+      opacity: 1,
+    }, {
+      delay: 10,
+    }],
+    ['animate', '#c', {
+      expression: function (i, end) { return end ? lerp(points[0], points[1], 1/3) : points[0]; },
+    }, {
+      duration: 1000,
+    }],
+    ['add', 'vector', {
+      size: .1,
+      id: 'd',
+      n: 1,
+      live: true,
+      expression: function (i, end) { return end ? lerp(points[0], points[1], 1/3) : [-1.7, .15]; },
+      color: 0xB040D0,
+      lineWidth: 6,
+      zIndex: 50,
+    }, {
+      delay: 1100,
+    }],
+    ['add', 'curve', {
+      id: 'points1a',
+      n: 1,
+      line: false,
+      points: true,
+      live: true,
+      expression: function (i) { return lerp(points[0], points[1], 1/3); },
+      color: 0xB040D0,
+      pointSize: 20,
+      zIndex: 2,
+    }, {
+      delay: 1100,
+    }],
+  ],
+
+  // Interpolate
+  [
+    ['remove', 'axis'],
+    ['remove', 'vector'],
+    ['animate', '#controlline', {
+      color: 0xB040D0,
+    }],
+    ['set', '#points1a', {
+      expression: function (i) {
+        var t = lerptime(clock(1));
+        return lerp(points[0], points[1], t);
+      },
+    }]
+  ],
+
+  // Third point
+  [
+    ['remove', '#controlpoints'],
+    ['remove', '#controlline'],
+    ['add', 'curve', {
+      id: 'controlline',
+      n: 3,
+      line: true,
+      points: false,
+      live: true,
+      data: points,
+      color: 0xB040D0,
+      lineWidth: 4,
+      zIndex: -1,
+    }, {
+      delay: 500,
+    }],
+    ['add', 'curve', {
+      id: 'controlpoints',
+      n: 3,
+      line: false,
+      points: true,
+      live: true,
+      data: points,
+      color: 0x303030,
+      pointSize: 20,
+      zIndex: 1,
+    }],
+    ['animate', 'viewport', {
+      rotation: [0, 0, τ/4],
+      position: [-1, 0, 0],
+      range: [[-1, 1], [-.5, 1.5]],
+      scale: [0.45, 1.8, 0.9],
+    }, {
+      duration: 800,
+    }],
+  ],
+
+  // Interpolate
+  [
+    ['add', 'curve', {
+      id: 'points1b',
+      n: 1,
+      line: false,
+      points: true,
+      live: true,
+      expression: function (i) {
+        var t = lerptime(clock(1));
+        return lerp(points[1], points[2], t);
+      },
+      color: 0xB040D0,
+      pointSize: 20,
+      zIndex: 2,
+    }, {
+      delay: 500,
+    }],
+  ],
+
+  // Connect 2nd order
+  [
+    ['add', 'curve', {
+      id: 'line2',
+      n: 2,
+      line: true,
+      points: false,
+      live: true,
+      expression: function (x, i) {
+        var t = lerptime(clock(1));
+        return lerp(points[i], points[i+1], t);
+      },
+      lineWidth: 4,
+      color: 0x20C050,
+      zIndex: -2,
+    }],
+    ['add', 'curve', {
+      id: 'finalcurve',
+      n: 64,
+      line: true,
+      points: false,
+      live: true,
+      expression: function (x) {
+        var t = Math.min(x, lerptime(clock(1)));
+        return lerp(
+          lerp(points[0], points[1], t),
+          lerp(points[1], points[2], t),
+          t);
+      },
+      lineWidth: 4,
+      color: 0x20C050,
+    }, {
+      delay: 1000,
+    }],
+    ['add', 'curve', {
+      id: 'points2a',
+      n: 1,
+      line: false,
+      points: true,
+      live: true,
+      expression: function (i) {
+        var t = lerptime(clock(1));
+        return lerp(
+          lerp(points[0], points[1], t),
+          lerp(points[1], points[2], t),
+          t);
+      },
+      pointSize: 20,
+      color: 0x20C050,
+      zIndex: 3,
+    }],
+  ],
+
+  // Fourth point
+  [
+    ['remove', '#finalcurve'],
+    ['remove', '#controlpoints'],
+    ['remove', '#controlline'],
+    ['remove', '#line2'],
+    ['add', 'curve', {
+      id: 'controlline',
+      n: 4,
+      line: true,
+      points: false,
+      live: true,
+      data: points,
+      color: 0xB040D0,
+      lineWidth: 4,
+      zIndex: -1,
+    }],
+    ['add', 'curve', {
+      id: 'controlpoints',
+      n: 4,
+      line: false,
+      points: true,
+      live: true,
+      data: points,
+      color: 0x303030,
+      pointSize: 20,
+      zIndex: 1,
+    }],
+    ['animate', 'viewport', {
+      position: [-1.2, 0, 0],
+    }, {
+      duration: 800,
+    }],
+    ['add', 'curve', {
+      id: 'points1c',
+      n: 1,
+      line: false,
+      points: true,
+      live: true,
+      expression: function (i) {
+        var t = lerptime(clock(1));
+        return lerp(points[2], points[3], t);
+      },
+      color: 0xB040D0,
+      pointSize: 20,
+      zIndex: 2,
+    }, {
+      delay: 500,
+    }],
+    ['add', 'curve', {
+      id: 'line2',
+      n: 3,
+      line: true,
+      points: false,
+      live: true,
+      expression: function (x, i) {
+        var t = lerptime(clock(1));
+        return lerp(points[i], points[i+1], t);
+      },
+      lineWidth: 4,
+      color: 0x20C050,
+      zIndex: -2,
+    }, {
+      delay: 500,
+      duration: 800,
+    }],
+    ['add', 'curve', {
+      id: 'points2b',
+      n: 1,
+      line: false,
+      points: true,
+      live: true,
+      expression: function (i) {
+        var t = lerptime(clock(1));
+        return lerp(
+          lerp(points[1], points[2], t),
+          lerp(points[2], points[3], t),
+          t);
+      },
+      color: 0x20C050,
+      pointSize: 20,
+      zIndex: 3,
+    }, {
+      delay: 500,
+      duration: 800,
+    }],
+  ],
+
+  // Connect 3rd order
+  [
+    ['add', 'curve', {
+      id: 'line3',
+      n: 2,
+      line: true,
+      points: false,
+      live: true,
+      expression: function (x, i) {
+        var t = lerptime(clock(1));
+        return lerp(
+          lerp(points[i], points[i+1], t),
+          lerp(points[i+1], points[i+2], t),
+          t);
+      },
+      lineWidth: 4,
+      zIndex: -3,
+    }],
+    ['add', 'curve', {
+      id: 'finalcurve',
+      n: 64,
+      line: true,
+      points: false,
+      live: true,
+      expression: function (x) {
+        var t = Math.min(x, lerptime(clock(1)));
+        return lerp(
+          lerp(
+            lerp(points[0], points[1], t),
+            lerp(points[1], points[2], t),
+            t),
+          lerp(
+            lerp(points[1], points[2], t),
+            lerp(points[2], points[3], t),
+            t),
+          t);
+      },
+      lineWidth: 4,
+    }, {
+      delay: 1000,
+    }],
+    ['add', 'curve', {
+      id: 'points3',
+      n: 1,
+      line: false,
+      points: true,
+      live: true,
+      expression: function (i) {
+        var t = lerptime(clock(1));
+        return lerp(
+          lerp(
+            lerp(points[0], points[1], t),
+            lerp(points[1], points[2], t),
+            t),
+          lerp(
+            lerp(points[1], points[2], t),
+            lerp(points[2], points[3], t),
+            t),
+          t);
+      },
+      pointSize: 20,
+      zIndex: 4,
+    }],
+  ],
+
+  // Move controlpoints
+  [
+    ['set', '#finalcurve', {
+      expression: function (x) {
+        var t = x;
+        return lerp(
+          lerp(
+            lerp(points[0], points[1], t),
+            lerp(points[1], points[2], t),
+            t),
+          lerp(
+            lerp(points[1], points[2], t),
+            lerp(points[2], points[3], t),
+            t),
+          t);
+      },
+    }],
+    ['set', '#controlline', {
+      live: true,
+      data: [],
+      expression: function (x, i) {
+        var t = clock(2);
+        var f = (.5 - .5 * Math.cos(Math.min(1, Math.max(0, t))*π))*.6;
+
+        if (i == 0) {
+          set(points, [
+              [-1, 0.5],
+              [1 + Math.cos(t*.71+1)*f, 0.5 + Math.sin(t*.71+1)*f/4],
+              [1.5 + Math.cos(t*.31+2)*f, -0.5 + Math.sin(t*.31+2)*f/4],
+              [-1, -0.9],
+            ]);
+        }
+
+        return points[i];
+      },
+    }],
+  ],
+
+  // Move controlpoints
+  [
+    ['add', 'grid', {
+      axis: [ 1, 2 ],
+      color: 0xB0B0B0,
+      offset: [-1, -.75, 0],
+      lineWidth: 2,
+    }, {
+      duration: 300,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4+1.1,
+      theta: .3,
+    }, {
+      delay: 300,
+      duration: 1500,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4+τ*3/5,
+    }, {
+      delay: 0,
+      duration: 15000,
+    }],
+    ['set', '#controlline', {
+      live: true,
+      data: [],
+      expression: function (x, i) {
+        var t = clock(2);
+        var f = (.5 - .5 * Math.cos(Math.min(1, Math.max(0, t))*π))*.6;
+        var tz = clock(3)*.5 - 1;
+        var fz = (.5 - .5 * Math.cos(Math.min(1, Math.max(0, tz))*π))*.8;
+
+        if (i == 0) {
+          set(points, [
+              [-1, 0.5],
+              [1 + Math.cos(t*.71+1)*f, 0.5 + Math.sin(t*.71+1)*f/4, fz],
+              [1.5 + Math.cos(t*.31+2)*f, -0.5 + Math.sin(t*.31+2)*f/4, -fz],
+              [-1, -0.9],
+            ]);
+        }
+
+        return points[i];
+      },
+    }],
+  ],
+
+];
+
+</script>
+

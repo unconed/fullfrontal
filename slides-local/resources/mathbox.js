@@ -29,6 +29,10 @@ DomReady.ready(function() {
     }
 
     // Single or multiple mathboxen
+    window.mathBoxSetup = window.mathBoxSetup || function () {};
+    window.mathBoxOptions = window.mathBoxOptions || {}
+    window.mathBoxScript = window.mathBoxScript || [];
+
     if (window.mathBoxSetup.constructor != Array) {
       window.mathBoxOptions = [window.mathBoxOptions || {}];
       window.mathBoxSetup = [window.mathBoxSetup];
@@ -58,10 +62,10 @@ DomReady.ready(function() {
       window.mathbox.push(mathbox);
       window.prim.push(mathbox.primitives);
 
-      var director = new MathBox.Director(mathbox, script);
+      var director = new MathBox.Director(mathbox, script || []);
       window.director.push(director);
 
-      setup(mathbox, director);
+      setup && setup(mathbox, director);
 
     });
 

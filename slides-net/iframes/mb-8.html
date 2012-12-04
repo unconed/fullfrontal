@@ -1,0 +1,132 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'sphere',
+      range: [[-π, π], [-π/2, π/2], [-1, 1]],
+      scale: [.85, .85, .85],
+      sphere: 1,
+    })
+    .camera({
+      phi: τ/4,
+      theta: .3,
+    });
+
+}
+
+function bump(x, y, cx, cy, s) {
+  x -= cx;
+  y -= cy;
+  var d = Math.sqrt(x*x + y*y);
+  var c = Math.min(π, d*π*s);
+  return .5+.5*Math.cos(c);
+}
+
+window.mathBoxScript = [
+
+  [
+    ['add', 'surface', {
+      id: "wire",
+      domain: [[-π/2, π/2], [-π/2, π/2]],
+      expression: function (x, y, i, j) {
+        return [x, y, 1];
+      },
+      n: 56,
+      opacity: 1,
+      line: true,
+      mesh: false,
+      live: true,
+      doubleSided: false,
+      flipSided: true,
+      zIndex: 0,
+      color: 0x909090,
+      shaded: false,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      domain: [[-π, π], [-π/2, π/2]],
+      expression: function (x, y, i, j) {
+        return [x, y, 1];
+      },
+      opacity: 1,
+      doubleSided: false,
+      flipSided: true,
+      zIndex: -50,
+      color: 0xffffff,
+      shaded: false,
+    }, {
+      duration: 0,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      n: 64,
+      domain: [-π, π],
+      expression: function (x, i) {
+        return [Math.cos(x)*.4+.1, Math.sin(x)*.4, 1];
+      },
+      live: true,
+      opacity: 1,
+      zIndex: 2,
+    }, {
+      duration: 0,
+    }],
+    ['animate', 'surface', {
+      expression: function (x, y, i, j) {
+        v = bump(x, y, .1, 0, 3);
+        return [x, y, 1 + v*.3];
+      },
+    }]
+  ],
+
+  [
+    ['add', 'curve', {
+      n: 64,
+      domain: [-π, π],
+      expression: function (x, i) {
+        return [Math.cos(x)*.6-.2, Math.sin(x)*.6 + .2, 1];
+      },
+      live: true,
+      opacity: 1,
+      zIndex: 2,
+      color: 0x20C050,
+    }, {
+      duration: 0,
+    }],
+    ['animate', 'surface', {
+      expression: function (x, y, i, j) {
+        v = bump(x, y, -.2, .2, 2) + bump(x, y, .1, 0, 3);
+        return [x, y, 1 + v*.3];
+      },
+    }]
+  ],
+
+  [
+    ['add', 'curve', {
+      n: 64,
+      domain: [-π, π],
+      expression: function (x, i) {
+        return [Math.cos(x)*.3-.1, Math.sin(x)*.3 + .2, 1];
+      },
+      live: true,
+      opacity: 1,
+      zIndex: 2,
+      color: 0xC02050,
+    }, {
+      duration: 0,
+    }],
+    ['animate', 'surface', {
+      expression: function (x, y, i, j) {
+        v =  bump(x, y, .1, 0, 3) + bump(x, y, -.2, .2, 2) - bump(x, y, -.1, .2, 4);
+        return [x, y, 1 + v*.3];
+      },
+    }]
+  ],
+
+];
+
+</script>
