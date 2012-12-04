@@ -84,6 +84,7 @@ window.mathBoxScript = [
       tickBase: [π, π],
       ticks: [10, 10],
       lineWidth: 2,
+      zIndex: -3,
     }],
     ['add', 'axis', {
       axis: 0,
@@ -105,7 +106,7 @@ window.mathBoxScript = [
         return [x, y, .85];
       },
       opacity: 1,
-      doubleSided: false,
+      doubleSided: true,
       flipSided: true,
       zIndex: -50,
       color: 0xffffff,

@@ -161,7 +161,8 @@ Acko.TubeCurves.prototype = {
   },
 
   getShader: function (id) {
-    return document.getElementById(id).innerText;
+    var el = document.getElementById(id);
+    return el.innerText || el.textContent;
   },
   
   initDebug: function () {           

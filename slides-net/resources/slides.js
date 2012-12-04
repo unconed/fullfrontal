@@ -78,6 +78,8 @@ $(function() {
 	$(document).bind('deck.change', function (e, from, to) {
     var out = [];
 
+    $('#message').remove();
+
     function getTopSlide(step) {
       var $slide = $.deck('getSlide', step),
           $parents = $slide.parents('.slide');

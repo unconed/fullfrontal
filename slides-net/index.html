@@ -40,8 +40,9 @@
       messageStyle: 'none'
     });
   </script>
-  <script type="text/javascript" src="../mathjax/MathJax.js?config=TeX-AMS_HTML"></script>
-  
+  <script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>  
 </head>
 <body>
 
@@ -297,7 +298,7 @@ f=Math; e=document.body.children[$=0]; G="globalCompositeOperation"; Q=.43; P=.0
 
 <section class="slide">
   <div class="box images">
-    <div><img src="images/procedural-textures.jpg"><br>Textures</div>
+    <div><img src="images/procedural-textures.jpg" width="720"><br>Textures</div>
     <div><img src="images/procedural-city.jpg"><br>3D Models</div>
   </div>
 </section>
@@ -580,9 +581,17 @@ f=Math; e=document.body.children[$=0]; G="globalCompositeOperation"; Q=.43; P=.0
 <!-- End slides. -->
 </div>
 
+<div id="message">
+  <p>Note: these slides use cutting edge CSS 3 and WebGL features. It is recommended to use Google Chrome to view them.</p>
+</div>
+
+<div id="video">
+<a href="http://www.youtube.com/watch?v=ONN3jBly364&list=UUyBAm31tEpZ17hka6ZvVqcg&index=2&feature=plcp" target="_blank"><span> ►</span> Watch Presentation Video</a></a>
+</div>
+
 <div id="controls">
-  <a href="javascript:$.deck('prev');return false;">‹</a>
-  <a href="javascript:$.deck('next');return false;">›</a>
+  <a href="javascript:$.deck('prev')">‹</a>
+  <a href="javascript:$.deck('next')">›</a>
 </div>
 
 </body>

@@ -384,16 +384,52 @@ div.spotlight img {
   height: 1320px;
 }
 
-#controls {
+#message {
+  font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
+  font-weight: normal;
+  font-style: normal;
   position: absolute;
   top: 50%;
   left: 50%;
   margin-left: -640px;
-  margin-top: 360px;
+  margin-top: -360px;
   width: 1280px;
+  text-align: center;
+  color: #999;
+}
+#video {
+  font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  margin-right: 100px;
+  margin-top: 385px;
+  color: #999;
+  width: 300px;
+}
+#video span {
+  font-size: 80%;
+  padding-right: 10px;
+}
+#video a {
+  text-decoration: none;
+  color: #808080;
+}
+#controls {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -100px;
+  margin-top: 360px;
+  width: 200px;
   text-align: center;
 }
 #controls a {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
   display: inline-block;
   padding: 10px 25px;
   background: #999;
