@@ -397,6 +397,21 @@ div.spotlight img {
   text-align: center;
   color: #999;
 }
+#context {
+  font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  margin-left: 180px;
+  margin-top: 385px;
+  color: #999;
+  width: 300px;
+}
+#context a {
+  color: #808080;
+}
 #video {
   font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
   font-weight: normal;
