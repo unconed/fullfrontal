@@ -9,6 +9,8 @@ The following dependencies are not included and must be installed:
 - mathbox/ - MathBox graphing library
 - mathjax/ - Mathematical typesetting
 
+`slides-net` is the online version, `slides-local` is for offline presentations (the large video files are not included).
+
 * * *
 
 Steven Wittens - http://acko.net/
