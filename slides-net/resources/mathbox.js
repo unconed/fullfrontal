@@ -26,7 +26,7 @@ DomReady.ready(function() {
       speed = speed + (temp - speed) * .3;
 
       // Apply speed
-      mathbox.speed(speed);
+      mathbox[0].speed(speed);
 
       // Variable clock
       time += (1000 / 60) * speed;
