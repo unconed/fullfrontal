@@ -17,15 +17,18 @@ DomReady.ready(function() {
     if (!clocks[id]) clocks[id] = time;
     return (time - clocks[id]) * .001;
   }
-  var speed = 1, temp = 1;
+  var target = 1, temp = 1, speed = 1;
   window.requestAnimationFrame(function loop() {
     window.requestAnimationFrame(loop);
     if (window.mathbox && window.mathbox[0]) {
       // smooth out transition
-      temp = temp + (mathbox[0].speed() - temp) * .3;
+      temp = temp + (target - temp) * .3;
       speed = speed + (temp - speed) * .3;
 
-      // variable clock
+      // Apply speed
+      mathbox.speed(speed);
+
+      // Variable clock
       time += (1000 / 60) * speed;
     }
   });
@@ -108,7 +111,10 @@ DomReady.ready(function() {
         method = data.method;
         args = data.args || [];
         _.each(window.mathbox, function (mathbox) {
-          if (mathbox[method]) {
+          if (method == 'speed') {
+            target = args[0];
+          }
+          else if (mathbox[method]) {
             mathbox[method].apply(mathbox, args);
           }
         })
