@@ -1,13 +1,16 @@
 $(function() {
 	$.deck('.slide');
 
+  var speed = 1;
+
   function slomo(e) {
     $('body')[e.shiftKey ? 'addClass' : 'removeClass']('slomo');
+    speed = e.shiftKey ? .2 : 1;
 
     // Sync up iframe mathboxes to correct step
     window.$frames = $frames;
     $frames && $frames.each(function () {
-      mathboxSpeed(this, e.shiftKey ? .2 : 1);
+      mathboxSpeed(this, speed);
     });
 
   }
@@ -127,7 +130,7 @@ $(function() {
       $.deck('getSlide', from).find('video').each(function () {
         this.pause();
       });
-    }, 580);
+    }, 500 / speed + 80);
 
     // Start at beginning or end of mathbox slides
     var go = to > from ? 1 : -1;
@@ -135,7 +138,7 @@ $(function() {
     // Pre-load iframes (but allow time for current transition)
     $iframes[to].each(function () {
       var iframe = this;
-      setTimeout(function () { enable(iframe, go); }, 580);
+      setTimeout(function () { enable(iframe, go); }, 500 / speed + 80);
     });
 
     // Unload old iframes
