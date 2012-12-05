@@ -57,33 +57,33 @@ window.mathBoxScript = [
   [
     // Curve segments
     ['add', 'curve', {
-      id: "f",
+      id: "f1",
       n: 256,
-      domain: [-4, -2.0005],
+      domain: [-4, -2.01],
       live: true,
       expression: rational,
       lineWidth: 6,
     }],
     ['add', 'curve', {
-      id: "f",
+      id: "f2",
       n: 256,
-      domain: [-1.9995, -0.0005],
+      domain: [-1.99, -0.01],
       live: true,
       expression: rational,
       lineWidth: 6,
     }],
     ['add', 'curve', {
-      id: "f",
+      id: "f3",
       n: 384,
-      domain: [0.0005, 2.9995],
+      domain: [0.01, 2.99],
       live: true,
       expression: rational,
       lineWidth: 6,
     }],
     ['add', 'curve', {
-      id: "f",
+      id: "f4",
       n: 128,
-      domain: [3.0005, 4],
+      domain: [3.01, 4],
       live: true,
       expression: rational,
       lineWidth: 6,
@@ -136,7 +136,31 @@ window.mathBoxScript = [
     }, {
       duration: 500,
     }],
-    ['animate', '#f', {
+    ['animate', '#f1', {
+      domain: [-4, -2.0001],
+    }, {
+      delay: 1200,
+      duration: 500
+    }],
+    ['animate', '#f2', {
+      domain: [-1.9999, -0.0001],
+    }, {
+      delay: 1200,
+      duration: 500
+    }],
+    ['animate', '#f3', {
+      domain: [0.0001, 2.9999],
+    }, {
+      delay: 1200,
+      duration: 500
+    }],
+    ['animate', '#f4', {
+      domain: [3.0001, 4],
+    }, {
+      delay: 1200,
+      duration: 500
+    }],
+    ['animate', '#f1, #f2, #f3, #f4', {
       expression: rationalWrap,
     }, {
       delay: 1000,
