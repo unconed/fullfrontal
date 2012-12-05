@@ -17,7 +17,7 @@ DomReady.ready(function() {
     if (!clocks[id]) clocks[id] = time;
     return (time - clocks[id]) * .001;
   }
-  var target = 1, temp = 1, speed = 1;
+  var target = 1, temp = 1, speed = 1, step = 0;
   window.requestAnimationFrame(function loop() {
     window.requestAnimationFrame(loop);
     if (window.mathbox && window.mathbox[0]) {
@@ -27,6 +27,10 @@ DomReady.ready(function() {
 
       // Apply speed
       mathbox[0].speed(speed);
+      if (window.physics) {
+        if (!step) step = window.physics.options.step;
+        window.physics.options.step = step * speed;
+      }
 
       // Variable clock
       time += (1000 / 60) * speed;
