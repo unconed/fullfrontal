@@ -498,7 +498,7 @@ div.spotlight img {
   -moz-user-select: none;
   user-select: none;
   display: inline-block;
-  padding: 2px 25px 3px;
+  padding: 0px 25px 5px;
   background: #999;
   color: #fff;
   text-decoration: none;
