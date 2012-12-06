@@ -35,7 +35,7 @@ body .slide * {
   top: 50%;
   left: 50%;
   margin-left: -640px;
-  margin-top: -360px;
+  margin-top: -390px;
 }
 .deck-container, .deck-container > .slide {
   padding: 0;
@@ -392,7 +392,7 @@ div.spotlight img {
   top: 50%;
   left: 50%;
   margin-left: -640px;
-  margin-top: -360px;
+  margin-top: -390px;
   width: 1280px;
   text-align: center;
   color: #999;
@@ -405,13 +405,16 @@ div.spotlight img {
   top: 50%;
   right: 0;
   margin-right: 200px;
-  margin-top: 375px;
+  margin-top: 342px;
   color: #999;
   width: 300px;
   text-align: center;
 }
 #context a {
   color: #808080;
+}
+#context a:hover {
+  color: rgb(60,180,90);
 }
 #video {
   font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
@@ -420,8 +423,8 @@ div.spotlight img {
   position: absolute;
   top: 50%;
   left: 0;
-  margin-left: 235px;
-  margin-top: 385px;
+  margin-left: 185px;
+  margin-top: 350px;
   color: #999;
   width: 300px;
 }
@@ -432,14 +435,14 @@ div.spotlight img {
 #video a {
   text-decoration: none;
   color: #808080;
-  padding: 5px 10px;
+  padding: 10px 20px;
   background: #ffffff;
   background-image: linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
   background-image: -o-linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
   background-image: -moz-linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
   background-image: -webkit-linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
   background-image: -ms-linear-gradient(top, rgb(255,255,255) 9%, rgb(237,237,237) 55%);
-
+  position: relative;
   background-image: -webkit-gradient(
   	linear,
   	left top,
@@ -447,20 +450,46 @@ div.spotlight img {
   	color-stop(0.09, rgb(255,255,255)),
   	color-stop(0.55, rgb(237,237,237))
   );
-  -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, .2);
-  -moz-box-shadow: 0 1px 5px rgba(0, 0, 0, .2);
-  box-shadow: 0 1px 5px rgba(0, 0, 0, .2);
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+  -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+}
+#video a:hover {
+  color: #fff;
+  background: #dddddd;
+  background-image: linear-gradient(top, rgb(60,180,90) 9%, rgb(25,167,60) 55%);
+  background-image: -o-linear-gradient(top, rgb(60,180,90) 9%, rgb(25,167,60) 55%);
+  background-image: -moz-linear-gradient(top, rgb(60,180,90) 9%, rgb(25,167,60) 55%);
+  background-image: -webkit-linear-gradient(top, rgb(30,180,90) 9%, rgb(25,167,60) 55%);
+  background-image: -ms-linear-gradient(top, rgb(60,180,90) 9%, rgb(25,167,60) 55%);
+
+  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .4);
+  -moz-box-shadow: 0 1px 6px rgba(0, 0, 0, .4);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .4);
+
+  -webkit-text-shadow: 0 -1px 0 rgba(0, 0, 0, .3);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .3);
+}
+#video a:active, #controls a:active {
+  -webkit-box-shadow: inset 0 1px 10px rgba(0, 0, 0, .4),
+                      0 1px 2px rgba(0, 0, 0, .2);
+  -moz-box-shadow: inset 0 1px 10px rgba(0, 0, 0, .4),
+                   0 1px 2px rgba(0, 0, 0, .2);
+  box-shadow: inset 0 1px 10px rgba(0, 0, 0, .4),
+              0 1px 2px rgba(0, 0, 0, .2);
+  top: 1px;
 }
 #video a, #context {
   -webkit-text-shadow: 0 1px 0 rgba(255, 255, 255, 1);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 1);
 }
 #controls {
+  -webkit-font-smoothing: antialiased;
   position: absolute;
   top: 50%;
   left: 50%;
   margin-left: -100px;
-  margin-top: 360px;
+  margin-top: 330px;
   width: 200px;
   text-align: center;
 }
@@ -469,12 +498,20 @@ div.spotlight img {
   -moz-user-select: none;
   user-select: none;
   display: inline-block;
-  padding: 10px 25px;
+  padding: 2px 25px 3px;
   background: #999;
   color: #fff;
   text-decoration: none;
-  font-size: 36px;
+  font-size: 48px;
   font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
   font-weight: normal;
   font-style: normal;
+}
+#controls a:hover {
+  background: #dddddd;
+  background-image: linear-gradient(top, rgb(60,180,90) 9%, rgb(25,167,60) 55%);
+  background-image: -o-linear-gradient(top, rgb(60,180,90) 9%, rgb(25,167,60) 55%);
+  background-image: -moz-linear-gradient(top, rgb(60,180,90) 9%, rgb(25,167,60) 55%);
+  background-image: -webkit-linear-gradient(top, rgb(30,180,90) 9%, rgb(25,167,60) 55%);
+  background-image: -ms-linear-gradient(top, rgb(60,180,90) 9%, rgb(25,167,60) 55%);
 }
