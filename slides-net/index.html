@@ -585,7 +585,7 @@ f=Math; e=document.body.children[$=0]; G="globalCompositeOperation"; Q=.43; P=.0
 
 <div id="message">
   <script type="text/javascript">
-  if (true || !document.createElement('canvas').getContext('experimental-webgl')) {
+  if (!document.createElement('canvas').getContext('experimental-webgl')) {
     document.write('<p class="error"><strong>Sorry! Your browser does not support WebGL, which is required to view this presentation.</strong><br><br>You can <a href="http://www.youtube.com/watch?v=ONN3jBly364&list=UUyBAm31tEpZ17hka6ZvVqcg&index=2&feature=plcp">view the video on YouTube</a> instead.<br><br>Or you can use Google Chrome or Mozilla Firefox.</p>');
   }
   else {
