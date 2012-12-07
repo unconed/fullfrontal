@@ -515,3 +515,20 @@ div.spotlight img {
   background-image: -webkit-linear-gradient(top, rgb(30,180,90) 9%, rgb(25,167,60) 55%);
   background-image: -ms-linear-gradient(top, rgb(60,180,90) 9%, rgb(25,167,60) 55%);
 }
+#message {
+  -webkit-transform: translateZ(10000px);
+}
+#message .error {
+  font-style: italic;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
+  font-size: 24px;
+  background: #ffeeee;
+  color: #400000;
+  padding: 50px;
+}
+#message .error a {
+  font-size: strong;
+  border-bottom: 1px solid #900000;
+  color: #900000;
+  text-decoration: none;
+}
