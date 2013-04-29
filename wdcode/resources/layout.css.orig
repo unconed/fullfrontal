@@ -1,0 +1,402 @@
+/* body */
+html, body {
+  padding: 0;
+  height: 100%;
+  background: #eee;
+}
+
+/* reset */
+body .slide * {
+  margin: 0;
+  padding: 0;
+}
+.slide .slide {
+  opacity: 0;
+  visibility: visible;
+}
+.deck-child-current .deck-previous, .deck-child-current .deck-before, .deck-child-current .deck-current {
+  opacity: 1;
+}
+.deck-container .slide h1 {
+  margin: 0;
+  padding: 0;
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  -webkit-transform: none;
+}
+
+/* frame */
+.deck-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -640px;
+  margin-top: -360px;
+}
+.deck-container, .deck-container > .slide {
+  padding: 0;
+  width: 1280px;
+  height: 720px;
+  min-height: 0;
+}
+.deck-container .slide {
+  background: none;
+}
+.slide > p, .slide h1, .slide h2, .slide pre {
+  position: relative;
+  z-index: 10;
+}
+
+/* block elements */
+.deck-container .slide p {
+  margin-bottom: 25px;
+}
+
+.deck-container .box {
+  box-sizing: border-box;
+  padding: 25px 50px;
+}
+
+.deck-container .box:first-child {
+  padding-top: 50px;
+}
+
+.deck-container .box.images {
+  display: table;
+  margin-left: auto;
+  margin-right: auto;
+}
+.deck-container .box.images > div {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  margin: 0;
+  padding: 0 25px;
+}
+.deck-container .box.images img {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+.deck-container .box.images > :first-child {
+  padding-left: 0;
+}
+.deck-container .box.images > :last-child {
+  padding-right: 0;
+}
+.deck-container .box.images.equalTicks > div {
+  width: 105px;
+  padding: 0;
+  margin: 0 !important;
+}
+.deck-container .slide.overlay img {
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 20px rgba(255,255,255,1);
+}
+
+/* cover page layout */
+body .deck-container .slide h1 {
+  margin-top: 270px;
+}
+.deck-container .slide.page-cover h2 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 610px;
+  padding: 0 50px 0 0;
+  opacity: .5;
+}
+
+body .deck-container .slide.page-cover h3 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 580px;
+  padding-left: 50px;
+}
+
+/* reference page layout */
+.deck-container .slide.page-ref h3 {
+  text-align: center;
+}
+
+/* manual layout adjustments */
+.csstransitions.csstransforms .deck-container .slide.temp {
+  position: absolute;
+}
+.csstransitions.csstransforms .deck-container .slide.abs,
+.csstransitions.csstransforms .deck-container .abs {
+  position: absolute !important;
+  width: 300px;
+  margin-left: -150px;
+  margin-top: -100px;
+  left: 50%;
+  right: auto;
+  top: 50%;
+  bottom: auto;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-l,
+.csstransitions.csstransforms .deck-container .abs-l {
+  width: 200px;
+  position: absolute !important;
+  right: auto;
+  top: 300px;
+  left: 200px;
+  z-index: 20;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-r,
+.csstransitions.csstransforms .deck-container .abs-r {
+  width: 200px;
+  position: absolute !important;
+  left: auto;
+  top: 300px;
+  right: 200px;
+  z-index: 20;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-tc,
+.csstransitions.csstransforms .deck-container .abs-tc {
+  width: 100%;
+  position: absolute !important;
+  bottom: auto;
+  top: 50px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 20;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-tl,
+.csstransitions.csstransforms .deck-container .abs-tl {
+  width: 450px;
+  position: absolute !important;
+  left: 100px;
+  top: 100px;
+  z-index: 20;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-tr,
+.csstransitions.csstransforms .deck-container .abs-tr {
+  width: 450px;
+  position: absolute !important;
+  left: auto;
+  right: 100px;
+  top: 100px;
+  z-index: 20;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-bl,
+.csstransitions.csstransforms .deck-container .abs-bl {
+  width: 450px;
+  position: absolute !important;
+  top: auto;
+  right: auto;
+  left: 100px;
+  bottom: 50px;
+  z-index: 20;
+  font-size: 28px;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-br,
+.csstransitions.csstransforms .deck-container .abs-br {
+  width: 450px;
+  position: absolute !important;
+  top: auto;
+  left: auto;
+  right: 100px;
+  bottom: 50px;
+  z-index: 20;
+  font-size: 28px;
+}
+.csstransitions.csstransforms .deck-container .slide.abs-bc,
+.csstransitions.csstransforms .deck-container .abs-bc {
+  width: 100%;
+  position: absolute !important;
+  top: auto;
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 20;
+}
+.csstransitions.csstransforms .deck-container .abs-bc img {
+  margin: 0 auto;
+}
+
+.deck-container .t-2 {
+  margin-top: -50px !important;
+  padding-top: 0 !important;
+}
+.deck-container .t-1 {
+  margin-top: -25px !important;
+  padding-top: 0 !important;
+}
+.deck-container .t0 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+.deck-container .t1 {
+  margin-top: 25px !important;
+}
+.deck-container .t2 {
+  margin-top: 50px !important;
+}
+.deck-container .t3 {
+  margin-top: 75px !important;
+}
+.deck-container .t4 {
+  margin-top: 100px !important;
+}
+.deck-container .t5 {
+  margin-top: 125px !important;
+}
+.deck-container .t6 {
+  margin-top: 150px !important;
+}
+.deck-container .l4 {
+  padding-left: 100px !important;
+}
+.deck-container .r4 {
+  padding-right: 100px !important;
+}
+
+/* code */
+.deck-container .slide pre {
+  border-color: #ccc;
+  -webkit-box-shadow: inset 0 2px 5px rgba(0, 0, 0, .3);
+  padding: 25px;
+}
+.deck-container .slide pre.thin {
+  padding: 10px;
+}
+.deck-container .slide pre.overlay {
+  margin: 100px 50px 0 50px;
+}
+.deck-container .slide pre.wrap {
+  white-space: pre-wrap;
+}
+.deck-container .slide blockquote {
+  padding: 1em 1em;
+  font-size: 56px;
+}
+.deck-container .slide blockquote p {
+  margin: 0;
+}
+.deck-container .slide p.signature {
+  text-align: right;
+  padding-right: 50px;
+}
+
+/* centerfold layout */
+.deck-container .slide .icon-float {
+  position: absolute;
+  bottom: 50px;
+  right: 100px;
+
+  -webkit-transform: scale(1.05, 1.05) translateZ(50px);
+}
+.deck-container .slide .make-it-pop {
+  -webkit-transform: scale(1.05, 1.05) translateZ(50px);
+}
+.deck-container .slide .icon-float img {
+  margin: 0;
+}
+.deck-container .slide.page-centerfold video {
+  width: 1280px;
+}
+.deck-container .slide.page-centerfold .box {
+  display: table;
+  margin-left: auto;
+  margin-right: auto;
+}
+.deck-container .slide.page-centerfold .box > div {
+  display: table-cell;
+  vertical-align: middle;
+}
+.deck-container .slide.page-centerfold .box > div iframe,
+.deck-container .slide.page-centerfold .box > div img, {
+  margin: 0 auto;
+}
+
+/* two up layout */
+.deck-container .slide.page-two-up .box {
+  float: left;
+  width: 50%;
+  padding: 50px 50px 50px 25px;
+}
+.deck-container .slide.page-two-up .box:first-child {
+  padding: 50px 25px 50px 50px;
+}
+.deck-container .slide.page-two-up img {
+  width: 100%;
+}
+
+.deck-container .page-floats .box.l {
+  float: left;
+}
+.deck-container .page-floats .box.r {
+  float: right;
+}
+.deck-container .page-floats .box.cl {
+  clear: left;
+}
+.deck-container .page-floats .box.cr {
+  clear: right;
+}
+
+/* iframes */
+iframe.punch {
+  z-index: 10000;
+  -webkit-transform: translateZ(1000px);
+}
+.deck-container .slide iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+}
+.slide iframe.overscan {
+  margin: -4%;
+  width: 108%;
+  height: 108%;
+  max-width: none;
+  -webkit-transform: translateZ(-10px);
+}
+.slide iframe.mathbox {
+  -webkit-transform: scale3d(1.1, 1.1, 1) translate3d(0, 16.5px, -100px);
+  -webkit-transform-style: preserve-3d;
+  overflow: hidden;
+}
+.slide img.recessed, .slide .recessed {
+  -webkit-transform: scale3d(1.1, 1.1, 1) translate3d(0, 16.5px, -100px);
+  -webkit-transform-style: preserve-3d;
+}
+.deck-container .slide .slide iframe {
+  height: 720px;
+}
+
+/* spotlight */
+div.spotlight img {
+  width: 100%;
+}
+div.spotlight img.overscan {
+  -webkit-transform: translate(0, -50px) scale(2, 2);
+}
+
+/* slide invert */
+.csstransitions.csstransforms .deck-container > .slide.invert {
+  margin-top: -300px;
+  margin-left: -300px;
+  padding: 300px;
+  width: 1880px;
+  height: 1320px;
+}
+
+img.inline {
+  display: inline;
+  vertical-align: middle;
+}

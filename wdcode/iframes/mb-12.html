@@ -1,0 +1,276 @@
+<script type="text/javascript" charset="utf-8">
+
+var particles = [
+  new Physics.Particle(-1, -.5, 0, 1, .5, 0, .09, 1),
+];
+
+var npart = particles.length;
+
+var constraints = [
+  new Physics.BoxCollider(4, 4, 4, 1),
+  new Physics.ParticleCollider(1),
+];
+
+var physics = window.physics = new Physics.Engine({
+  method: 'euler',
+  step: 1/60,
+}, particles, constraints);
+
+var activePhysics = [7];
+
+window.requestAnimationFrame(function loop() {
+  window.requestAnimationFrame(loop);
+
+  if (window.director && (activePhysics.indexOf(window.director[0].step) != -1)) {
+    physics.update();
+  }
+});
+
+var positionCache = {};
+var velocityCache = {};
+
+function snapshotPosition(sample, i) {
+  var cache = positionCache[sample];
+  if (cache == null) {
+    cache = positionCache[sample] = [];
+  }
+  return (cache[i] = cache[i] || physics.position(i));
+}
+
+function snapshotVelocity(sample, i, end, scale) {
+  var cache = velocityCache[sample];
+  if (cache == null) {
+    cache = velocityCache[sample] = [];
+  }
+  var key = i +','+ end +','+ scale;
+  return (cache[key] = cache[key] || physics.velocity(i, end, scale));
+}
+
+function bigparticle(index) {
+  return function (x, i) {
+    var p = physics.point(index);
+    var r = physics.particles[index].radius;
+    return [p[0] + Math.cos(x) * r, p[1] + Math.sin(x) * r];
+  }
+}
+
+window.mathBoxSetup = function (mathbox, director) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-2, 2], [-2, 2]],
+      scale: [1, 1],
+    })
+    .grid({
+      ticks: [2, 2],
+      zIndex: -9,
+    })
+    .curve({
+      n: 5,
+      points: false,
+      line: true,
+      live: true,
+      expression: function (x, i) {
+        return [Math.cos(x*τ+τ/8)/0.707*2, Math.sin(x*τ+τ/8)/0.707*2, 0];
+      },
+      color: 0x000000,
+      opacity: 0.5,
+      zIndex: -10,
+    });
+
+  director.on('go', function (step, direction) {
+    var laststep = physics.options.step,
+        timestep = 0;
+
+    if (step == 4 && direction > 0) {
+      timestep = 1;
+    }
+    else if (step == 3 && direction < 0) {
+      timestep = -1;
+    }
+
+    if (step == 6 && direction > 0) {
+      timestep = .5;
+    }
+    else if (step == 7 && direction < 0) {
+      timestep = -.5;
+    }
+
+    if (timestep) {
+      physics.options.step = timestep;
+      physics.update();
+      physics.options.step = laststep;
+    }
+  });
+}
+
+window.mathBoxScript = [
+
+  // Add point
+  [
+    ['add', 'curve', {
+      id: "point",
+      n: npart,
+      points: true,
+      line: false,
+      live: true,
+      expression: function (x, i) {
+        return snapshotPosition(1, i);
+      },
+      color: 0x000000,
+      pointSize: 20,
+      zIndex: 20,
+    }],
+  ],
+
+  // Add position vector
+  [
+    ['add', 'vector', {
+      id: "pos",
+      n: 1,
+      live: true,
+      expression: function (i, end) {
+        return end ? snapshotPosition(1, i) : [-2, -2, 0];
+      },
+      lineWidth: 6,
+      size: .1,
+    }],
+  ],
+
+  // Add velocity vector
+  [
+    ['add', 'vector', {
+      id: "vel",
+      n: 1,
+      live: true,
+      expression: function (i, end) {
+        return snapshotVelocity(1, i, end, 1);
+      },
+      color: 0x20C050,
+      lineWidth: 6,
+      size: .1,
+      zIndex: 10,
+    }],
+  ],
+
+  // Move position ahead 1s
+  [
+    ['add', 'curve', {
+      id: "shadow",
+      n: npart,
+      points: true,
+      line: false,
+      live: true,
+      expression: function (x, i) {
+        return snapshotPosition(1, i);
+      },
+      color: 0x000000,
+      opacity: .3,
+      pointSize: 20,
+      zIndex: 18,
+    }],
+    ['animate', '#pos', {
+      expression: function (i, end) {
+        return end ? snapshotPosition(2, i) : [-2, -2, 0];
+      },
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#point', {
+      expression: function (i) {
+        return snapshotPosition(2, i);
+      },
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#vel', {
+      expression: function (i, end) {
+        return snapshotVelocity(2, i, end, 1);
+      },
+    }, {
+      delay: 1200,
+      duration: 500,
+    }],
+  ],
+
+  // Scale velocity by 0.5
+  [
+    ['animate', '#vel', {
+      expression: function (i, end) {
+        return snapshotVelocity(2, i, end, .5);
+      },
+    }, {
+      duration: 300,
+    }],
+  ],
+
+  // Move position ahead 0.5s
+  [
+    ['add', 'curve', {
+      id: "shadow",
+      n: npart,
+      points: true,
+      line: false,
+      live: true,
+      expression: function (x, i) {
+        return snapshotPosition(2, i);
+      },
+      color: 0x000000,
+      opacity: .3,
+      pointSize: 20,
+      zIndex: 18,
+    }],
+    ['animate', '#pos', {
+      expression: function (i, end) {
+        return end ? snapshotPosition(3, i) : [-2, -2, 0];
+      },
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#point', {
+      expression: function (i) {
+        return snapshotPosition(3, i);
+      },
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#vel', {
+      expression: function (i, end) {
+        return snapshotVelocity(3, i, end, 1);
+      },
+    }, {
+      delay: 700,
+      duration: 500,
+    }],
+  ],
+
+  // Turn on realtime physics
+  [
+    ['remove', '#shadow'],
+    ['set', '#pos', {
+      expression: function (i, end) {
+        return end ? physics.position(i) : [-2, -2, 0];
+      }
+    }],
+    ['set', '#point', {
+      expression: function (i) {
+        return physics.position(i);
+      },
+    }],
+    ['set', '#vel', {
+      expression: function (i, end) {
+        return physics.velocity(i, end, 1);
+      },
+    }],
+  ],
+
+  [
+    ['remove', 'vector, curve', {
+      duration: 500,
+    }],
+  ],
+];
+
+
+</script>

@@ -1,0 +1,244 @@
+<script type="text/javascript" charset="utf-8">
+
+var exports = window.exports = {};
+
+var points = exports.points = [];
+var n = 6, iN = 1/(n-1);
+for (var i = 0; i < n; ++i) {
+  var x = i*iN;
+  points.push([x, 1-x*x*x]);
+}
+
+var curve = exports.curve = [];
+var nn = 32, iNn = 1/(nn-1);
+for (var i = 0; i < nn; ++i) {
+  var x = i*iNn;
+  curve.push([x, 1-x*x*x]);
+}
+
+var vectors = exports.vectors = [];
+for (var i = 0; i < n-1; ++i) {
+  vectors.push(points[i]);
+  vectors.push(points[i + 1]);
+}
+
+var vectors2 = exports.vectors2 = [];
+for (var i = 0; i < n-1; ++i) {
+  var x = points[i][0];
+  vectors2.push(points[i]);
+  vectors2.push([ x + iN*.85, 1-x*x*x + .425 * ((1-(x+iN)*(x+iN)*(x+iN)) - (1-(x-iN)*(x-iN)*(x-iN))) ]);
+}
+
+var vectors3 = exports.vectors3 = [];
+for (var i = 0; i < n-1; ++i) {
+  var x = points[i][0];
+  vectors3.push(points[i]);
+  vectors3.push([ x + iN*.85, 1-x*x*x + .425 * ((1-(x+iN*2)*(x+iN*2)*(x+iN*2)) - (1-x*x*x)) ]);
+}
+
+var vectors4 = exports.vectors4 = [];
+for (var i = 0; i < n-1; ++i) {
+  var x = points[i][0];
+  vectors4.push(points[i]);
+  vectors4.push([ x + iN*.85, 1-x*x*x + .2125 * (((1-(x+iN)*(x+iN)*(x+iN)) - (1-(x-iN)*(x-iN)*(x-iN))) + ((1-(x+iN*2)*(x+iN*2)*(x+iN*2)) - (1-x*x*x))) ]);
+}
+
+var vectors5 = exports.vectors5 = [];
+for (var i = 0; i < n-1; ++i) {
+  var x = points[i][0];
+  vectors5.push(points[i]);
+  vectors5.push([ x + iN, 1-(x+iN)*(x+iN)*(x+iN) ]);
+}
+
+var vectors6 = exports.vectors6 = [];
+for (var i = 0; i < n-2; ++i) {
+  vectors6.push([
+    points[i+1][0],
+    points[i+1][1],
+  ]);
+  vectors6.push([
+    points[i+1][0] + (vectors5[i*2+3][0] - vectors5[i*2+2][0] - vectors5[i*2+1][0] + vectors5[i*2][0])*3,
+    points[i+1][1] + (vectors5[i*2+3][1] - vectors5[i*2+2][1] - vectors5[i*2+1][1] + vectors5[i*2][1])*3,
+  ]);
+}
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-.2, 1.201], [-.2, 1.201], [-1, 1]],
+      scale: [1, 1, 1],
+      polar: 0,
+    })
+    .camera({
+      phi: τ/4,
+    });
+
+}
+
+window.mathBoxScript = [
+
+  [
+    ['add', 'grid', {
+      ticks: [4, 4],
+      tickUnit: [.1, .1],
+      zIndex: -9,      
+      color: 0xc0c0c0,
+    }],
+    ['add', 'curve', {
+      id: 'curve',
+      n: exports.curve.length,
+      data: exports.curve,
+      points: false,
+      line: true,
+      lineWidth: 4,
+      color: 0xb0b0b0,
+      zIndex: -20,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'points',
+      n: exports.points.length,
+      data: exports.points,
+      points: true,
+      line: false,
+      pointSize: 20,
+      zIndex: 50,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'points2',
+      n: 2,
+      data: exports.points,
+      points: true,
+      line: false,
+      pointSize: 20,
+      opacity: 0,
+      zIndex: 51,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['add', 'vector', {
+      id: 'instant',
+      n: exports.vectors2.length / 2,
+      data: exports.vectors2,
+      size: .08,
+      color: 0x20c050,
+      lineWidth: 4,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['animate', '#instant', {
+      data: exports.vectors3,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['animate', '#instant', {
+      data: exports.vectors4,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['animate', 'viewport', {
+      range: [[-.101, .601], [.499, 1.201], [-1, 1]],
+    }, {
+      duration: 1200,
+    }],
+    ['animate', '#instant', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+    ['set', '#points2', {
+      opacity: 1,
+    }],
+    ['animate', '#points', {
+      opacity: 0,
+    }],
+  ],
+
+  [
+    ['add', 'vector', {
+      id: 'v1',
+      n: 1,
+      data: exports.vectors5,
+      size: .08,
+      color: 0x20c050,
+      lineWidth: 4,
+      zIndex: 10,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['add', 'vector', {
+      id: 'a',
+      n: 1,
+      data: exports.vectors6,
+      size: .08,
+      color: 0xc02050,
+      lineWidth: 4,
+      zIndex: 30,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'v2',
+      n: 1,
+      data: exports.vectors5.slice(2, 4),
+      size: .08,
+      color: 0x20c050,
+      lineWidth: 4,
+      zIndex: 20,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['add', 'vector', {
+      id: 'a2',
+      n: 2,
+      data: exports.vectors6.slice(2),
+      size: .08,
+      color: 0xc02050,
+      lineWidth: 4,
+      zIndex: 30,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'v3',
+      n: 2,
+      data: exports.vectors5.slice(4),
+      size: .08,
+      color: 0x20c050,
+      lineWidth: 4,
+      zIndex: 10,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#points', {
+      opacity: 1,
+    }, {
+      duration: 500,
+    }],
+  ],
+];
+
+</script>
