@@ -5,9 +5,14 @@ $(function() {
 
   function slomo(e) {
     $('body')[e.shiftKey ? 'addClass' : 'removeClass']('slomo');
+    speed = e.shiftKey ? .2 : 1;
 
     // Sync up iframe mathboxes to correct step
-    mathboxSpeed(e.shiftKey);
+    window.$frames = $frames;
+    $frames && $frames.each(function () {
+      mathboxSpeed(this, speed);
+    });
+
   }
   $(document).keydown(slomo).keyup(slomo);
 
@@ -19,12 +24,8 @@ $(function() {
   }
 
   // Set speed
-  function mathboxSpeed(slomo) {
-    var speed = slomo ? .2 : 1;
-    var message = { mathBox: { method: 'speed', args: [speed] }};
-    $frames && $frames.each(function () {
-      this.contentWindow && this.contentWindow.postMessage(message, '*');
-    });
+  function mathboxSpeed(iframe, speed) {
+    iframe.contentWindow && iframe.contentWindow.postMessage({ mathBox: { method: 'speed', args: [speed] }}, '*');
   }
 
   // Pre-load and unload iframes one frame before/after
