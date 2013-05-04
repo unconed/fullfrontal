@@ -282,3 +282,6 @@
 .deck-before {
   z-index: -1000;
 }
+.deck-before, .deck-previous, .deck-next, .deck-after {
+  pointer-events: none;
+}
