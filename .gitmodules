@@ -1,0 +1,9 @@
+[submodule "wdcode/iframes/lib/ShaderGraph.js"]
+        path = wdcode/iframes/lib/ShaderGraph.js
+        url = https://github.com/unconed/ShaderGraph.js.git
+[submodule "wdcode/iframes/lib/ThreeBox.js"]
+        path = wdcode/iframes/lib/ThreeBox.js
+        url = https://github.com/unconed/ThreeBox.js.git
+[submodule "wdcode/iframes/lib/ThreeRTT.js"]
+        path = wdcode/iframes/lib/ThreeRTT.js
+        url = https://github.com/unconed/ThreeRTT.js
