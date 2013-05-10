@@ -158,3 +158,9 @@ pre.small {
   color: #C02050;
 }
 
+big {
+  font-size: 120%;
+}
+small {
+  font-size: 80%;
+}
