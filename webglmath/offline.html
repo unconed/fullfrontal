@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=1280, user-scalable=no">
+
+  <title>Making WebGL Dance</title>
+  
+  <!-- Required stylesheet -->
+  <link rel="stylesheet" href="../deck.js/core/deck.core.css">
+  
+  <!-- Theme -->
+  <link rel="stylesheet" href="resources/transition.css">
+  <link rel="stylesheet" href="resources/layout.css">
+  <link rel="stylesheet" href="resources/typography.css">
+  
+  <!-- Required Modernizr file -->
+  <script src="../deck.js/modernizr.custom.js"></script>
+
+  <!-- Typekit fonts -->
+  <!--
+  <script type="text/javascript" src="//use.typekit.net/nde6wmn.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  -->
+
+  <!-- Required JS files. -->
+  <script src="../deck.js/jquery-1.7.2.min.js"></script>
+  <script src="../deck.js/core/deck.core.js"></script>
+  <script src="../mathbox/vendor/underscore.js"></script>
+  <script src="resources/slides.js"></script>
+  
+  <!-- MathJax typesetting -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      "HTML-CSS": { availableFonts: ["TeX"] },
+      extensions: ["tex2jax.js"],
+      jax: ["input/TeX","output/HTML-CSS"],
+      tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+      messageStyle: 'none',
+    });
+  </script>
+  <script type="text/javascript" src="../mathjax/MathJax.js?config=TeX-AMS_HTML"></script>
+  
+</head>
+<body class="offline">
+
+<div class="deck-container">
+
+<!-- Begin slides. -->
+
+<section class="slide page-cover">
+  <h1 class="white-outline">Making WebGL Dance</h1>
+  <h4><i>or</i> <span class="i">How I Learnt to</span> Stop Worrying <span class="i">and</span> Love Linear Algebra</h4>
+  <h2 class="recessed">Steven Wittens</h2>
+  <h3 class="recessed"><img src="images/github.png" width="48" height="48" class="inline"><img class="inline" src="images/twitter.png" width="48" height="48"> &nbsp;<span>unconed</span><br>http:// <span>acko.net</span></h3>
+</section>
+
+
+<section class="slide t-1">
+  <h1><small><small><i>How to Draw</i><i>Where to Draw</i><i>What to Draw</i></small></small></h1>
+</section>
+
+<!-- - ->
+
+<section class="slide t-2">
+  <h1><small><small><i>In the Beginning</i></small></small>There Was Pixels</h1>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="spotlight t-1">
+    <img src="images/vector-graphics.jpg" class="t1 recessed"></img>      
+  </div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <iframe src="iframes/mathbox.html#1" class="mathbox"></iframe>
+  <div class="slide temp abs-tc"><h3 class="mj">Bresenham Lines</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Scanline Rendering</h3></div>
+  <div class="slide"></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Snap To Pixel</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">"Anti-Aliasing!"</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Sub-Pixel Accuracy</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Samples</h3></div>
+  <div class="slide temp abs-tl box images delay20" style="width: 1100px">
+    <div class="l">
+      <h3 class="mj">Vector World</h3>
+    </div>
+    <div class="r">
+      <h3 class="mj">Raster World</h3>
+    </div>
+    <div class="l cl" style="width: 920px; padding-top: 300px">
+      <h3 class="mj">Sampling</h3>
+    </div>
+  </div>
+  <div class="slide temp abs-tc"><h3 class="mj">Nearest Neighbour Filter</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Bilinear Filter</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Aliasing</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Anisotropic Filtering</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Sampling Theorem – Nyquist Frequency</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Jaggies</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Anti-Aliasing (AA) = Blur All The Things?</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Pixel Coverage – Box Filter</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">SuperSampling (SSAA ⨉ 16)</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">MultiSampling (MSAA ⨉ 16)</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Sampled Box Filter + Bilinear Filter</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Distance Function – Pixel-wide Gradient</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">AA = Filter Before Sampling</h3><br><br><br><br><br><br><br><br><br><br><br><div class="mj">Gaussian Blur, MIP Mapping, Anisotropic Filter</div></div>
+  <div class="slide temp abs-tc"><h3 class="mj white">Sub-Pixel AA (RGB)</h3><div class="mj white"><code>-webkit-font-smoothing</code></div><div class="t6"><br><br><img class="t6" width="1280" src="images/subpixel-aa.png"></div></div>
+  <div class="slide temp slow">
+    <h1 class="mj abs-tc" style="text-outline: none"><big>The Pixel is Dead<br>Long Live the Pixel</big></h1>
+    <img src="images/retina.jpg" class="" width="1280">
+  </div>
+  <div class="slide temp abs-tc"><h3 class="mj">Procedural Textures<br>Perlin / Derivative Noise</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Depth – Z-Buffer / Shadow Map</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Normals – Deferred Lighting</h3></div>
+</section>
+
+<!- - -->
+
+<section class="slide">
+  <h1><small><small>Enter The Matrix</small></small></h1>
+</section>
+
+<section class="slide zoom">
+  <iframe src="iframes/mathbox.html#2" class="mathbox"></iframe>
+
+  <div class="slide temp abs-tc"><h3 class="mj">Affine Transforms</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Rotation</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Scaling</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Skewing</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Parallel Lines</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Vector Basis</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">New Basis</h3></div>
+  <div class="slide temp-delay abs-tc"><h3 class="mj">Disassemble and Reassemble</h3></div>
+  <div class="slide"></div>
+  
+  <div class="slide inflate temp delay10">
+    <div class="abs-tc"><h3 class="mj">Matrix</h3></div>
+    <div class="mj abs-r">
+      $$
+      \begin{bmatrix}
+        \class{mj-blue}{0.53} & \class{mj-green}{0.42} \\
+       \class{mj-blue}{-0.32} & \class{mj-green}{0.77}
+      \end{bmatrix}
+      $$
+    </div>
+  </div>
+
+  <div class="slide inflate temp">
+    <div class="abs-tc"><h3 class="mj">Matrix-Vector Multiply</h3></div>
+    <div class="mj abs" style="margin-left: 50px; top: 300px">
+      $$
+      \class{mj-purple}{\vec v'} = \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+      $$<br><br>
+      $$
+      
+      \begin{bmatrix}
+        \class{mj-purple}{x'} \\ \class{mj-purple}{y'}
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        \class{mj-blue}{0.53} & \class{mj-green}{0.42} \\
+       \class{mj-blue}{-0.32} & \class{mj-green}{0.77}
+      \end{bmatrix}
+      \cdot
+      \begin{bmatrix}
+        \class{mj-orangered}{x} \\ \class{mj-orangered}{y}
+      \end{bmatrix}
+      $$
+    </div>
+  </div>
+
+  <div class="slide inflate temp">
+    <div class="abs-tc"><h3 class="mj">Disassemble and Reassemble</h3></div>
+    <div class="mj abs" style="margin-left: 0px; top: 300px;">
+      $$
+      \class{mj-purple}{\vec v'} = \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+      $$<br><br>
+      $$
+      \begin{bmatrix}
+        \class{mj-purple}{x'} \\ \class{mj-purple}{y'}
+      \end{bmatrix}
+      =
+      \class{mj-orangered}{x} \cdot
+      \begin{bmatrix}
+        \class{mj-blue}{0.53} \\ \class{mj-blue}{-0.32}
+      \end{bmatrix}
+      +
+      \class{mj-orangered}{y} \cdot
+      \begin{bmatrix}
+       \class{mj-green}{0.42} \\ \class{mj-green}{0.77}
+      \end{bmatrix}
+      $$
+    </div>
+  </div>
+
+  <div class="slide inflate temp">
+    <div class="abs-tc"><h3 class="mj">Matrix-Matrix Multiplication</h3></div>
+    <div class="mj abs" style="margin-left: 20px; top: 300px;">
+      $$
+      \class{mj-purple}{\vec v'} = \mathbf{M'} \cdot \class{mj-orangered}{\vec v} = \mathbf{R} \cdot \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+      $$
+      <br><br>
+      $$
+      
+      \begin{bmatrix}
+        \class{mj-purple}{x'} \\ \class{mj-purple}{y'}
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        \class{mj-blue}{-0.32} & \class{mj-green}{0.77} \\
+       \class{mj-blue}{-0.53} & \class{mj-green}{-0.42}
+      \end{bmatrix}
+      \begin{bmatrix}
+        \class{mj-orangered}{x} \\ \class{mj-orangered}{y}
+      \end{bmatrix}
+      $$<br>
+      $$
+      =
+      \begin{bmatrix}
+        \class{mj-blue}{0} & \class{mj-green}{1} \\
+       \class{mj-blue}{-1} & \class{mj-green}{0}
+      \end{bmatrix}
+      \begin{bmatrix}
+        \class{mj-blue}{0.53} & \class{mj-green}{0.42} \\
+       \class{mj-blue}{-0.32} & \class{mj-green}{0.77}
+      \end{bmatrix}
+      \begin{bmatrix}
+        \class{mj-orangered}{x} \\ \class{mj-orangered}{y}
+      \end{bmatrix}
+      $$
+    </div>
+  </div>
+
+  <div class="slide inflate temp">
+    <div class="abs-tc"><h3 class="mj">3D</h3></div>
+    <div class="mj abs" style="margin-left: 20px; top: 300px;">
+      $$
+      \class{mj-purple}{\vec v'} = \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+      $$
+      <br><br>
+      $$
+      
+      \begin{bmatrix}
+        \class{mj-purple}{x'} \\ \class{mj-purple}{y'} \\ \class{mj-purple}{z'}
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        \class{mj-blue}{a} & \class{mj-green}{d} & \class{mj-red}{g}  \\
+       \class{mj-blue}{b} & \class{mj-green}{e} & \class{mj-red}{h} \\
+       \class{mj-blue}{c} & \class{mj-green}{f} & \class{mj-red}{i}
+      \end{bmatrix}
+      \begin{bmatrix}
+        \class{mj-orangered}{x} \\ \class{mj-orangered}{y} \\ \class{mj-orangered}{z}
+      \end{bmatrix}
+      $$
+    </div>
+  </div>
+
+  <div class="slide inflate temp">
+    <div class="abs-tc"><h3 class="mj">4D?</h3></div>
+    <div class="mj abs" style="margin-left: 20px; top: 300px;">
+      $$
+      \class{mj-purple}{\vec v'} = \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+      $$
+      <br><br>
+      $$
+      
+      \begin{bmatrix}
+        \class{mj-purple}{x'} \\ \class{mj-purple}{y'} \\ \class{mj-purple}{z'} \\ \class{mj-purple}{w'}
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        \class{mj-blue}{a} & \class{mj-green}{e} & \class{mj-red}{i} & \class{mj-indigo}{m} \\
+       \class{mj-blue}{b} & \class{mj-green}{f}  & \class{mj-red}{j} & \class{mj-indigo}{n} \\
+       \class{mj-blue}{c} & \class{mj-green}{g}  & \class{mj-red}{k} & \class{mj-indigo}{o} \\
+       \class{mj-blue}{d} & \class{mj-green}{h}  & \class{mj-red}{l} & \class{mj-indigo}{p}
+      \end{bmatrix}
+      \begin{bmatrix}
+        \class{mj-orangered}{x} \\ \class{mj-orangered}{y} \\ \class{mj-orangered}{z} \\ \class{mj-orangered}{w}
+      \end{bmatrix}
+      $$
+    </div>
+  </div>
+
+  <div class="slide temp abs-tc"><h3 class="mj">Ordinary 2D Space</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Projective 2D Space</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Z Vector = Translation</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">X/Y Vector = Perspective</h3></div>
+
+  <div class="slide inflate temp">
+    <div class="abs-tc"><h3 class="mj">3D Projective Transform = 3D <span class="mj-blue">X</span><span class="mj-green">Y</span><span class="mj-red">Z</span> Matrix + <span class="mj-indigo">Translation</span> + <span class="mj-orangered">Perspective</span></h3></div>
+    <div class="mj abs-tc">
+      <br><br>
+      $$
+      
+      \begin{bmatrix}
+        \class{mj-blue}{a} & \class{mj-green}{e} & \class{mj-red}{i} & \class{mj-indigo}{m} \\
+       \class{mj-blue}{b} & \class{mj-green}{f}  & \class{mj-red}{j} & \class{mj-indigo}{n} \\
+       \class{mj-blue}{c} & \class{mj-green}{g}  & \class{mj-red}{k} & \class{mj-indigo}{o} \\
+       \class{mj-orangered}{d} & \class{mj-orangered}{h}  & \class{mj-orangered}{l} & 1
+      \end{bmatrix}
+
+      $$
+    </div>
+  </div>
+
+  <div class="slide temp abs-tc"><h3 class="mj">Object Space to World Space</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">World Space to View Space</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">View Space to Screen Space</h3></div>
+
+</section>
+
+<!-- End slides. -->
+</div>
+
+</body>
+</html>

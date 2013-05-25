@@ -1,0 +1,1736 @@
+<script type="text/javascript" charset="utf-8">
+
+// Prepare canvas + aliased view
+var width = 30, height = 20;
+var w2 = width / 2, h2 = height / 2;
+var patternW = 128;
+
+function makeCanvas(w, h) {
+  var canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  return canvas;
+}
+
+var canvas = makeCanvas(width, height);
+var aliased = makeCanvas(width, height);
+var pattern = makeCanvas(patternW, 1);
+var grid = makeCanvas(patternW, patternW);
+
+var canvasCtx = canvas.getContext('2d');
+var aliasedCtx = aliased.getContext('2d');
+var patternCtx = pattern.getContext('2d');
+var gridCtx = grid.getContext('2d');
+
+var canvasTexture = new THREE.Texture(canvas);
+var canvasLinearTexture = new THREE.Texture(canvas);
+var aliasedTexture = new THREE.Texture(aliased);
+var aliasedLinearTexture = new THREE.Texture(aliased);
+
+var gridLinearTexture = new THREE.Texture(grid);
+var gridMipTexture = new THREE.Texture(grid);
+var gridAnisoTexture = new THREE.Texture(grid);
+
+canvasTexture.magFilter =
+  canvasTexture.minFilter = THREE.NearestFilter;
+
+aliasedTexture.magFilter =
+  aliasedTexture.minFilter = THREE.NearestFilter;
+
+canvasLinearTexture.magFilter =
+  canvasLinearTexture.minFilter = THREE.LinearFilter;
+
+aliasedLinearTexture.magFilter =
+  aliasedLinearTexture.minFilter = THREE.LinearFilter;
+
+gridLinearTexture.magFilter =
+  gridLinearTexture.minFilter = THREE.LinearFilter;
+
+gridMipTexture.magFilter = THREE.LinearFilter;
+gridMipTexture.minFilter = THREE.LinearMipMapNearestFilter;
+
+gridAnisoTexture.magFilter = THREE.LinearFilter;
+gridAnisoTexture.minFilter = THREE.LinearMipMapNearestFilter;
+gridAnisoTexture.anisotropy = 16;
+
+var repeat = 16;
+gridLinearTexture.repeat.set(repeat, repeat);
+gridLinearTexture.wrapS = THREE.RepeatWrapping;
+gridLinearTexture.wrapT = THREE.RepeatWrapping;
+
+gridMipTexture.repeat.set(repeat, repeat);
+gridMipTexture.wrapS = THREE.RepeatWrapping;
+gridMipTexture.wrapT = THREE.RepeatWrapping;
+
+gridAnisoTexture.repeat.set(repeat, repeat);
+gridAnisoTexture.wrapS = THREE.RepeatWrapping;
+gridAnisoTexture.wrapT = THREE.RepeatWrapping;
+
+// Update canvas textures
+var bufferData, aliasedData;
+
+function initTextures() {
+  var buf = patternCtx.getImageData(0, 0, patternW, 2);
+  var data = buf.data;
+  for (var j = 0, i = 0; i < patternW; ++i, j += 4) {
+    var c = Math.floor(255 * (Math.cos(i / patternW * 60) * .5 + .5));
+    data[j] = c;
+    data[j+1] = c;
+    data[j+2] = c;
+    data[j+3] = 255;
+  }
+  patternCtx.putImageData(buf, 0, 0);
+
+  buf = gridCtx.getImageData(0, 0, patternW, patternW);
+  data = buf.data;
+  for (var y = 0, j = 0; y < patternW; ++y) {
+    var d = Math.cos(y / patternW * π * 20) * .5 + .5;
+    var e = Math.cos(y / patternW * π * 4) * .5 + .5;
+    for (i = 0; i < patternW; ++i, j += 4) {
+      c = Math.max(d, (Math.cos(i / patternW * π * 20) * .5 + .5));
+
+      var f = e * (Math.cos(i / patternW * π * 4) * .5 + .5);
+
+//      c = (1-c)*(1-c)*20-17;
+      c = c > .85 ? 0 : e*f*.3+.7;
+      c = Math.floor(255 * c);
+      data[j] = c;
+      data[j+1] = c;
+      data[j+2] = c;
+      data[j+3] = 255;
+    }
+  }
+  gridCtx.putImageData(buf, 0, 0);
+
+  gridLinearTexture.needsUpdate = true;
+  gridMipTexture.needsUpdate = true;
+  gridAnisoTexture.needsUpdate = true;
+}
+
+function updateTextures() {
+  var src = canvasCtx.getImageData(0, 0, width, height);
+  var dst = aliasedCtx.createImageData(width, height);
+
+  var srcData = src.data;
+  var dstData = dst.data;
+
+  var n = width * height * 4;
+  var thresh = (lastStep <= 5) ? .31*255 : .5*255;
+  for (var i = 0; i < n; i += 4) {
+    dstData[i]   = srcData[i];
+    dstData[i+1] = srcData[i+1];
+    dstData[i+2] = srcData[i+2];
+    dstData[i+3] = srcData[i+3] > thresh ? 255 : 0;
+  }
+
+  aliasedCtx.putImageData(dst, 0, 0);
+
+  canvasTexture.needsUpdate = true;
+  canvasLinearTexture.needsUpdate = true;
+  aliasedTexture.needsUpdate = true;
+  aliasedLinearTexture.needsUpdate = true;
+
+  bufferData = srcData;
+  aliasedData = dstData;
+}
+
+function clearCanvas() {
+  canvasCtx.clearRect(0, 0, width, height);
+}
+
+function trace(points) {
+  canvasCtx.beginPath();
+  points.forEach(function (point, i) {
+    canvasCtx[i ? 'lineTo' : 'moveTo'](w2+point[0], h2+point[1]);
+  });
+}
+
+function patternStrip(size, opacity) {
+  canvasCtx.globalAlpha = opacity;
+  canvasCtx.drawImage(pattern, w2 - size * 5 + 2, h2 - 8, size * 2, 16);
+  canvasCtx.drawImage(pattern, w2 - size * 3 + 1, h2 - 8, size * 2, 16);
+  canvasCtx.drawImage(pattern, w2 - size, h2 - 8, size * 2, 16);
+  canvasCtx.drawImage(pattern, w2 + size - 1, h2 - 8, size * 2, 16);
+  canvasCtx.drawImage(pattern, w2 + size * 3 - 2, h2 - 8, size * 2, 16);
+  canvasCtx.globalAlpha = 1;
+}
+
+function fill(color) {
+  canvasCtx.fillStyle = color || '#000';
+  canvasCtx.fill();
+}
+
+function stroke() {
+  canvasCtx.stroke();
+}
+
+function snap(points) {
+  return points.map(function (point) {
+    return point.map(function (x) {
+      return Math.round(x+.5)-.5;
+    });
+  });
+}
+
+function pixels(points, color) {
+  canvasCtx.fillStyle = color || '#000';
+  points.forEach(function (point) {
+    canvasCtx.fillRect(w2+point[0]-.5, h2+point[1]-.5, 1, 1)
+  });
+}
+
+function snapExpand(points) {
+  return points.map(function (point) {
+    return point.map(function (x) {
+      return Math.round((Math.round(x+.5)-.5)*1.01);
+    });
+  });
+}
+
+var π = Math.PI, τ = π*2;
+
+function tri(size, step) {
+  var n = 3, out = [];
+  for (var i = 0; i < n; ++i) {
+    var t = i/n*τ + director[0].clock(step||0)*.37;
+    out.push([size*Math.cos(t), size*Math.sin(t)]);
+  }
+  return out;
+}
+
+// Live arrays of samples
+var activePoints = [];
+var activeSamples = [];
+var inactiveSamples = [];
+var samples = [];
+var zoomSamples = [];
+
+var zoomWidth = Math.floor(width/4)*4;
+
+function initSamples() {
+  var th = 0;
+  for (var y = 0; y < height; ++y) {
+    for (var x = 0; x < width; ++x) {
+      samples.push([x+.5-w2, y+.5-h2]);
+
+      if (x < zoomWidth) {
+        var th = (th + (x + y*4)*τ*0.618*.155*4) % (τ*7);
+        var r = .03125*2;
+        var dx = Math.cos(th)*r;
+        var dy = Math.sin(th)*r;
+        zoomSamples.push([(x-w2)*.25+dx+.625+.25, (y-h2)*.25+dy+.5+3.125]);
+      }
+    }
+  }
+}
+
+function isIn(sample, points) {
+  var n = points.length, accum = 0;
+  if (n < 2) return;
+  for (var i = 0; i < n; ++i) {
+    var a = points[i];
+    var b = points[(i+1)%n];
+    var x = a[0], y = a[1];
+    var dx = b[0] - x, dy = b[1] - y;
+    var d = (sample[1] - y)*dx - (sample[0] - x)*dy;
+    accum += d>0 ? 1 : -1;
+  }
+  return accum > 1;
+}
+
+function sdLinearShape(sample, points, slope) {
+  var n = points.length, accum = Infinity;
+  if (n < 2) return 0;
+  for (var i = 0; i < n; ++i) {
+    var a = points[i];
+    var b = points[(i+1)%n];
+    var x = a[0], y = a[1];
+    var dx = b[0] - x, dy = b[1] - y;
+
+    var ddx = sample[0] - x;
+    var ddy = sample[1] - y;
+
+    var d = (ddy + .5)*dx - (ddx + .5)*dy;
+    accum = Math.min(d, accum);
+  }
+  return Math.max(0, Math.min(1, accum * .06125*1.4*slope+.4 ));
+}
+
+function sdEaseShape(sample, points, slope) {
+  var n = points.length, accum = 1;
+  for (var i = 0; i < n; ++i) {
+    var a = points[i];
+    var b = points[(i+1)%n];
+    var x = a[0], y = a[1];
+    var dx = b[0] - x, dy = b[1] - y;
+    var d = (sample[1] - y + .5)*dx - (sample[0] - x + .5)*dy;
+    var c = Math.max(0, Math.min(1, d * .06125*1.2*slope+.4));
+    accum *= .5-.5*Math.cos(c*π);
+  }
+  return accum;
+}
+
+function isMixed(sample, points) {
+  var x = Math.floor(sample[0]+w2);
+  var y = Math.floor(sample[1]+h2);
+  var r = bufferData[(x+y*width)*4+3];
+  return r > 0 && r < 255;
+}
+
+function samplePolygon(samples, points) {
+  activeSamples = [];
+  inactiveSamples = [];
+
+  for (var j = 0; j < samples.length; ++j) {
+    var sample = samples[j];
+
+    if (isIn(sample, points)) {
+      activeSamples.push(sample);
+    }
+    else {
+      inactiveSamples.push(sample);
+    }
+  }
+
+}
+
+function multisamplePolygon(samples, points) {
+  activeSamples = [];
+  inactiveSamples = [];
+
+  for (var p = 0, j = 0; j < samples.length; j += 4) {
+    var sample = samples[j];
+
+    if (isMixed(sample, points)) {
+      for (var y = 0; y < 4; ++y) {
+        for (var x = 0; x < 4; ++x) {
+          sample = samples[j+x+y*zoomWidth];
+          if (isIn(sample, points)) {
+            activeSamples.push(sample);
+          }
+          else {
+            inactiveSamples.push(sample);
+          }
+        }
+      }
+    }
+    else {
+      var sample2 = [Math.floor(sample[0])+.5, Math.floor(sample[1])+.5];
+      if (isIn(sample2, points)) {
+        activeSamples.push(sample2);
+      }
+      else {
+        inactiveSamples.push(sample2);
+      }
+    }
+
+    p += 4;
+    if (p >= zoomWidth) {
+      p = 0;
+      j += 3 * zoomWidth;
+    }
+  }
+}
+
+// Back and forth easing curve with minor pause at the edges.
+function lerptime(t) {
+  t = t*.33-.5;
+  t = Math.sin(Math.min(1, Math.max(-1, .7*Math.asin(Math.sin(π*t))))*τ/4);
+  return t*.5+.5;
+}
+
+initSamples();
+initTextures();
+
+// Prepare mathbox
+var lastStep = 0;
+window.mathBoxSetup = function (mathbox, director) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-w2, w2], [-h2, h2], [-1, 1]],
+      scale: [.9*1.5, .9, 1],
+    })
+    .camera({
+      phi: τ/4,
+      orbit: 3.5,
+    });
+
+  mathbox.world().loop().hookPreRender(function () {
+    if ([4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24].indexOf(lastStep)>=0) {
+      clearCanvas();
+
+      var r = 5.99;
+      activePoints = tri(r, 4);
+
+      if (lastStep <= 6) {
+        activePoints = snap(activePoints);
+      }
+
+      if (lastStep <= 5) {
+        trace(activePoints);
+        for (var i = 0; i < 20; ++i) fill();
+      }
+      else if (lastStep <= 7) {
+        trace(activePoints);
+        fill(_darkred);
+      }
+      else if (lastStep == 13 || lastStep == 14) {
+        samplePolygon(samples, activePoints);
+        var t = Math.max(0, director.clock(14)*.3);
+        var t2 = (t<.5 ? t*t : t-.25) * 5;
+        t = Math.max(0, t - 1);
+        t = t<.5 ? t*t : t-.25;
+
+        var a = -.555;
+        var r = lerptime(t+π)*2-1;
+        r = (a+r*Math.abs(r)*(r<0?.5:1))*13+17;
+
+        if (t2 > 0) {
+          patternStrip(r, Math.min(1, t2));
+        }
+      }
+      else if (lastStep == 15) {
+        trace(activePoints);
+        fill(_darkred);
+        samplePolygon(samples, activePoints);
+
+        var t = Math.max(0, director.clock(14)*.3);
+        var t2 = (t<.5 ? t*t : t-.25)*5;
+        t = Math.max(0, t - 1);
+        t = t<.5 ? t*t : t-.25;
+
+        var a = -.555;
+        var r = lerptime(t+π)*2-1;
+        r = (a+r*Math.abs(r)*(r<0?.5:1))*13+17;
+
+        var t3 = Math.max(0, Math.min(1, director.clock(15) - .3));
+        t3 = .5+.5*Math.cos(t3*π);
+        if (t2 > 0 && t3  > 0) {
+          patternStrip(r, t3 * Math.min(1, t2));
+        }
+      }
+      else if (lastStep <= 17) {
+        trace(activePoints);
+        fill(_darkred);
+        samplePolygon(samples, activePoints);
+      }
+      else if (lastStep <= 18) {
+        trace(activePoints);
+        fill(_darkred);
+
+        var t = director.clock(18);
+        if (t < .3) {
+          samplePolygon(samples, activePoints);
+        }
+        else {
+          samplePolygon(zoomSamples, activePoints);
+        }
+      }
+      else if (lastStep <= 19) {
+        trace(activePoints);
+        fill(_darkred);
+        multisamplePolygon(zoomSamples, activePoints);
+      }
+      else if (lastStep <= 24) {
+        trace(activePoints);
+        fill(_darkred);
+      }
+
+      if (lastStep >= 5 && lastStep <= 6) pixels(activePoints, _orangered);
+
+      updateTextures();
+    }
+  });
+
+  director.on('go', function (step, direction) {
+    lastStep = step;
+
+    var fragmentDepth = "void main() { float c = (gl_FragCoord.w / gl_FragCoord.z) * 4.0 - .9; c = sqrt(max(0.0, c)); gl_FragColor = vec4(c, c, c, 1.0); }";
+    var fragmentNormal = "varying vec3 vNormal;	void main() { vec3 normal = normalize(vNormal); gl_FragColor = vec4(sqrt(normal *.5 + .5), 1.0); }";
+
+    var obj1 = mathbox.select('#water')[0];
+    var obj2 = mathbox.select('#bilinear')[0];
+
+    var mat1 = obj1 && obj1.mesh.material;
+    var mat2 = obj2 && obj2.mesh.material;
+    var mat3 = obj1 && obj1.line.material;
+    var mat4 = obj2 && obj2.line.material;
+
+    if (lastStep >= 25) {
+      mat1.needsUpdate =
+      mat2.needsUpdate =
+      mat3.needsUpdate =
+      mat4.needsUpdate =
+        true;
+    }
+
+    if (lastStep == 25 && direction > 0) {
+      mat1._fragmentShader = mat1.fragmentShader;
+      mat2._fragmentShader = mat2.fragmentShader;
+      mat3._fragmentShader = mat3.fragmentShader;
+      mat4._fragmentShader = mat4.fragmentShader;
+    }
+    else if (lastStep == 25 && direction < 0) {
+      mat1.fragmentShader = mat1._fragmentShader;
+      mat2.fragmentShader = mat2._fragmentShader;
+      mat3.fragmentShader = mat3._fragmentShader;
+      mat4.fragmentShader = mat4._fragmentShader;
+    }
+    else if (lastStep == 26) {
+      mat1.fragmentShader = fragmentDepth;
+      mat2.fragmentShader = fragmentDepth;
+      mat3.fragmentShader = fragmentDepth;
+      mat4.fragmentShader = fragmentDepth;
+    }
+    else if (lastStep == 27) {
+      mat1.fragmentShader = fragmentNormal;
+      mat2.fragmentShader = fragmentNormal;
+      mat3.fragmentShader = fragmentNormal;
+      mat4.fragmentShader = fragmentNormal;
+    }
+  });
+}
+
+function pixelsRound(x, y, i, j) {
+  return [Math.round(x), Math.round(y), 0];
+}
+
+var darkred = 0x220000, _darkred = '#200',
+    orangered = 0xc03000, _orangered = "#c03000",
+    green = 0x50c020, _green = "#50c020",
+    land = 0x509000, _land = "#509000",
+    blue = 0x3090ff,
+    surfacered = 0xdf5000, _slate = '#efb030',
+    purple = 0xd040b0,
+    water = 0x103070,
+    gold = 0xffd040,
+    channelR = 0xff1010,
+    channelG = 0x10d010,
+    channelB = 0x1030f0;
+
+window.mathBoxScript = [
+
+  [
+    // Pixel grid
+    ['add', 'grid', {
+      id: "grid",
+      color: 0x808080,
+      opacity: .5,
+      lineWidth: 3,
+      ticks: [width, height],
+      tickUnit: [1, 1],
+      zIndex: 10,
+    }, {
+      duration: 500,
+    }],
+
+  ],
+
+  // Line drawing
+  [
+    // Horizontal Line
+    ['add', 'surface', {
+      id: 'hline',
+      domain: [[-12, -12], [-8, -7]],
+      n: 2,
+      shaded: false,
+      color: orangered,
+      expression: pixelsRound,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#hline', {
+      domain: [[-12, 4], [-8, -7]],
+    }, {
+      duration: 2000,
+    }],
+
+    // Vertical Line
+    ['add', 'surface', {
+      id: 'vline',
+      domain: [[10, 11], [-6, -6]],
+      n: 2,
+      shaded: false,
+      color: blue,
+      expression: pixelsRound,
+    }, {
+      delay: 1000,
+      duration: 1000,
+    }],
+    ['animate', '#vline', {
+      domain: [[10, 11], [-6, 6]],
+    }, {
+      delay: 1000,
+      duration: 2000,
+    }],
+
+    // Diagonal Line
+    ['add', 'surface', {
+      id: 'dline1',
+      domain: [[-10, -10], [-5, -4]],
+      n: 2,
+      shaded: false,
+      color: green,
+      expression: pixelsRound,
+    }, {
+      delay: 2000,
+      duration: 1000,
+    }],
+    ['add', 'surface', {
+      id: 'dline2',
+      domain: [[-6, -6], [-4, -3]],
+      n: 2,
+      shaded: false,
+      color: green,
+      expression: pixelsRound,
+    }, {
+      delay: 2000,
+      duration: 1000,
+    }],
+    ['add', 'surface', {
+      id: 'dline3',
+      domain: [[-3, -3], [-3, -2]],
+      n: 2,
+      shaded: false,
+      color: green,
+      expression: pixelsRound,
+    }, {
+      delay: 2000,
+      duration: 1000,
+    }],
+    ['add', 'surface', {
+      id: 'dline4',
+      domain: [[1, 1], [-2, -1]],
+      n: 2,
+      shaded: false,
+      color: green,
+      expression: pixelsRound,
+    }, {
+      delay: 2000,
+      duration: 1000,
+    }],
+
+    ['animate', '#dline1', {
+      domain: [[-10, -6], [-5, -4]],
+    }, {
+      delay: 2000,
+      duration: 500,
+    }],
+    ['animate', '#dline2', {
+      domain: [[-6, -3], [-4, -3]],
+    }, {
+      delay: 2500,
+      duration: 500,
+    }],
+    ['animate', '#dline3', {
+      domain: [[-3, 1], [-3, -2]],
+    }, {
+      delay: 3000,
+      duration: 500,
+    }],
+    ['animate', '#dline4', {
+      domain: [[1, 4], [-2, -1]],
+    }, {
+      delay: 3500,
+      duration: 500,
+    }],
+  ],
+
+  // Fill triangle span by span
+  [
+    ['add', 'surface', {
+      id: 'tri1',
+      domain: [[-10, -10], [8, 9]],
+      n: 2,
+      shaded: false,
+      color: purple,
+      expression: pixelsRound,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'tri2',
+      domain: [[-11, -11], [7, 8]],
+      n: 2,
+      shaded: false,
+      color: purple,
+      expression: pixelsRound,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'tri3',
+      domain: [[-12, -12], [6, 7]],
+      n: 2,
+      shaded: false,
+      color: purple,
+      expression: pixelsRound,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'tri4',
+      domain: [[-13, -13], [5, 6]],
+      n: 2,
+      shaded: false,
+      color: purple,
+      expression: pixelsRound,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'tri5',
+      domain: [[-9, -9], [4, 5]],
+      n: 2,
+      shaded: false,
+      color: purple,
+      expression: pixelsRound,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'tri6',
+      domain: [[-5, -5], [3, 4]],
+      n: 2,
+      shaded: false,
+      color: purple,
+      expression: pixelsRound,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'tri7',
+      domain: [[-1, -1], [2, 3]],
+      n: 2,
+      shaded: false,
+      color: purple,
+      expression: pixelsRound,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'tri8',
+      domain: [[3, 3], [1, 2]],
+      n: 2,
+      shaded: false,
+      color: purple,
+      expression: pixelsRound,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+
+    ['animate', '#tri1', {
+      domain: [[-10, -9], [8, 9]],
+    }, {
+      delay: 200,
+      duration: 300,
+    }],
+    ['animate', '#tri2', {
+      domain: [[-11, -7], [7, 8]],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#tri3', {
+      domain: [[-12, -5], [6, 7]],
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['animate', '#tri4', {
+      domain: [[-13, -3], [5, 6]],
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#tri5', {
+      domain: [[-9, -1], [4, 5]],
+    }, {
+      delay: 1800,
+      duration: 500,
+    }],
+    ['animate', '#tri6', {
+      domain: [[-5, 1], [3, 4]],
+    }, {
+      delay: 2200,
+      duration: 500,
+    }],
+    ['animate', '#tri7', {
+      domain: [[-1, 3], [2, 3]],
+    }, {
+      delay: 2600,
+      duration: 500,
+    }],
+    ['animate', '#tri8', {
+      domain: [[3, 5], [1, 2]],
+    }, {
+      delay: 3000,
+      duration: 500,
+    }],
+
+  ],
+
+  // Switch to live canvas
+  [
+    ['animate', 'viewport', {
+      scale: [.9*1.5*1.5, .9*1.5, 1],
+    }, {
+      duration: 1500,
+    }],
+    ['remove', '#hline, #vline,'+
+               '#dline1, #dline2, #dline3, #dline4,'+
+               '#tri1, #tri2, #tri3, #tri4, #tri5, #tri6, #tri7, #tri8', {
+      duration: 500,
+    }],
+
+    ['add', 'surface', {
+      id: 'canvas',
+      domain: [[-w2, w2], [-h2, h2]],
+      expression: function (x, y, i, j) { return [x, y, 0]; },
+      n: 2,
+      shaded: false,
+      color: 0xffffff,
+      map: aliasedTexture,
+      mapColor: 1,
+      mapOpacity: 1,
+      zIndex: -10,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'canvas2',
+      domain: [[-w2, w2], [-h2, h2]],
+      expression: function (x, y, i, j) { return [x, y, 0]; },
+      n: 2,
+      shaded: false,
+      color: 0xffffff,
+      map: aliasedLinearTexture,
+      mapColor: 1,
+      mapOpacity: 1,
+      zIndex: -5,
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+  ],
+
+  // Show pixel snapping
+  [
+    ['animate', '#canvas', {
+      opacity: 1,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      n: 4,
+      id: 'stroke',
+      expression: function (x, i) {
+        var n = activePoints.length;
+        return n ? activePoints[i % n] : []; 
+      },
+      lineWidth: 8,
+      zIndex: 100,
+      color: orangered,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      n: 2,
+      id: 'fill',
+      expression: function (x, y, i, j) {
+        var n = activePoints.length;
+        return n ? activePoints[(i+j*2) % n] : [];
+      },
+      shaded: false,
+      zIndex: 80,
+      color: orangered,
+      opacity: .33,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // Switch to antialias
+  [
+    ['animate', '#canvas', {
+      opacity: 1,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#stroke', {
+      opacity: .3,
+    }],
+    ['animate', '#fill', {
+      opacity: .15,
+    }],
+    ['set', '#canvas', {
+      map: canvasTexture,
+    }],
+  ],
+
+  // Alias Smooth
+  [
+    ['animate', '#stroke', {
+      opacity: .6,
+    }],
+    ['set', '#canvas', {
+      map: aliasedTexture,
+    }],
+  ],
+
+  // Sampling
+  [
+    ['animate', '#fill', {
+      opacity: .33,
+    }],
+    ['animate', 'viewport', {
+      scale: [.9*1.5*2, .9*2, 1],
+    }, {
+      duration: 800,
+    }],
+    ['add', 'curve', {
+      n: samples.length,
+      id: 'active',
+      expression: function (x, i) {
+        return activeSamples[i] || [-100, -100];
+      },
+      pointSize: 15,
+      points: true,
+      line: false,
+      color: orangered,
+      zIndex: 50,
+      opacity: .999,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      n: samples.length,
+      id: 'inactive',
+      expression: function (x, i) {
+        return inactiveSamples[i] || [-100, -100];
+      },
+      pointSize: 15,
+      points: true,
+      line: false,
+      color: 0x000000,
+      opacity: .3,
+      zIndex: 50,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+  ],
+
+  // Sampling lenticular view
+  [
+    ['animate', '#canvas, #grid', {
+      mathPosition: [0, 0, -2.5],
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'camera', {
+      lookAt: [0, 0, -1.25],
+      phi: 0,
+      theta: .15,
+    }, {
+      duration: 2000,
+    }],
+    ['add', 'surface', {
+      id: 'frustum',
+      n: [5, 2],
+      domain: [[0, τ], [0, 0]],
+      shaded: false,
+      color: orangered,
+      opacity: .5,
+      expression: function (x, y, i, j) {
+        var s = samples[w2+h2*width];
+        var th = x+π/4;
+        var r = (y*.9+.1)*.7;
+        var dx = Math.cos(th);
+        var dy = Math.sin(th);
+        return [s[0] + dx*r, s[1] + dy*r, -y*2.5];
+      },
+      zIndex: 20,
+    }, {
+      duration: 0,
+    }],
+    ['animate', '#frustum', {
+      domain: [[0, τ], [0, 1]],
+    }, {
+      duration: 2000,
+    }],
+  ],
+
+  // Flatten / Re-sample
+  [
+    ['animate', '#frustum', {
+      domain: [[0, τ], [0, 0]],
+    }, {
+      duration: 1500,
+    }],
+    ['animate', '#active', {
+      color: 0x808080,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', '#active', {
+      color: 0,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4,
+      theta: 0,
+      lookAt: [0, 0, 0],
+    }, {
+      duration: 1500,
+    }],
+    ['animate', '#canvas, #grid', {
+      mathPosition: [0, 0, 0],
+    }, {
+      duration: 1500,
+    }],
+    ['animate', '#stroke', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', '#fill', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+
+    ['animate', '#canvas', {
+      opacity: .65,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+  ],
+
+  // Bilinear filtering
+  [
+    ['animate', '#canvas', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', '#canvas2', {
+      opacity: .65,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+  ],
+
+  // Aliasing
+  [
+    ['animate', '#grid', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#active, #inactive', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+
+    ['add', 'surface', {
+      id: 'aliasing',
+      n: 2,
+      domain: [[-w2*2, w2*2], [-w2*2, w2*2]],
+      expression: function (x, y, i, j) {
+        var t = Math.max(0, director[0].clock(12) - 8);
+        t = t<.5 ? t*t : t-.25;
+        return [x + Math.sin(t) * .2, y, .02 - Math.cos(t) * .02];
+      },
+      map: gridLinearTexture,
+//      map: gridMipTexture,
+//      map: gridAnisoTexture,
+      mapColor: 1,
+      color: 0xdfefff,
+      shaded: false,
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      rotation: [-π/2+.02, 0, π/8-.017],
+    }, {
+      delay: 500,
+      duration: 7000,
+    }],
+  ],
+
+  // Aliasing aniso
+  [
+    ['set', '#aliasing', {
+      map: gridAnisoTexture,
+    }],
+  ],
+
+  // Sampling theorem
+  [
+    ['animate', 'viewport', {
+      rotation: [0, 0, 0],
+    }, {
+      delay: 0,
+      duration: 1500,
+    }],
+    ['remove', '#aliasing', {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['set', '#canvas2', {
+      map: canvasLinearTexture,
+      opacity: 1,
+    }],
+  ],
+
+  // Bilinear surface
+  [
+    ['animate', '#grid', {
+      opacity: .5,
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#canvas', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['animate', '#canvas2', {
+      opacity: .65,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      position: [-.3, .4, 0],
+      rotation: [-π/2*.4, .1, -1],
+      scale: [.9*1.5*3, .9*3, 1*3/2],
+    }, {
+      delay: 200,
+      duration: 2500,
+    }],
+    ['add', 'surface', {
+      n: [48, 62],
+      id: 'bilinear',
+      color: surfacered,
+      domain: [[-w2/4+3, w2/4+3], [-w2/4-1, w2/4+1]],
+      expression: function (x, y, i, j) {
+        var t = director[0].clock(15)*.5-.75;
+        var ease = .5-.5*Math.cos(Math.max(0, Math.min(1, t))*π);
+
+        var fx = Math.floor(x);
+        var fy = Math.floor(y);
+        var dx = x - fx;
+        var dy = y - fy;
+
+        fx += w2;
+        fy += h2;
+
+        var o = (fx+fy*width)*4+3;
+        var c11 = Math.sqrt(aliasedData[o]/255);
+        var c12 = Math.sqrt(aliasedData[o+4]/255);
+        var c21 = Math.sqrt(aliasedData[o+4*width]/255);
+        var c22 = Math.sqrt(aliasedData[o+4*width+4]/255);
+
+        var c1 = c11+(c12-c11)*dx;
+        var c2 = c21+(c22-c21)*dx;
+        var c = c1+(c2-c1)*dy;
+
+        return [x, y, c*.35*ease];
+      },
+      line: true,
+      opacity: .01,
+      zIndex: 200,
+    }, {
+      duration: 0,
+    }],
+    ['animate', '#bilinear', {
+      opacity: .5,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#bilinear', {
+      opacity: .95,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+  ],
+
+  // Smooth
+  [
+    ['remove', '#bilinear', {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [0, 0, 0],
+      rotation: [0, 0, 0],
+      scale: [.9*1.5*2.5, .9*2.5, 1*2.5/2],
+    }, {
+      duration: 1500,
+    }],
+    ['animate', '#canvas', {
+      map: canvasTexture,
+      opacity: 1,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#canvas2', {
+      opacity: 0,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+  ],
+
+  // Antialiasing
+  [
+    ['animate', '#fill', {
+      opacity: .333,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#stroke', {
+      opacity: .6,
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [0, -2, 0],
+      scale: [.9*1.5*8, .9*8, 1],
+    }, {
+      duration: 800,
+    }],
+    ['animate', '#active', {
+      color: orangered,
+      opacity: 1,
+    }, {
+      delay: 800,
+      duration: 500,
+    }],
+    ['animate', '#inactive', {
+      opacity: .3,
+    }, {
+      delay: 800,
+      duration: 500,
+    }],
+    ['animate', '#stroke', {
+      opacity: 1,
+    }, {
+      delay: 800,
+      duration: 500,
+    }],
+  ],
+
+  // Supersampling
+  [
+    ['animate', '#active, #inactive', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['animate', '#active', {
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['animate', '#inactive', {
+      opacity: .3,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+  ],
+
+  // Multisampling
+  [
+  ],
+
+  // AA + bilinear
+  [
+    ['set', '#canvas2', {
+      map: canvasLinearTexture,
+    }],
+    ['animate', '#canvas', {
+      opacity: 0,
+    }, {
+      delay: 700,
+      duration: 500,
+    }],
+    ['animate', '#canvas2', {
+      opacity: .65,
+    }, {
+      delay: 700,
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [-.3, .4, 0],
+      rotation: [-π/2*.4, .1, -1],
+      scale: [.9*1.5*3, .9*3, 1*3/2],
+    }, {
+      delay: 200,
+      duration: 2500,
+    }],
+    ['add', 'surface', {
+      n: [48, 62],
+      id: 'bilinear',
+      color: surfacered,
+      domain: [[-w2/4+3, w2/4+3], [-w2/4-1, w2/4+1]],
+      expression: function (x, y, i, j) {
+        var fx = Math.floor(x);
+        var fy = Math.floor(y);
+        var dx = x - fx;
+        var dy = y - fy;
+
+        fx += w2;
+        fy += h2;
+
+        var o = (fx+fy*width)*4+3;
+        var c11 = bufferData[o];
+        var c12 = bufferData[o+4];
+        var c21 = bufferData[o+4*width];
+        var c22 = bufferData[o+4*width+4];
+
+        var c1 = c11+(c12-c11)*dx;
+        var c2 = c21+(c22-c21)*dx;
+        var c = c1+(c2-c1)*dy;
+
+        return [x, y, c/255*.35];
+      },
+      line: true,
+      opacity: .01,
+      zIndex: 200,
+    }, {
+      duration: 0,
+    }],
+    ['add', 'surface', {
+      n: [48, 62],
+      id: 'bilinear2',
+      color: surfacered,
+      domain: [[-w2/4+3, w2/4+3], [-w2/4-1, w2/4+1]],
+      expression: function (x, y, i, j) {
+        var fx = Math.floor(x);
+        var fy = Math.floor(y);
+        var dx = x - fx;
+        var dy = y - fy;
+
+        fx += w2;
+        fy += h2;
+
+        var o = (fx+fy*width)*4+3;
+        var c11 = bufferData[o];
+        var c12 = bufferData[o+4];
+        var c21 = bufferData[o+4*width];
+        var c22 = bufferData[o+4*width+4];
+
+        var c1 = c11+(c12-c11)*dx;
+        var c2 = c21+(c22-c21)*dx;
+        var c = c1+(c2-c1)*dy;
+
+        return [x, y, c/255*.35];
+      },
+      line: true,
+      opacity: 0,
+      zIndex: 200,
+    }, {
+      duration: 0,
+    }],
+    ['add', 'surface', {
+      n: [48, 62],
+      id: 'bilinear3',
+      color: surfacered,
+      domain: [[-w2/4+3, w2/4+3], [-w2/4-1, w2/4+1]],
+      expression: function (x, y, i, j) {
+        var fx = Math.floor(x);
+        var fy = Math.floor(y);
+        var dx = x - fx;
+        var dy = y - fy;
+
+        fx += w2;
+        fy += h2;
+
+        var o = (fx+fy*width)*4+3;
+        var c11 = bufferData[o];
+        var c12 = bufferData[o+4];
+        var c21 = bufferData[o+4*width];
+        var c22 = bufferData[o+4*width+4];
+
+        var c1 = c11+(c12-c11)*dx;
+        var c2 = c21+(c22-c21)*dx;
+        var c = c1+(c2-c1)*dy;
+
+        return [x, y, c/255*.35];
+      },
+      line: true,
+      opacity: 0,
+      zIndex: 200,
+    }, {
+      duration: 0,
+    }],
+    ['animate', '#bilinear', {
+      opacity: .95,
+    }, {
+      delay: 1200,
+      duration: 500,
+    }],
+    ['animate', '#stroke, #fill, #active, #inactive', {
+      opacity: 0,
+    }, {
+      delay: 200,
+      duration: 500,
+    }],
+  ],
+
+  // Analytical AA
+  [
+    ['add', 'surface', {
+      id: 'points',
+      n: [6, 8],
+      domain: [[-w2/4+3, w2/4+3], [-w2/4-1, w2/4+1]],
+      shaded: false,
+      mesh: false,
+      points: true,
+      expression: function (x, y, i, j) {
+        return [x, y, sdLinearShape([x, y], activePoints, 1)*.35];
+      },
+      color: darkred,
+      opacity: .5,
+      zIndex: 220,
+      pointSize: 21,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'points2',
+      n: [6, 8],
+      domain: [[-w2/4+3, w2/4+3], [-w2/4-1, w2/4+1]],
+      shaded: false,
+      mesh: false,
+      points: true,
+      expression: function (x, y, i, j) {
+        return [x, y, sdLinearShape([x, y], activePoints, 1)*.35];
+      },
+      color: gold,
+      opacity: .999,
+      zIndex: 250,
+      pointSize: 15,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+    ['animate', '#bilinear', {
+      expression: function (x, y, i, j) {
+        return [x, y, sdLinearShape([x, y], activePoints, 1)*.35];
+      },
+    }, {
+      duration: 500,
+    }]
+  ],
+
+  // Low-pass filtered (approx)
+  [
+    ['animate', '#points, #points2, #bilinear', {
+      expression: function (x, y, i, j) {
+        return [x, y, sdEaseShape([x, y], activePoints, .4)*.35];
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // Subpixel AA (Linear RGB)
+  [
+    ['remove', '#points, #points2'],
+    ['animate', '#grid', {
+      opacity: .25,
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [-.3, .4, 0],
+      rotation: [-π/2*.4, .1, -1],
+      scale: [.9*1.5*7, .9*7, 1*7/2],
+    }, {
+      delay: 0,
+      duration: 1500,
+    }],
+    ['animate', '#canvas2', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#bilinear2', {
+      mathPosition: [0, -1/height, -.002],
+      color: channelR,
+      opacity: .75,
+      mesh: false,
+      zIndex: 210,
+      lineWidth: 10,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#bilinear3', {
+      mathPosition: [0, 1/height, .002],
+      color: channelB,
+      opacity: .75,
+      mesh: false,
+      zIndex: 220,
+      lineWidth: 10,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#bilinear', {
+      color: channelG,
+      mesh: false,
+      opacity: .75,
+      lineWidth: 10,
+    }, {
+      duration: 1000,
+    }],
+  ],
+
+  // Scalable UI
+  [
+    ['animate', '#bilinear, #bilinear2, #bilinear3', {
+      opacity: .25,
+    }, {
+      delay: 1000,
+      duration: 0,
+    }],
+  ],
+
+  // Perlin noise synthesis
+  [
+    ['animate', '#grid', {
+      opacity: .5,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#bilinear', {
+      mesh: true,
+      opacity: .95,
+      lineWidth: 2,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#bilinear', {
+      lineWidth: 1,
+    }, {
+      delay: 8300,
+      duration: 500,
+    }],
+    ['animate', '#bilinear2, #bilinear3', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [-.3, .3, 0],
+      rotation: [-π/2*.8, 0, -.8],
+      scale: [.9*1.5*2.7, .9*2.7, 1*2.7/2],
+    }, {
+      delay: 2000,
+      duration: 8000,
+    }],
+    ['animate', 'camera', {
+      theta: +.5,
+      phi: τ/4 - .5,
+    }, {
+      delay: 2000,
+      duration: 8000,
+    }],
+    ['add', 'surface', {
+      n: 2,
+      id: 'water',
+      domain: [[-w2/4+3, w2/4+3], [-w2/4-1, w2/4+1]],
+      expression: function (x,y,i,j) {
+        return [x, y, -.1];
+      },
+      color: water,
+      shaded: true,
+      zIndex: 198,
+    }, {
+      delay: 500,
+      duration: 2000,
+    }],
+    ['animate', '#water', {
+      expression: function (x,y,i,j) {
+        return [x, y, .1];
+      },
+    }, {
+      delay: 8000,
+      duration: 2000,
+    }],
+    ['animate', '#bilinear', {
+      color: land,
+      expression: function (x, y, i, j) {
+        var fx = Math.floor(x);
+        var fy = Math.floor(y);
+        var dx = x - fx;
+        var dy = y - fy;
+
+        fx += w2;
+        fy += h2;
+
+        function bend(t) {
+          t = Math.max(0, t);
+          return t<.5?t*t:t-.25;
+        }
+
+        var t = director[0].clock(25);
+        var ts = bend(t * .4 - 4);
+
+        function gradient(o, seed) {
+          o += seed * 133.74 + 30.0;
+          var x = Math.sin(ts + o * 4189.41 + (o * o * 1117.3149) % 1000);
+          var y = Math.sin(ts*.5 + ((.5+(o%7)/28) * ts) + o * 3185.32 + (o * o * 2571.8472) % 1000);
+          return [x, y];
+        }
+
+        function perlin(x, y, scale, seed) {
+          x *= scale;
+          y *= scale;
+
+          var fx = Math.floor(x);
+          var fy = Math.floor(y);
+          var dx = x - fx;
+          var dy = y - fy;
+
+          var o = (fx+fy*width);
+
+          var g11 = gradient(o, seed);
+          var g12 = gradient(o+1, seed);
+          var g21 = gradient(o+width, seed);
+          var g22 = gradient(o+width+1, seed);
+
+          var c11 = g11[0]*dx+g11[1]*dy;
+          var c12 = g12[0]*(dx-1)+g12[1]*dy;
+          var c21 = g21[0]*dx+g21[1]*(dy-1);
+          var c22 = g22[0]*(dx-1)+g22[1]*(dy-1);
+
+          dx = .5-.5*Math.cos(dx*π);
+          dy = .5-.5*Math.cos(dy*π);
+
+          var c1 = c11+(c12-c11)*dx;
+          var c2 = c21+(c22-c21)*dx;
+          var c = c1+(c2-c1)*dy;
+
+          var gx1 = g11[0]+(g12[0]-g11[0])*dx;
+          var gx2 = g21[0]+(g22[0]-g21[0])*dx;
+          var gx = gx1+(gx2-gx1)*dy;
+
+          var gy1 = g11[1]+(g12[1]-g11[1])*dx;
+          var gy2 = g21[1]+(g22[1]-g21[1])*dx;
+          var gy = gy1+(gy2-gy1)*dy;
+
+          c = c*.75+.25;
+
+          return [(c+c*Math.abs(c)*1.2)*.5, gx*gx+gy*gy];
+        }
+
+        var h = 0;
+        var tt = t, v, sc = 1;
+
+        function ease(t) {
+          return .5-.5*Math.cos(Math.min(1, tt)*π);
+        }
+
+        tt = bend(tt - 3);
+        v = perlin(x, y, .25, 1);
+        h += v[0]*.22*ease(tt)*sc;
+        sc /= (1+v[1]*.4);
+
+        tt = bend(tt - 1);
+        v = perlin(x, y, .5, 2);
+        h += v[0]*.22*.5*ease(tt)*sc;
+        sc /= (1+v[1]*.4);
+
+        tt = bend(tt - 1);
+        v = perlin(x, y, 1, 3);
+        h += v[0]*.22*.25*ease(tt)*sc;
+        sc /= (1+v[1]*.4);
+
+        tt = bend(tt - 1);
+        v = perlin(x, y, 2, 4);
+        h += v[0]*.22*.125*ease(tt)*sc;
+        sc /= (1+v[1]*.4);
+
+        tt = bend(tt - 1);
+        v = perlin(x, y, 4, 5);
+        h += v[0]*.22*.06125*ease(tt)*sc;
+        sc /= (1+v[1]*.4);
+
+        return [x, y, h*2.3];
+      },
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+  ],
+
+  [
+    ['animate', 'viewport', {
+      position: [-.4, .3, 0],
+      rotation: [-π/2*.9, .3, -.2],
+      scale: [.9*1.5*2.7, .9*2.7, 1*2.7/2],
+    }, {
+      delay: 0,
+      duration: 6000,
+    }],
+  ],
+
+  [
+    ['animate', 'viewport', {
+      position: [-.3, -.9, 0],
+      rotation: [-π/2*.7, .9, 1.7],
+      scale: [.9*1.5*2.7, .9*2.7, 1*2.7/2],
+    }, {
+      delay: 2000,
+      duration: 7000,
+    }],
+  ],
+
+  [],
+];
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
