@@ -50,9 +50,18 @@ window.mathBoxSetup = function (mathbox, director) {
       scene: mathbox.world().tScene(),
     };
 
+    var cubeSurface = null;
     exports.world.loop().hookPreRender(function () {
-      if ([-1].indexOf(lastStep)>=0) {
+
+      // Hackity hack to fix DV attributes disappearing
+      var s = mathbox.select('#surfaceW');
+      if (s.length) {
+        cubeSurface = s[0];
       }
+      if (cubeSurface) {
+        cubeSurface.mesh.material.needsUpdate = true;
+      }
+
     });
     exports.world.loop().hookPostRender(function () {
     });
@@ -82,7 +91,7 @@ var darkred = 0x220000, _darkred = '#200',
     indigo = 0x7040f0,
     gold = 0xD0A020,
     land = 0x509000, _land = "#509000",
-    blue = 0x3090ff,
+    blue = 0x3080ff,
     red = 0xC02050,
     surfacered = 0xdf5000, _slate = '#efb030',
     purple = 0xd040b0,
@@ -119,12 +128,12 @@ var nullFrustum = [
  [0, 0, fd+fo], [0, 0, fd+fo],
 ];
 
-var fo2 = .04, fd2 = 2, fr = .5;
+var fo2 = .04, fd2 = 2, fr = .5, ar = 1.5;
 var frustum2 = [
- [0, 0, fo2], [fr, fr, fo2+fd2],
- [0, 0, fo2], [-fr, fr, fo2+fd2],
- [0, 0, fo2], [fr, -fr, fo2+fd2],
- [0, 0, fo2], [-fr, -fr, fo2+fd2],
+ [0, 0, fo2], [fr*ar, fr, fo2+fd2],
+ [0, 0, fo2], [-fr*ar, fr, fo2+fd2],
+ [0, 0, fo2], [fr*ar, -fr, fo2+fd2],
+ [0, 0, fo2], [-fr*ar, -fr, fo2+fd2],
 ];
 
 var nullFrustum2 = [
@@ -582,7 +591,7 @@ window.mathBoxScript = [
     ['animate', '#awesome2', {
       opacity: .5,
     }, {
-      delay: 2500,
+      delay: 3000,
       duration: 500,
     }],
     ['animate', '#xp, #xp2', {
@@ -1091,18 +1100,27 @@ window.mathBoxScript = [
       duration: 3000,
     }],
     ['animate', 'viewport', {
-      projective: [[1, 0, -.2, 0],
+      projective: [[1, 0, -.3, 0],
                    [0, 1, -.5, 0],
-                   [0, 0, 1, 0],
+                   [0, 0, 1.1, 0],
                    [0, 0, 0, 1]],
     }, {
       delay: 500,
       duration: 3000,
     }],
     ['animate', 'viewport', {
-      projective: [[1, 0, -.5, 0],
-                   [0, 1, .2, 0],
-                   [0, 0, 1, 0],
+      projective: [[1, 0, -.3, 0],
+                   [0, 1, -.1, 0],
+                   [0, 0, 2.4, 0],
+                   [0, 0, 0, 1]],
+    }, {
+      delay: 500,
+      duration: 3000,
+    }],
+    ['animate', 'viewport', {
+      projective: [[1, 0, .2, 0],
+                   [0, 1, .4, 0],
+                   [0, 0, 2, 0],
                    [0, 0, 0, 1]],
     }, {
       delay: 500,
@@ -1119,9 +1137,9 @@ window.mathBoxScript = [
     }],
 
     ['animate', 'camera', {
-      phi: τ/4-.5,
+      phi: τ/4-.6,
     }, {
-      duration: 13000,
+      duration: 17000,
     }],
   ],
 
@@ -1143,7 +1161,7 @@ window.mathBoxScript = [
                    [.9, .9, 1, 0],
                    [0, 0, 0, 1]],
     }, {
-      delay: 3000,
+      delay: 3300,
       duration: 2000,
     }],
 
@@ -1321,16 +1339,47 @@ window.mathBoxScript = [
 
   // World Space
   [
+    ['add', 'surface', {
+      n: 4,
+      id: 'surfaceW',
+      domain: [[-2, 2], [-2, 2]],
+      expression: function (x, y, i, j) {
+        return [x, 0, y];
+      },
+      color: 0xefefef,
+      opacity: 0,
+      zIndex: -20,
+      mathPosition: [4.5, 0, 0],
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
     ['add', 'grid', {
       id: 'gridW',
+      n: 2,
+      ticks: [2, 2],
+      tickScale: [2, 2],
+      axis: [0, 2],
+      color: 0x404040,
+      opacity: 0,
+      lineWidth: 2,
+      mathPosition: [4.5, 0, 0],
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'grid', {
+      id: 'gridW2',
       n: 2,
       ticks: [10, 10],
       tickScale: [2, 2],
       axis: [0, 2],
-      color: 0x909090,
+      color: 0x404040,
       opacity: 0,
       lineWidth: 2,
       mathPosition: [4.5, 0, 0],
+      zIndex: 10,
     }, {
       delay: 0,
       duration: 1,
@@ -1404,8 +1453,26 @@ window.mathBoxScript = [
       delay: 100,
       duration: 2000,
     }],
-    ['animate', '#xaxisW, #yaxisW, #zaxisW, #gridW', {
-      opacity: .5,
+    ['animate', '#surfaceW', {
+      opacity: .25,
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+    ['animate', '#gridW', {
+      opacity: .3,
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+    ['animate', '#gridW2', {
+      opacity: .15,
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+    ['animate', '#xaxisW, #yaxisW, #zaxisW', {
+      opacity: .75,
     }, {
       delay: 100,
       duration: 2000,
@@ -1459,14 +1526,13 @@ window.mathBoxScript = [
     ['set', '#frustum', {
       opacity: 0,
       color: blue,
-      data: nullFrustum2,
+      data: frustum2,
       mathPosition: [5.5, 2, 2],
       mathRotation: [-τ/8, π, 0],
       mathScale: [2, 2, 2],
     }],
     ['animate', '#frustum', {
       opacity: .5,
-      data: frustum2,
     }, {
       delay: 100,
       duration: 1000,
@@ -1475,8 +1541,41 @@ window.mathBoxScript = [
 
   // View Space
   [
-    ['animate', '#xaxisW, #yaxisW, #zaxisW', {
+    ['animate', '#xaxisW, #yaxisW, #zaxisW, #gridW', {
       opacity: 0,
+    }, {
+      duration: 500,
+    }],
+    ['clone', '#xaxis', {
+      id: 'xaxisV',
+      mathPosition: [5.5, 2*.95, 2*.95],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [.8, .8, .8],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#yaxis', {
+      id: 'yaxisV',
+      mathPosition: [5.5, 2*.95, 2*.95],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [.8, .8, .8],
+      opacity: 0,
+    }, {
+      duration: 1,
+      opacity: 0,
+    }],
+    ['clone', '#zaxis', {
+      id: 'zaxisV',
+      mathPosition: [5.5, 2*.95, 2*.95],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [.8, .8, .8],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['animate', '#xaxisV, #yaxisV, #zaxisV', {
+      opacity: .75,
     }, {
       duration: 500,
     }],
@@ -1489,19 +1588,25 @@ window.mathBoxScript = [
       lookAt: [5.5*.425, 2*.405, 2*.405],
       orbit: .01,
     }, {
-      duration: 4000,
+      delay: 500,
+      duration: 3000,
     }],
     ['animate', 'camera', {
       phi: τ/4,
       theta: τ/8,
     }, {
-      delay: 1000,
-      duration: 4000,
+      delay: 1500,
+      duration: 3000,
     }],
   ],
 
   // Screen space
   [
+    ['animate', '#xaxisV, #yaxisV, #zaxisV', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
     ['add', 'grid', {
       id: 'gridS',
       n: 2,
@@ -1513,7 +1618,7 @@ window.mathBoxScript = [
       lineWidth: 3,
       mathPosition: [5.5, 0, 0],
       mathRotation: [-τ/8, π, 0],
-      mathScale: [.8, .8, .8],
+      mathScale: [.75, .75, .75],
       zIndex: 1000,
     }, {
       delay: 0,
@@ -1523,6 +1628,28 @@ window.mathBoxScript = [
       opacity: .6,
     }, {
       duration: 1000,
+    }],
+  ],
+
+  // closing
+  [
+    ['animate', '#gridS', {
+      lineWidth: 2,
+    }, {
+      duration: 3000,
+    }],
+    ['animate', 'viewport', {
+      position: [-1.5, .3, .3],
+    }, {
+      duration: 3000,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4-.7,
+      theta: .7,
+      lookAt: [0, 0, 0],
+      orbit: 3,
+    }, {
+      duration: 3000,
     }],
   ],
 ];

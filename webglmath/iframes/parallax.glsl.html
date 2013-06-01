@@ -1,0 +1,55 @@
+<script type="application/glsl" id="parallax-vertex" charset="utf-8">
+varying vec2 vUV;
+varying vec3 vWorldPosition;
+
+void main() {
+  vec4 position4 = vec4(position, 1.0);
+
+  vUV = uv;
+  vWorldPosition = (modelMatrix * position4).xyz;
+
+  gl_Position = projectionMatrix * modelViewMatrix * position4;
+}
+</script>
+
+<script type="application/glsl" id="parallax-fragment" charset="utf-8">
+uniform sampler2D diffuseMap;
+uniform sampler2D heightMap;
+uniform sampler2D normalMap;
+uniform vec3 lightPosition;
+uniform vec3 eyePosition;
+uniform float opacity;
+uniform float parallax;
+
+varying vec2 vUV;
+varying vec3 vWorldPosition;
+
+uniform vec3 pointLightColor[2];
+uniform vec3 pointLightPosition[2];
+uniform float pointLightDistance[2];
+
+void main() {
+  float height = texture2D(heightMap, vUV).x;
+
+  vec3 ray = normalize(eyePosition - vWorldPosition);
+  vec2 offset = ray.xz * height;
+
+  vec2 uv = vUV - offset * parallax;
+
+  vec4 color = texture2D(diffuseMap, uv);
+  vec3 normal = texture2D(normalMap, uv).xyz;
+  float bump = texture2D(heightMap, vUV).x;
+
+  float ao = clamp(1.5 - bump * .5, 0., 1.);
+
+  vec3 accum = vec3(0, 0, 0);
+
+  for (int i = 0; i < 2; ++i) {
+    vec3 view = pointLightPosition[i] - vWorldPosition;
+    accum += clamp(dot(normal, view), 0., 1.) * pointLightColor[i];
+  }
+
+  gl_FragColor = vec4(color.xyz * ao * accum, opacity);
+}
+
+</script>

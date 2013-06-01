@@ -88,7 +88,10 @@ $(function() {
         $.deck(command);
       }
       else if (data.type == 'down') {
-        mathboxSpeed(data.hold && data.pressed);
+        var speed = data.hold && data.pressed ? .2 : 1;
+        $frames && $frames.each(function () {
+          mathboxSpeed(this, speed);
+        });
       }
     };
   })();

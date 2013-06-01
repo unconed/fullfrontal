@@ -34,13 +34,13 @@ body .deck-container .slide.page-cover h3 {
 
 /* fonts */
 body .deck-container h1, body .deck-container h2, body .deck-container h3, body .deck-container h4 {
-  font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
+  font-family: 'klavika-web', 'Klavika Web Basic', sans-serif;
   font-weight: bold;
   font-style: italic;
 }
 
 body .deck-container {
-  font-family: 'Klavika Web Basic', 'klavika-web', sans-serif;
+  font-family: 'klavika-web', 'Klavika Web Basic', sans-serif;
   font-weight: normal;
   font-style: italic;
 
@@ -157,6 +157,9 @@ body .deck-container .slide.page-cover h3 {
 }
 pre.small {
   font-size: 70%;
+}
+pre em {
+  color: #a9d;
 }
 
 /* math coloring */

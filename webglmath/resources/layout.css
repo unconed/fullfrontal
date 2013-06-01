@@ -288,6 +288,14 @@ body .deck-container .slide.page-cover h3 {
 .deck-container .slide pre.overlay {
   margin: 100px 50px 0 50px;
 }
+.deck-container .slide pre.halfL {
+  width: 45%;
+  float: left;
+}
+.deck-container .slide pre.halfR {
+  width: 45%;
+  float: right;
+}
 .deck-container .slide pre.wrap {
   white-space: pre-wrap;
 }

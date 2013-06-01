@@ -61,7 +61,13 @@
   <h1><small><small><i>How to Draw</i><i>Where to Draw</i><i>What to Draw</i></small></small></h1>
 </section>
 
-<!-- - ->
+<section class="slide page-centerfold zoom">
+  <div class="spotlight t1">
+    <img src="images/hazard.png" class="recessed"></img>      
+  </div>
+</section>
+
+<!-- -->
 
 <section class="slide t-2">
   <h1><small><small><i>In the Beginning</i></small></small>There Was Pixels</h1>
@@ -96,9 +102,9 @@
   <div class="slide temp abs-tc"><h3 class="mj">Nearest Neighbour Filter</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">Bilinear Filter</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">Aliasing</h3></div>
-  <div class="slide temp abs-tc"><h3 class="mj">Anisotropic Filtering</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Anisotropic Filtering ⨉ 16</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">Sampling Theorem – Nyquist Frequency</h3></div>
-  <div class="slide temp abs-tc"><h3 class="mj">Jaggies</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Jaggies = Sampled Edge</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">Anti-Aliasing (AA) = Blur All The Things?</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">Pixel Coverage – Box Filter</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">SuperSampling (SSAA ⨉ 16)</h3></div>
@@ -111,15 +117,17 @@
     <h1 class="mj abs-tc" style="text-outline: none"><big>The Pixel is Dead<br>Long Live the Pixel</big></h1>
     <img src="images/retina.jpg" class="" width="1280">
   </div>
-  <div class="slide temp abs-tc"><h3 class="mj">Procedural Textures<br>Perlin / Derivative Noise</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Height Map – Perlin Derivative Noise</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">Depth – Z-Buffer / Shadow Map</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">Normals – Deferred Lighting</h3></div>
 </section>
 
-<!- - -->
 
-<section class="slide">
-  <h1><small><small>Enter The Matrix</small></small></h1>
+
+
+
+<section class="slide t-1">
+  <h1><small><small><small><i>This is the Part Where You Learn</i></small></small></small>Linear Algebra</h1>
 </section>
 
 <section class="slide zoom">
@@ -286,11 +294,11 @@
 
   <div class="slide temp abs-tc"><h3 class="mj">Ordinary 2D Space</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">Projective 2D Space</h3></div>
-  <div class="slide temp abs-tc"><h3 class="mj">Z Vector = Translation</h3></div>
+  <div class="slide temp abs-tc"><h3 class="mj">Z Vector = Translation + Scale</h3></div>
   <div class="slide temp abs-tc"><h3 class="mj">X/Y Vector = Perspective</h3></div>
 
   <div class="slide inflate temp">
-    <div class="abs-tc"><h3 class="mj">3D Projective Transform = 3D <span class="mj-blue">X</span><span class="mj-green">Y</span><span class="mj-red">Z</span> Matrix + <span class="mj-indigo">Translation</span> + <span class="mj-orangered">Perspective</span></h3></div>
+    <div class="abs-tc"><h3 class="mj">Projective 3D Transform = 3D <span class="mj-blue">X</span><span class="mj-green">Y</span><span class="mj-red">Z</span> Matrix + <span class="mj-indigo">Translation</span> + <span class="mj-orangered">Perspective</span></h3></div>
     <div class="mj abs-tc">
       <br><br>
       $$
@@ -307,10 +315,135 @@
   </div>
 
   <div class="slide temp abs-tc"><h3 class="mj">Object Space to World Space</h3></div>
-  <div class="slide temp abs-tc"><h3 class="mj">World Space to View Space</h3></div>
-  <div class="slide temp abs-tc"><h3 class="mj">View Space to Screen Space</h3></div>
+  <div class="slide temp delay10 abs-bc"><h3 class="mj">World Space to View Space</h3></div>
+  <div class="slide temp delay10 abs-bc"><h3 class="mj">View Space to Screen Space</h3></div>
+  <div class="slide temp delay10 abs-bc"><h3 class="mj">Or Back Again</h3></div>
 
 </section>
+
+
+<!-- -->
+
+
+
+<section class="slide t-1">
+  <h1><small><small><small><i>The Rise Of The</i></small></small></small>Shaders</h1>
+</section>
+
+
+<section class="slide zoom">
+  <iframe src="iframes/mathbox.html#3" class="mathbox"></iframe>
+
+  <div class="slide delay10 temp inflate">
+    <div class="box t1">
+      <div class="r"><img src="images/raster-pipeline.png" width="700" alt=""></div>
+    </div>    
+  </div>
+  <div class="slide temp inflate">
+    <div class="box">
+      <div class="r"><img src="images/raster-pipeline-2.png" width="700" alt=""></div>
+    </div>    
+  </div>
+
+  <div class="slide temp inflate">
+    <div class="abs-tc"><h3 class="mj">Vertex Shader</h3></div><br>
+    <pre class="wrap overlay halfR small">
+<em>// Global Variables</em>
+<span class="mj-blue">uniform</span> mat4 projectionMatrix;
+<span class="mj-blue">uniform</span> mat4 viewMatrix;
+<span class="mj-blue">uniform</span> mat4 modelMatrix;
+
+<em>// Per Vertex Attributes</em>
+<span class="mj-green">attribute</span> vec3 position;
+
+<em>// Per Vertex Code</em>
+void main() {
+  <span class="mj-red">gl_Position</span> = projectionMatrix
+              * viewMatrix
+              * modelMatrix
+              * vec4(position, 1.0);
+}</pre>
+  </div>
+
+  <div class="slide temp inflate">
+    <div class="abs-tc"><h3 class="mj">Fragment Shader</h3></div><br>
+    <pre class="wrap overlay halfR small">
+<em>// Global Variables</em>
+<span class="mj-blue">uniform</span> vec3 color;
+<span class="mj-blue">uniform</span> vec3 direction;
+
+<em>// Interpolated Per-Vertex Quantities</em>
+<span class="mj-green">varying</span> vec3 vNormal;
+
+<em>// Per Fragment Code</em>
+void main() {
+  float diffuse = dot(vNormal, direction);
+  <span class="mj-red">gl_FragColor</span> =
+    vec4(diffuse * colorlight, 1.0);
+}</pre>
+  </div>
+
+  <div class="slide temp inflate">
+    <div class="abs-tr"><br><br><br><br><h3 class="mj">Skeletal Animation</h3></div><br>
+  </div>
+
+  <div class="slide temp inflate">
+    <div class="abs-tr"><h3 class="mj">Normal Map</h3><br><img src="iframes/models/cyberdemon_local.jpg" alt=""></div>
+  </div>
+
+  <div class="slide temp inflate delay10">
+    <div class="abs-tl"><h3 class="mj">Color Map</h3></div><br><br>
+<pre class="wrap overlay halfL small">
+<em>// Global Variables</em>
+<span class="mj-blue">uniform</span> sampler2D colorMap;
+
+<em>// Interpolated Per-Vertex Quantities</em>
+<span class="mj-green">varying</span> vec2 vUV;
+
+<em>// Per Fragment Code</em>
+void main() {
+  <span class="mj-red">gl_FragColor</span> = texture2D(colorMap, vUV);
+}</pre>
+<div class="abs-bl">+ Specular Map, Normal Map, …</div>
+  </div>
+
+  <div class="slide mj temp abs-tc"><h3 class="mj">Normal Mapping</h3></div>
+  <div class="slide mj temp abs-tc"></div>
+  <div class="slide mj temp abs-tc"><h3 class="mj">Parallax Mapping</h3></div>
+  <div class="slide mj temp abs-tc"><h3 class="mj">Freeze Camera Uniforms</h3></div>
+  <div class="slide mj temp abs-tc"></div>
+
+</section>
+
+<section class="slide">
+  <h1>References and Links</h1>
+</section>
+
+<section class="slide page-ref">
+  <h2>Aerotwist.com — Paul Lewis – @aerotwist</h2>
+  <div class="box images"><div><img src="images/aerotwist.png" class="recessed"><br>+ LearningWebGL.com, LearningThreeJS.com, Google "WebGL"</div></div>
+</section>
+
+<section class="slide page-ref">
+  <h2>Iquilezles.org — Iñigo Quílez – @iquilezles</h2>
+  <div class="box images"><div><img src="images/iq.png" class="recessed"></div></div>
+</section>
+
+<section class="slide page-ref">
+  <h2>mrdoob.github.io — Ricardo Cabello – @mrdoob</h2>
+  <div class="box images"><div><img src="images/mrdoob.png" class="recessed"></div></div>
+</section>
+
+<section class="slide page-ref">
+  <h2>AlteredQualia – @AlteredQualia</h2>
+  <div class="box images"><div><img src="images/alteredqualia.png" class="recessed"></div></div>
+</section>
+
+<section class="slide">
+  <h1>Thanks!</h1>
+  <div style="text-align: center; opacity: .5"><br><br><br><br>Cyberdemon © id Software, Three.js port by AlteredQualia</div>
+</section>
+
 
 <!-- End slides. -->
 </div>

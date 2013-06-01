@@ -1,0 +1,615 @@
+<script type="text/javascript" charset="utf-8">
+
+
+var darkred = 0x220000, _darkred = '#200',
+    orangered = 0xc03000, _orangered = "#c03000",
+    green = 0x50c020, _green = "#50c020",
+    indigo = 0x7040f0,
+    gold = 0xD0A020,
+    land = 0x509000, _land = "#509000",
+    blue = 0x3080ff,
+    red = 0xC02050,
+    surfacered = 0xdf5000,
+    slate = 0x6fa0df,  _slate = '#6fa0df',
+    purple = 0xd040b0,
+    water = 0x103070,
+    gray = 0xa0a0a0,
+    white = 0xffffff,
+    black = 0x000000,
+    channelR = 0xff1010,
+    channelG = 0x10d010,
+    channelB = 0x1030f0,
+    creme = 0xffffdd;
+
+// Prepare mathbox
+var lastStep = 0, cyberdemon;
+
+window.mathBoxSetup = function (mathbox, director) {
+
+  var scene = mathbox.world().tScene();
+  var camera = mathbox.world().tCamera();
+  var renderer = mathbox.world().tRenderer();
+
+  /*
+
+  doom 3 / cyberdemon animation code borrowed from
+  http://alteredqualia.com/three/examples/webgl_animation_skinning_doom3.html
+
+  */
+
+  function ensureLoop( animation ) {
+
+  	for ( var i = 0; i < animation.hierarchy.length; i ++ ) {
+
+  		var bone = animation.hierarchy[ i ];
+
+  		var first = bone.keys[ 0 ];
+  		var last = bone.keys[ bone.keys.length - 1 ];
+
+  		last.pos = first.pos;
+  		last.rot = first.rot;
+  		last.scl = first.scl;
+
+  	}
+
+  }
+
+  function loadCallback(geometry, materials) {
+
+  	geometry.computeBoundingBox();
+  	var bb = geometry.boundingBox;
+
+    ensureLoop(geometry.animation);
+  	THREE.AnimationHandler.add(geometry.animation);
+
+		var material = new THREE.MeshFaceMaterial(materials);
+  	for (var i = 0; i < materials.length; i++) {
+
+  		var m = materials[i];
+  		m.skinning = true;
+  		m.wrapAround = true;
+
+  		if (m.uniforms) {
+  			m.uniforms.wrapRGB.value.set(0.75, 0.5, 0.5);
+  		}
+
+  		if ( m.name === "cyberdemon_body" ) {
+  			m.metal = true;
+  		}
+
+  	}
+
+  	cyberdemon = new THREE.SkinnedMesh(geometry, material);
+  	var s = .004;
+  	cyberdemon.scale.set(s, s, s);
+  	cyberdemon.position.set(0, -.3, -.3);
+  	cyberdemon.rotation.set(0, -.6, 0);
+  	cyberdemon.material.opacity = 0;
+  	cyberdemon.visible = false;
+  	cyberdemon._visible = false;
+
+  	var animation = new THREE.Animation(cyberdemon, geometry.animation.name);
+  	animation.interpolationType = THREE.AnimationHandler.LINEAR;
+  	animation.play(true, 0);
+  }
+
+
+	var loader = new THREE.JSONLoader();
+  loader.load("models/cyberdemon.js", loadCallback);
+
+  /*
+  ------------------------------
+  */
+
+
+  // Viewport setup
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-1, 1], [-1, 1], [-1, 1]],
+      scale: [1, 1, 1],
+//      rotation: [2.2, π/2+.2, .5],
+    })
+    .camera({
+      phi: τ/4,
+      orbit: 3.5,
+    })
+
+  // Light setup
+  var ambient = new THREE.AmbientLight(0x404040);
+  var point = new THREE.PointLight(0xffffff, .7, 10000);
+  var point2 = new THREE.PointLight(0xff9020, .5, 10000);
+
+	scene.add(ambient);
+	scene.add(point);
+	scene.add(point2);
+
+  // Preload assets
+  ThreeBox.preload([
+    '../images/awesome.png',
+    '../images/rockwall_diffuse.png',
+    '../images/rockwall_height.png',
+    '../images/rockwall_normal.png',
+    'parallax.glsl.html',
+  ], function (assets) {
+
+    // Prepare icosahedron
+    var geometry = new THREE.IcosahedronGeometry(.75, 1);
+
+    var icosaPhongFlat = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({
+      color: blue,
+      ambient: blue,
+      shading: THREE.FlatShading,
+      specular: 0xc0c0c0,
+      shininess: 15,
+      opacity: 0,
+      transparent: true,
+    }));
+
+    icosaPhongFlat.visible = false;
+
+    icosaPhongFlat._visible = false;
+
+    var exports = window.exports = {
+      assets: assets,
+      world: mathbox.world(),
+      scene: mathbox.world().tScene(),
+    };
+
+    // Parallax mapping demo
+    var geometry = new THREE.PlaneGeometry(2, 2, 1, 1);
+    var material = new THREE.ShaderMaterial({
+      vertexShader:   MathBox.getShader('parallax-vertex'),
+      fragmentShader: MathBox.getShader('parallax-fragment'),
+      uniforms: {
+        diffuseMap:    { type: 't',  value: assets['rockwall_diffuse'], },
+        heightMap:     { type: 't',  value: assets['rockwall_height'],  },
+        normalMap:     { type: 't',  value: assets['rockwall_normal'],  },
+        lightPosition: { type: 'v3', value: new THREE.Vector3(1, 1, 1), },
+        eyePosition: { type: 'v3', value: new THREE.Vector3(1, 1, 1), },
+        opacity:       { type: 'f',  value: 0, },
+        parallax:      { type: 'f',  value: 0, },
+      },
+    });
+    _.extend(material.uniforms, THREE.UniformsLib.lights);
+    material.lights = true;
+    material.opacity = 0;
+    material.minFilter = THREE.LinearMipMapLinearFilter;
+    material.anisotropy = 16;
+    material.side = THREE.DoubleSide;
+
+    var parallax = new THREE.Mesh(geometry, material);
+    parallax.position.set(0, -.31, 0);
+    parallax.rotation.set(π/2, 0, 0);
+
+
+    var last = +new Date();
+    exports.world.loop().hookPreRender(function () {
+
+      // Animation update for cyberdemon
+      var now = +new Date();
+			var delta = (now - last) * .001;
+      last = now;
+			THREE.AnimationHandler.update(delta);
+
+      // Animate light
+      var t = Math.max(0, director.clock(3) - 2);
+      t = t<.5?t*t:t-.25;
+      point.position.set(-Math.cos(t)*1.5, 1, 2-Math.sin(t)*2);
+      point2.position.set(Math.cos(t)*1.5, 1, 2+Math.sin(t)*2);
+
+      if ([10].indexOf(lastStep)>=0) {
+        var t2 = Math.min(1, Math.max(0, director.clock(10)));
+        var ease = .5-.5*Math.cos(t2*π);
+
+        point.position.set(-Math.cos(t)*1.5, 1 - ease * .5, 2-Math.sin(t)*(2-ease*.5) - ease);
+        point2.position.set(Math.cos(t)*1.5, 1 - ease * .5, 2+Math.sin(t)*(2-ease*.5) - ease);
+      }
+
+      // 3d model visibility
+      icosaPhongFlat && (icosaPhongFlat._visible = [1, 2, 3, 4, 5].indexOf(lastStep)>=0);
+      cyberdemon && (cyberdemon._visible = [6, 7, 8, 9, 10, 11, 12, 13].indexOf(lastStep)>=0);
+      parallax && (parallax._visible = [9, 10, 11, 12, 13].indexOf(lastStep)>=0);
+
+      // 3d model fixups + opacity ramping
+      [
+        icosaPhongFlat,
+        cyberdemon,
+        parallax,
+      ].forEach(function (o) {
+        if (!o) return;
+
+        if (o._visible) {
+          o.material.opacity = Math.min(1, o.material.opacity + .05);
+        }
+        else {
+          o.material.opacity = Math.max(0, o.material.opacity - .05);
+        }
+
+        o.visible = o.material.opacity > 0;
+        var uniforms = o.material.uniforms;
+        if (uniforms && uniforms.opacity) {
+          o.material.uniforms.opacity.value = o.material.opacity;
+        }
+
+        // Only insert if visible to avoid weird three.js attribute bug
+        if (o.visible && !o.parent) {
+          mathbox.add(o);
+        }
+        else if (!o.visible && o.parent) {
+          mathbox.remove(o);
+        }
+
+      });
+
+      // 3d model fixups + opacity ramping
+      [
+        icosaPhongFlat,
+        cyberdemon,
+      ].forEach(function (o) {
+        if (!o) return;
+
+        // Hackity hack to fix attributes disappearing
+        if (o.visible) {
+          o.material.needsUpdate = true;
+        }
+      });
+
+      // light ramping
+      if ([5, 6, 7, 8].indexOf(lastStep)>=0) {
+        var target = { '4': 4/16, '5': 1/16, '7': 1/16, '8': 4/16 }[lastStep] || 0;
+        var c = ambient.color;
+        c.r = c.r + (target - c.r) * .3;
+        c.g = c.g + (target - c.g) * .3;
+        c.b = c.b + (target - c.b) * .3;
+      }
+
+      // normal / color maps for cyberdemon
+      if (cyberdemon) {
+        var uniforms = cyberdemon.material.materials[4].uniforms;
+        if ([6].indexOf(lastStep)>=0) {
+          uniforms.uNormalScale.value.set(0, 0);
+          uniforms.enableDiffuse.value = 0;
+        }
+        if ([7].indexOf(lastStep)>=0) {
+          var v = uniforms.uNormalScale.value;
+          var target = Math.min(1, Math.max(0, (director.clock(7) - 2)*.5));
+          var normal = .5-.5*Math.cos(target*π);
+          v.x = normal;
+          v.y = normal;
+
+          uniforms.enableDiffuse.value = 0;
+        }
+        if ([8].indexOf(lastStep)>=0) {
+          uniforms.enableDiffuse.value = 1;
+        }
+      }
+
+      // parallax on bricks
+      if (parallax) {
+        var uniforms = parallax.material.uniforms;
+
+        if ([10].indexOf(lastStep)>=0) {
+          uniforms.parallax.value = 0;
+          uniforms.eyePosition.value.copy(camera.position);
+        }
+
+        if ([11].indexOf(lastStep)>=0) {
+          var t = Math.min(1, Math.max(0, director.clock(11) *.5 ));
+          var ease = .5-.5*Math.cos(t*π);
+
+          uniforms.parallax.value = ease * .03;
+          uniforms.eyePosition.value.copy(camera.position);
+        }
+
+        if ([13].indexOf(lastStep)>=0) {
+          var v = new THREE.Vector3();
+          v.copy(camera.position);
+          v.subSelf(uniforms.eyePosition.value);
+          v.multiplyScalar(.1);
+          v.addSelf(uniforms.eyePosition.value);
+          uniforms.eyePosition.value.copy(v);
+        }
+      }
+    });
+
+    exports.world.loop().hookPostRender(function () {
+    });
+
+  });
+
+  director.on('go', function (step, direction) {
+    lastStep = step;
+  });
+}
+
+function vToArray(v) {
+  return [v.x, v.y, v.z];
+}
+
+function mToArray(m) {
+  m = m.flattenToArray([]);
+  return [m.slice(0, 4), m.slice(4, 8), m.slice(8, 12), m.slice(12, 16)];
+}
+
+var geometry = new THREE.IcosahedronGeometry(.75, 1);
+var facePoints = [];
+var faceNormals = [];
+var faceLerpNormals = [];
+var face = geometry.faces[62];
+var v1 = new THREE.Vector3();
+var v2 = new THREE.Vector3();
+var v3 = new THREE.Vector3();
+var w1 = new THREE.Vector3();
+var w2 = new THREE.Vector3();
+var normalScale = 1.2;
+
+for (var i = 0; i < 3; ++i) {
+  v1.copy(geometry.vertices[face[['a','b','c'][i]]]);
+  v2.copy(geometry.vertices[face[['b','c','a'][i]]]);
+  v3.copy(geometry.vertices[face[['c','a','b'][i]]]);
+
+  v3.addSelf(v1);
+  v3.addSelf(v2);
+  v3.multiplyScalar(.333);
+
+  facePoints.push(vToArray(v1));
+  faceNormals.push(vToArray(v1));
+
+  for (var j = 0; j < 3; ++j) {
+    var n = 4 - j + 1;
+    for (var k = 1; k < n; k++) {
+      w1.copy(v1);
+      w2.copy(v2);
+      w1.multiplyScalar(k / n);
+      w2.multiplyScalar(1 - k / n);
+
+      w1.addSelf(w2);
+      w2.copy(v3);
+
+      w2.multiplyScalar(j / 3);
+      w1.multiplyScalar(1 - j / 3);
+
+      w1.addSelf(w2);
+
+      faceLerpNormals.push(vToArray(w1));
+      w1.multiplyScalar(normalScale);
+      faceLerpNormals.push(vToArray(w1));
+    }
+  }
+
+  v1.multiplyScalar(normalScale);
+  faceNormals.push(vToArray(v1));
+}
+
+window.mathBoxScript = [
+
+  [
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'facepoints',
+      n: facePoints.length,
+      data: facePoints,
+      color: 0xffffff,
+      pointSize: 25,
+      zIndex: 50,
+      line: false,
+      points: true,
+      opacity: .99,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'facepoints2',
+      n: facePoints.length,
+      data: facePoints,
+      color: 0x000000,
+      pointSize: 18,
+      zIndex: 60,
+      line: false,
+      points: true,
+      opacity: .99,
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [-1, 0, 0],
+    }, {
+      delay: 0,
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      rotation: [0, 0, 0],
+    }, {
+      delay: 0,
+      duration: 6000,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'facepoints',
+      n: facePoints.length,
+      data: facePoints,
+      color: 0xffffff,
+      pointSize: 25,
+      zIndex: 50,
+      line: false,
+      points: true,
+      opacity: .99,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'facepoints2',
+      n: facePoints.length,
+      data: facePoints,
+      color: 0x000000,
+      pointSize: 18,
+      zIndex: 60,
+      line: false,
+      points: true,
+      opacity: .99,
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [-.5, -.15, -.2],
+    }, {
+      duration: 1500,
+    }],
+    ['animate', 'camera', {
+      orbit: 1.65,
+    }, {
+      duration: 1500,
+    }],
+  ],
+
+  [],
+
+  [
+    ['add', 'vector', {
+      id: 'facenormals',
+      n: faceNormals.length / 2,
+      data: faceNormals,
+      color: 0xdfefff,
+      pointSize: 25,
+      zIndex: 50,
+      line: false,
+      points: true,
+      opacity: .99,
+      size: .025,
+      lineWidth: 5,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'facelerpnormals',
+      n: faceLerpNormals.length / 2,
+      data: faceLerpNormals,
+      color: 0x20c050,
+      pointSize: 25,
+      zIndex: 50,
+      line: false,
+      points: true,
+      opacity: .99,
+      size: .025,
+      lineWidth: 5,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      rotation: [.15, -.03, 0],
+    }, {
+      delay: 1000,
+      duration: 2000,
+    }],
+  ],
+
+  [
+    ['remove', '#facepoints, #facepoints2, #facenormals, #facelerpnormals', {
+      duration: 1000,
+    }],
+  ],
+
+  [
+    ['animate', 'viewport', {
+      position: [-.25, -.15, 0],
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4*2,
+      theta: .4,
+    }, {
+      duration: 2000,
+    }],
+  ],
+
+  [
+    ['animate', 'camera', {
+      phi: .1,
+      theta: .2,
+    }, {
+      duration: 4000,
+    }],
+    ['animate', 'viewport', {
+      position: [.5, -.2, -.1],
+    }, {
+      delay: 0,
+      duration: 4000,
+    }],
+  ],
+
+  [
+    ['animate', 'camera', {
+      theta: π/2,
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      rotation: [0, 0, 0],
+      position: [.2, .3, 0],
+    }, {
+      delay: 0,
+      duration: 2000,
+    }],
+  ],
+
+  [
+    ['animate', 'camera', {
+      phi: .3,
+      theta: .15,
+    }, {
+      duration: 3000,
+    }],
+  ],
+
+  [
+    ['animate', 'camera', {
+      phi: .3+π,
+      theta: .4,
+    }, {
+      delay: 2000,
+      duration: 5000,
+    }],
+  ],
+
+  [
+    ['animate', 'camera', {
+      phi: .3+τ,
+      theta: 1.1,
+    }, {
+      delay: 0,
+      duration: 5000,
+    }],
+  ],
+
+  [
+    ['animate', 'camera', {
+      phi: .3+τ+π,
+      theta: .7,
+      orbit: 3.5,
+    }, {
+      delay: 1000,
+      duration: 5000,
+    }],
+  ],
+
+];
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
