@@ -1,10 +1,16 @@
-Making things with Math(s)
+MathBox Talks
 ==========
 
-This repository contains various versions of the talk __Making Things with Maths__.
+Making things with Math(s)
+---
 
 * `slides-local/` and `slides-net/` – Full Frontal 2012, Brighton (offline, online)
-* `wdcode/` – Web Directions Code 2013 (both)
+* `wdcode/` – Web Directions Code 2013
+
+Making WebGL Dance
+---
+
+* `webglmath/` – JSConf US 2013
 
 The following dependencies are not included and must be installed:
 
