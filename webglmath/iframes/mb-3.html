@@ -302,9 +302,15 @@ window.mathBoxSetup = function (mathbox, director) {
           uniforms.eyePosition.value.copy(camera.position);
         }
 
-        if ([13].indexOf(lastStep)>=0) {
+        if ([12,13].indexOf(lastStep)>=0) {
           var v = new THREE.Vector3();
           v.copy(camera.position);
+          if (lastStep == 12) {
+            var x = v.x, z = v.z;
+            v.x = -z;
+            v.z = x;
+            v.y -= .3;
+          }
           v.subSelf(uniforms.eyePosition.value);
           v.multiplyScalar(.1);
           v.addSelf(uniforms.eyePosition.value);
@@ -574,28 +580,28 @@ window.mathBoxScript = [
       theta: .4,
     }, {
       delay: 2000,
-      duration: 5000,
+      duration: 7000,
     }],
   ],
 
   [
     ['animate', 'camera', {
-      phi: .3+τ,
-      theta: 1.1,
+      phi: .1,
+      theta: .7,
     }, {
       delay: 0,
-      duration: 5000,
+      duration: 7000,
     }],
   ],
 
   [
     ['animate', 'camera', {
-      phi: .3+τ+π,
-      theta: .7,
+      phi: .3+π,
+      theta: .8,
       orbit: 3.5,
     }, {
       delay: 1000,
-      duration: 5000,
+      duration: 6000,
     }],
   ],
 
