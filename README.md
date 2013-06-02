@@ -5,12 +5,12 @@ Making things with Math(s)
 ---
 
 * `slides-local/` and `slides-net/` – Full Frontal 2012, Brighton (offline, online)
-* `wdcode/` – Web Directions Code 2013
+* `wdcode/` – Web Directions Code 2013, Melbourne
 
 Making WebGL Dance
 ---
 
-* `webglmath/` – JSConf US 2013
+* `webglmath/` – JSConf US 2013, Amelia Island, Florida
 
 The following dependencies are not included and must be installed:
 
