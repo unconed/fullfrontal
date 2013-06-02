@@ -380,7 +380,7 @@ window.mathBoxSetup = function (mathbox, director) {
       }
       else if (lastStep == 13 || lastStep == 14) {
         samplePolygon(samples, activePoints);
-        var t = Math.max(0, director.clock(14)*.3);
+        var t = Math.max(0, director.clock(14)*.3+.5);
         var t2 = (t<.5 ? t*t : t-.25) * 5;
         t = Math.max(0, t - 1);
         t = t<.5 ? t*t : t-.25;
@@ -398,7 +398,7 @@ window.mathBoxSetup = function (mathbox, director) {
         fill(_darkred);
         samplePolygon(samples, activePoints);
 
-        var t = Math.max(0, director.clock(14)*.3);
+        var t = Math.max(0, director.clock(14)*.3+.5);
         var t2 = (t<.5 ? t*t : t-.25)*5;
         t = Math.max(0, t - 1);
         t = t<.5 ? t*t : t-.25;
