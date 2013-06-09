@@ -28,6 +28,8 @@ uniform vec3 pointLightColor[2];
 uniform vec3 pointLightPosition[2];
 uniform float pointLightDistance[2];
 
+const vec2 step = vec2(1./256.0, 1./256.0);
+
 void main() {
   float height = texture2D(heightMap, vUV).x;
 
@@ -37,19 +39,33 @@ void main() {
   vec2 uv = vUV - offset * parallax;
 
   vec4 color = texture2D(diffuseMap, uv);
+  color = color * color;
   vec3 normal = texture2D(normalMap, uv).xyz;
   float bump = texture2D(heightMap, vUV).x;
 
-  float ao = clamp(1.5 - bump * .5, 0., 1.);
+  float bumpu = texture2D(heightMap, vUV - vec2(0., step.y)).x;
+  float bumpd = texture2D(heightMap, vUV + vec2(0., step.y)).x;
+  float bumpl = texture2D(heightMap, vUV - vec2(step.x, 0.)).x;
+  float bumpr = texture2D(heightMap, vUV + vec2(step.x, 0.)).x;
+
+  float lap = (bumpu + bumpd + bumpl + bumpr) - bump * 4.;
+  float depth = clamp(1.6 - bump * .7, 0., 1.);
+
+  float ao = (1.0 - max(0., -lap * 1.2)) * depth;
+
+  vec3 wNormal = normal.yzx;
+  wNormal.x = -wNormal.x;
+
 
   vec3 accum = vec3(0, 0, 0);
 
   for (int i = 0; i < 2; ++i) {
     vec3 view = pointLightPosition[i] - vWorldPosition;
-    accum += clamp(dot(normal, view), 0., 1.) * pointLightColor[i];
+    accum += clamp(dot(wNormal, view), 0., 1.) * pointLightColor[i] * pointLightColor[i];
   }
 
-  gl_FragColor = vec4(color.xyz * ao * accum, opacity);
+  gl_FragColor = vec4(sqrt(color.xyz * ao * accum), opacity);
+//  gl_FragColor = vec4(sqrt(vec3(1., 1., 1.) * ao * accum), opacity);
 }
 
 </script>
