@@ -1,0 +1,4907 @@
+<script type="text/javascript" charset="utf-8">
+
+/**
+ * Setup
+ */
+window.mathBoxSetup = function (mathbox, assets) {
+
+  // Viewport camera/setup
+  mathbox
+    // Cartesian viewport
+    .viewport({
+      type: 'cartesian',
+      range: [[0, 1], [-.2, 1.05], [-1, 1]],
+      scale: [1.6, 1, 1],
+      rotation: [0, 0, 0],
+    })
+    .camera({
+      orbit: 3.5,
+      phi: τ/4,
+      theta: 0,
+    })
+    .transition(300)
+
+    // Number line
+    .axis({
+      id: 'smallTicks',
+      axis: 0,
+      lineWidth: 3,
+      color: 0xc0c0c0,
+      tickScale: 2,
+      ticks: 16,
+      size: .04,
+      arrow: false,
+      zIndex: -10,
+    })
+    .axis({
+      id: 'largeTicks',
+      axis: 0,
+      lineWidth: 3,
+      color: 0xc0c0c0,
+      tickScale: 2,
+      ticks: 16,
+      size: .08,
+      arrow: false,
+      zIndex: -10,
+    })
+
+    .axis({
+      id: 'labels',
+      axis: 0,
+      size: 0,
+      tickScale: 2,
+      ticks: 16,
+      lineWidth: 0.0001,
+      arrow: false,
+      labels: true,
+      formatter: formatter,
+      distance: 25,
+      decimals: 8,
+      zIndex: -10,
+      color: 0xb0b0b0,
+    })
+
+    .animate('#smallTicks, #largeTicks', { ticks: 16 }, { duration: 1 })
+    .animate('#labels', { ticks: 16 }, { duration: 1 })
+
+    .vector({
+      n: binaryTree.length / 2,
+      id: 'binaryTree',
+      data: binaryTree,
+      color: 0xd0d0d0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+    }, {
+      delay: 0,
+      duration: 1,
+    })
+    .animate('#binaryTree', { opacity: 0 }, { duration: 1 })
+
+    .vector({
+      n: ternaryMesh.length / 2,
+      id: 'ternaryMesh',
+      data: ternaryMesh,
+      color: 0xd0d0d0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      size: .05,
+      arrow: false,
+      live: false,
+    }, {
+      delay: 0,
+      duration: 1,
+    })
+    .animate('#ternaryMesh', { opacity: 0 }, { duration: 1 })
+
+    .vector({
+      n: ternaryTree.length / 2,
+      id: 'ternaryTree',
+      data: ternaryTree,
+      color: 0xd0d0d0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      size: .05,
+      arrow: false,
+      live: false,
+    }, {
+      delay: 0,
+      duration: 1,
+    })
+    .animate('#ternaryTree', { opacity: 0 }, { duration: 1 })
+
+    .curve({
+      id: 'edge',
+      n: 4,
+      color: 0xdedede,
+      lineWidth: 2,
+      zIndex: -30,
+      data: [[0, 0], [0, 1], [1, 1], [1, 0]],
+    })
+
+}
+
+
+
+/**
+ * Shared data
+ */
+var epsilon = 0.000001;
+var quad = [[[-1, -1], [1, -1]], [[-1, 1], [1, 1]]];
+var tri = [
+  [[0, 1], [1, 1], [2, 1]],
+  [[0, 1], [1, 1], [2, 1]],
+  [[1, -1], [1, -1], [1, -1]],
+];
+var strip = [
+  [[0, 1.5], [1, 1.5], [2, 1.5]],
+  [[0, 1], [1, 1], [2, 1]],
+  [[1, 1], [1, 1], [1, 1]],
+];
+
+// Fraction formatter
+var denominators = [2, 3, 4, 7, 8, 9, 12, 16, 27];
+var l = denominators.length;
+var numerator = "padding: 0 3px; margin-bottom: 1px; border-bottom: 1px solid #444;";
+var signfloat = "position: relative; width: 0; height: 0; left: -15px; top: 10px;";
+var transparent = 'opacity: 0.5' ;
+var formatterCache = {};
+window.ii = 0;
+var formatter = function (x) {
+  if (x === undefined || x === null) return;
+
+  var output;
+  var cache = formatterCache[x];
+  if (cache !== undefined) return cache;
+
+  if (x != Math.floor(x)) {
+    for (var i = 0; i <= l; ++i) {
+      var d = denominators[i];
+
+      var scaled = Math.abs(x * d);
+      var n = Math.round(scaled);
+      if (Math.abs(scaled - n) < epsilon) {
+        var fade = d > 9 ? transparent : '';
+        var sign = x > 0 ? '' : '<div style="'+ signfloat +'">-</div>';
+        var output = '<center>'+ sign +
+                  '<div style="' + numerator + fade + '">' + n + '</div>'+
+                  '<span style="' + fade + '">' + d +
+                '</span></center>';
+        return (formatterCache[x] = output);
+      }
+    }
+  }
+  output = (+x == x) ? '<div style="padding-top: 8px">' + x + '</div>' : x;
+  return (formatterCache[x] = output);
+}
+
+// Standard color
+var orangered = 0xE54723;
+var green = 0x20c050;
+var gold = 0xfeb500;
+var purple = 0xd000a0;
+
+// Random dots
+var dots = function (x, i) {
+  var j = x + Math.sin(i*143.13241 + i*i*72.73361)*.05+.05;
+  return [j * .75 + .125, 0, 0];
+};
+
+// Binary tree
+var levels = 5;
+var binaryPoints = [[.5, 0]],
+    binaryTree = [],
+    binaryTreeFlat = [],
+    i, j;
+for (i = 0; i < levels; ++i) {
+  for (j = (1<<i) - 1; j < (1<<(i+1)) - 1; ++j) {
+    binaryPoints.push([binaryPoints[j][0] - Math.pow(.5, i+2), 1 - Math.pow(.5, i+1)]);
+    binaryPoints.push([binaryPoints[j][0] + Math.pow(.5, i+2), 1 - Math.pow(.5, i+1)]);
+  }
+}
+for (i = 0; i < levels; ++i) {
+  for (j = (1<<i) - 1; j < (1<<(i+1)) - 1; ++j) {
+    binaryTree.push(binaryPoints[j]);
+    binaryTree.push(binaryPoints[(j + 1) * 2 - 1]);
+    binaryTree.push(binaryPoints[j]);
+    binaryTree.push(binaryPoints[(j + 1) * 2]);
+  }
+}
+var binaryLevel = function (i) {
+  return function (x, j) {
+    return binaryPoints[ (1<<i) - 1 + j ];
+  }
+}
+var binaryLevelFlat = function (i) {
+  return function (x, j) {
+    return [binaryPoints[ (1<<i) - 1 + j ][0], 0];
+  }
+}
+
+// ternary tree
+levels = 3;
+var ternaryPoints = [[1/3, 0], [2/3, 0]],
+    ternaryMesh = [],
+    ternaryTree = [],
+    ternaryTreeFlat = [],
+    i, j, k;
+for (i = 0; i < levels; ++i) {
+  for (k = 0, j = Math.pow(3, i) - 1; j < Math.pow(3, i + 1) - 1; ++j) {
+    var s = ((k++)%2) * 2 - 1;
+
+    if (s < 0) {
+      ternaryPoints.push([ternaryPoints[j][0] - 2*Math.pow(1/3, i+2), 1 - Math.pow(1/3, i+1)]);
+    }
+    ternaryPoints.push([ternaryPoints[j][0] - Math.pow(1/3, i+2), 1 - Math.pow(1/3, i+1)]);
+    ternaryPoints.push([ternaryPoints[j][0] + Math.pow(1/3, i+2), 1 - Math.pow(1/3, i+1)]);
+    if (s > 0) {
+      ternaryPoints.push([ternaryPoints[j][0] + 2*Math.pow(1/3, i+2), 1 - Math.pow(1/3, i+1)]);
+    }
+
+  }
+}
+for (i = 0; i < levels; ++i) {
+  for (k = 0, j = Math.pow(3, i) - 1; j < Math.pow(3, i + 1) - 1; ++j) {
+
+    var s = (k++%2)*2 - 1;
+    ternaryMesh.push(ternaryPoints[j]);
+    ternaryMesh.push(ternaryPoints[(j + 1) * 3 - 2 * s]);
+
+    ternaryTree.push(ternaryPoints[j]);
+    ternaryTree.push(ternaryPoints[(j + 1) * 3 - 1]);
+    ternaryTree.push(ternaryPoints[j]);
+    ternaryTree.push(ternaryPoints[(j + 1) * 3]);
+    ternaryTree.push(ternaryPoints[j]);
+    ternaryTree.push(ternaryPoints[(j + 1) * 3 + 1]);
+  }
+}
+var ternaryLevel = function (i) {
+  return function (x, j) {
+    return ternaryPoints[ Math.pow(3, i) - 1 + j ];
+  }
+}
+
+// prime tree
+var start = [.5];
+var primePoints = [
+  [1/2, 0],
+  [1/4, 1/2], [1/2, 1/2], [3/4, 1/2],
+];
+for (i = 1; i < 12; ++i) {
+  primePoints.push([i/12, 1 - 1/6]);
+}
+for (i = 1; i < 60; ++i) {
+  primePoints.push([i/60, 1 - 1/30]);
+}
+
+var primeLevel = function (i) {
+  switch (i) {
+    case 0:
+    case 1:
+      return function (x, j) {
+        return primePoints[ (1<<i) - 1 + j ];
+      }
+    case 2:
+      return function (x, j) {
+        return primePoints[ 4 + j ];
+      }
+    case 3:
+      return function (x, j) {
+        return primePoints[ 15 + j ];
+      }
+  }
+}
+
+var last;
+
+var path1 = [], value1 = 13/32,
+last = .5;
+for (i = 0; i < 4; ++i) {
+  var frac = (value1 * (1<<(i))) % 1;
+  var next = last + (frac > .5 ? 1 : -1) / (1<<(i+2));
+
+  path1.push([last, 1 - Math.pow(.5, i)]);
+  path1.push([next, 1 - Math.pow(.5, i+1)]);
+
+  last = next;
+}
+
+var path2 = [], value2 = 11/27;
+last = 1/3;
+for (i = 0; i < 2; ++i) {
+  var frac = (value2 * Math.pow(3, i)) % 1;
+  var scale = Math.pow(1/3, i+2);
+  var next;
+
+  if (frac < 1/3) {
+    next = last - scale;
+  }
+  else if (frac < 2/3) {
+    next = last + scale;
+  }
+  else {
+    next = last + 2*scale;
+  }
+
+  path2.push([last, 1 - Math.pow(1/3, i)]);
+  path2.push([next, 1 - Math.pow(1/3, i+1)]);
+
+  last = next;
+}
+
+var value3 = 21/60;
+var path3 = [
+  [1/2-1/12-2/60, 1-1/6], [1/2-1/12-4/60, 1-1/30],
+];
+
+var path4 = [], value4 = 2/3,
+last = .5;
+for (i = 0; i < 12; ++i) {
+  var frac = (value4 * (1<<(i))) % 1;
+  var next = last + (frac > .5 ? 1 : -1) / (1<<(i+2));
+
+  path4.push([last, 1 - Math.pow(.5, i)]);
+//    path4.push([next, 1 - Math.pow(.5, i+1)]);
+
+  last = next;
+}
+
+var path5 = [], value5 = 4/7,
+last = .5;
+for (i = 0; i < 12; ++i) {
+  var frac = (value5 * (1<<(i))) % 1;
+  var next = last + (frac > .5 ? 1 : -1) / (1<<(i+2));
+
+  path5.push([last, 1 - Math.pow(.5, i)]);
+//    path5.push([next, 1 - Math.pow(.5, i+1)]);
+
+  last = next;
+}
+
+var path6 = [], value6 = 3/7,
+last = .5;
+for (i = 0; i < 12; ++i) {
+  var frac = (value6 * (1<<(i))) % 1;
+  var next = last + (frac > .5 ? 1 : -1) / (1<<(i+2));
+
+  path6.push([last, 1 - Math.pow(.5, i)]);
+//    path6.push([next, 1 - Math.pow(.5, i+1)]);
+
+  last = next;
+}
+
+var path7 = [], value7 = 5/7,
+last = .5;
+for (i = 0; i < 12; ++i) {
+  var frac = (value7 * (1<<(i))) % 1;
+  var next = last + (frac > .5 ? 1 : -1) / (1<<(i+2));
+
+  path7.push([last, 1 - Math.pow(.5, i)]);
+//    path7.push([next, 1 - Math.pow(.5, i+1)]);
+
+  last = next;
+}
+
+var path8 = [], value8 = 5/16+epsilon,
+last = 5/16;
+for (i = 0; i < 12; ++i) {
+  var frac = (value8 * (1<<(i+3))) % 1;
+  var next = last + (frac > .5 ? 1 : -1) / (1<<(i+5));
+
+  path8.push([last, 1 - Math.pow(.5, i+3)]);
+//    path8.push([next, 1 - Math.pow(.5, i+4)]);
+
+  last = next;
+}
+
+var seq = [0, 1, 0, 2, 1, 3, 1, 4, 2, 5, 2, 6];
+var binaryDetail = function (i, end) {
+  var j = i%6;
+  var k = Math.floor(i/6);
+  var p = binaryPoints[seq[j * 2 + end]];
+  return [p[0] + k, p[1]];
+};
+
+var lpath = [], rpath = [], value9 = 5/3+epsilon,
+last = 1;
+for (i = 0; i < 12; ++i) {
+  var frac = (value9 * (1<<i)) % 2;
+  var next = last + (frac > 1 ? 1 : -1) / (1<<(i+1));
+  var list = (next > last) ? rpath : lpath;
+
+  list.push([last, 1 - Math.pow(.5, i-1)]);
+  list.push([next, 1 - Math.pow(.5, i)]);
+
+  last = next;
+}
+
+var lpath2 = [], rpath2 = [], value10 = 4/5+epsilon,
+last = 1;
+for (i = 0; i < 12; ++i) {
+  var frac = (value10 * (1<<i)) % 2;
+  var next = last + (frac > 1 ? 1 : -1) / (1<<(i+1));
+  var list = (next > last) ? rpath2 : lpath2;
+
+  list.push([last, 1 - Math.pow(.5, i-1)]);
+  list.push([next, 1 - Math.pow(.5, i)]);
+
+  last = next;
+}
+
+var lpath3 = [], rpath3 = [], value11 = π,
+last = 2;
+for (i = 0; i < 24; ++i) {
+  var frac = (value11 * (1<<i)) % 4;
+  var next = last + (frac > 2 ? 1 : -1) / (1<<(i));
+  var list = (next > last) ? rpath3 : lpath3;
+
+  list.push([last, 1 - Math.pow(.5, i-2)]);
+  list.push([next, 1 - Math.pow(.5, i-1)]);
+
+  last = next;
+}
+
+
+/** 
+ * Script
+ */
+window.mathBoxScript = [
+
+  /*
+  // Viewport
+  [
+    // 0 1
+    ['add', 'curve', {
+      id: 'zero-one',
+      n: 2,
+      data: [[0], [1]],
+      points: true,
+      pointSize: 13,
+      color: 0x000000,
+      line: false,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+
+    // Dots
+    ['add', 'curve', {
+      id: 'dots',
+      n: 15,
+      domain: [0, 1],
+      expression: dots,
+      points: true,
+      pointSize: 0.001,
+      line: false,
+    }, {
+      delay: 300,
+      duration: 300,
+    }],
+    ['animate', '#dots', {
+      pointSize: 9,
+    }, {
+      delay: 300,
+      duration: 600,
+    }],
+  ],
+
+  // Zoom
+  [
+    ['remove', '#dots, #dots-l1, #dots-l2, #dots-l3, #dots-r1, #dots-r2, #dots-r3', {
+      duration: 300,
+    }],
+    ['animate', 'axis', {
+      ticks: 1,
+    }, {
+      duration: 900,
+    }],
+    ['animate', 'viewport', {
+      range: [[0, 1], [-1, 1], [-1, 1]],
+    }, {
+      duration: 1000,
+    }],
+
+    ['animate', 'axis', {
+      ticks: 2,
+    }, {
+      delay: 300,
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'level0',
+      n: 1,
+      expression: binaryLevelFlat(0),
+      points: true,
+      line: false,
+      pointSize: 13,
+      zIndex: 10,
+    }, {
+      delay: 1200,
+      duration: 300,
+    }],
+  ],
+
+  // Recurse 1/2
+  [
+    ['add', 'curve', {
+      id: 'level1',
+      n: 2,
+      expression: binaryLevelFlat(1),
+      points: true,
+      line: false,
+      pointSize: 1,
+      color: green,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'curve', {
+      id: 'level2',
+      n: 4,
+      expression: binaryLevelFlat(2),
+      points: true,
+      line: false,
+      pointSize: 1,
+      color: gold,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'curve', {
+      id: 'level3',
+      n: 8,
+      expression: binaryLevelFlat(3),
+      points: true,
+      line: false,
+      pointSize: 1,
+      color: orangered,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'curve', {
+      id: 'level4',
+      n: 16,
+      expression: binaryLevelFlat(4),
+      points: true,
+      line: false,
+      pointSize: 1,
+      color: purple,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'curve', {
+      id: 'level5',
+      n: 32,
+      expression: binaryLevelFlat(5),
+      points: true,
+      line: false,
+      pointSize: 1,
+      opacity: 0.001,
+      zIndex: 10,
+      color: 0x909090,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#level1', {
+      opacity: 1,
+      pointSize: 15,
+    }, {
+      delay: 100,
+      duration: 700,
+    }],
+    ['animate', '#level2', {
+      opacity: 1,
+      pointSize: 13,
+    }, {
+      delay: 800,
+      duration: 700,
+    }],
+    ['animate', '#level3', {
+      opacity: 1,
+      pointSize: 11,
+    }, {
+      delay: 1500,
+      duration: 700,
+    }],
+    ['animate', '#level4', {
+      opacity: 1,
+      pointSize: 9,
+    }, {
+      delay: 2200,
+      duration: 700,
+    }],
+
+    ['animate', 'axis', {
+      ticks: 4,
+    }, {
+      delay: 100,
+      duration: 700,
+    }],
+    ['animate', 'axis', {
+      ticks: 8,
+    }, {
+      delay: 100,
+      duration: 700,
+    }],
+    ['animate', 'axis', {
+      ticks: 16,
+    }, {
+      delay: 100,
+      duration: 700,
+    }],
+    ['animate', '#smallTicks', {
+      ticks: 32,
+    }, {
+      delay: 100,
+      duration: 700,
+    }],
+    ['animate', '#smallTicks', {
+      ticks: 64,
+    }, {
+      delay: 100,
+      duration: 700,
+    }],
+  ],
+
+  // Binary tree
+  [
+    ['add', 'curve', {
+      id: 'edge',
+      n: 4,
+      color: 0xeeeeee,
+      lineWidth: 2,
+      zIndex: -30,
+      data: [[0, 0], [0, 1], [1, 1], [1, 0]],
+    }],
+    ['animate', '#level5', {
+      opacity: 1,
+      pointSize: 7,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      range: [[0, 1], [-.2, 1.05], [-1, 1]],
+    }, {
+      duration: 1000,
+    }],
+
+    ['animate', '#level0', {
+      expression: binaryLevel(0),
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#level1', {
+      expression: binaryLevel(1),
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#level2', {
+      expression: binaryLevel(2),
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#level3', {
+      expression: binaryLevel(3),
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#level4', {
+      expression: binaryLevel(4),
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#level5', {
+      expression: binaryLevel(5),
+    }, {
+      duration: 1000,
+    }],
+
+    ['animate', '#binaryTree', {
+      opacity: 1,
+    }, {
+      delay: 1000,
+      duration: 1000,
+    }],
+  ],
+
+  // Find number
+  [
+    ['animate', '#binaryTree', {
+      opacity: .5,
+    }, {
+      delay: 700,
+      duration: 500,
+    }],
+
+    ['add', 'vector', {
+      id: 'path',
+      n: path1.length / 2,
+      data: path1,
+      live: false,
+      opacity: 0,
+      color: 0x404040,
+      lineWidth: 4,
+      zIndex: 20,
+    }, {
+      duration: 1,
+    }],
+    ['animate', '#path', {
+      opacity: 1,
+    }, {
+      delay: 200,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 1,
+      points: true,
+      line: false,
+      data: [[value1]],
+      pointSize: 15,
+      color: purple,
+    }, {
+      delay: 200,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 2,
+      points: false,
+      line: true,
+      data: [[value2, 0], [value2, 1]],
+      lineWidth: 2,
+      color: 0xeeeeee,
+      zIndex: -100,
+    }, {
+      delay: 200,
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['animate', '#binaryTree', {
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['remove', '#target, #path', {
+      duration: 300,
+    }],
+  ],
+
+  // Recurse 1/3
+  [
+    // Remove tree
+    ['animate', '#binaryTree', {
+      opacity: 0,
+    }],
+    ['remove', '#target, #path, #level0, #level1, #level2, #level3, #level4, #level5', { duration: 300 }],
+
+    // Adjust scale
+    ['animate', '#labels', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'axis', {
+      ticks: 3,
+      tickScale: 3,
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#labels', {
+      opacity: 1,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+
+    // Add ternary tree
+    ['add', 'curve', {
+      id: 'level0',
+      n: 2,
+      expression: ternaryLevel(0),
+      points: true,
+      line: false,
+      pointSize: 1,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'curve', {
+      id: 'level1',
+      n: 6,
+      expression: ternaryLevel(1),
+      points: true,
+      line: false,
+      pointSize: 1,
+      color: green,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'curve', {
+      id: 'level2',
+      n: 18,
+      expression: ternaryLevel(2),
+      points: true,
+      line: false,
+      pointSize: 1,
+      color: gold,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'curve', {
+      id: 'level3',
+      n: 54,
+      expression: ternaryLevel(3),
+      points: true,
+      line: false,
+      pointSize: 1,
+      color: orangered,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#level0', {
+      opacity: 1,
+      pointSize: 15,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#level1', {
+      opacity: 1,
+      pointSize: 13,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['animate', '#level2', {
+      opacity: 1,
+      pointSize: 11,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+    ['animate', '#level3', {
+      opacity: 1,
+      pointSize: 11,
+    }, {
+      delay: 2000,
+      duration: 500,
+    }],
+    ['animate', '#ternaryMesh', {
+      opacity: 1,
+    }, {
+      delay: 3000,
+      duration: 500,
+    }],
+    ['animate', '#ternaryTree', {
+      opacity: 1,
+    }, {
+      delay: 3000,
+      duration: 500,
+    }],
+
+    ['animate', 'axis', {
+      ticks: 9,
+    }, {
+      delay: 1000,
+      duration: 0,
+    }],
+    ['animate', '#smallTicks, #labels', {
+      ticks: 27,
+    }, {
+      delay: 500,
+      duration: 0,
+    }],
+
+  ],
+
+  // ternary graph
+  [
+    ['animate', '#ternaryMesh', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 700,
+    }],
+    ['animate', '#ternaryTree', {
+      opacity: .5,
+    }, {
+      delay: 1200,
+      duration: 500,
+    }],
+
+    // path
+    ['add', 'vector', {
+      id: 'path',
+      n: path2.length / 2,
+      data: path2,
+      live: false,
+      opacity: 0,
+      color: 0x404040,
+      lineWidth: 4,
+      zIndex: 20,
+    }, {
+      duration: 1,
+    }],
+    ['animate', '#path', {
+      opacity: 1,
+    }, {
+      delay: 700,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 1,
+      points: true,
+      line: false,
+      data: [[value2]],
+      pointSize: 15,
+      color: gold,
+    }, {
+      delay: 700,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 2,
+      points: false,
+      line: true,
+      data: [[value2, 0], [value2, 1]],
+      lineWidth: 2,
+      color: 0xeeeeee,
+      zIndex: -100,
+    }, {
+      delay: 700,
+      duration: 500,
+    }],
+  ],
+
+  // clean slate
+  [
+    ['animate', 'axis', {
+      tickScale: 2,
+      ticks: 1,
+    }, {
+      duration: 1,
+    }],
+    ['remove', '#target, #path, #level0, #level1, #level2, #level3, #level4, #level5', { duration: 300 }],
+    ['animate', '#ternaryTree', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#id', {}],
+  ],
+
+  [
+  // Add prime tree
+    ['add', 'curve', {
+      id: 'level0',
+      n: 1,
+      expression: primeLevel(0),
+      points: true,
+      line: false,
+      pointSize: 15,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'curve', {
+      id: 'level1',
+      n: 3,
+      expression: primeLevel(1),
+      points: true,
+      line: false,
+      pointSize: 15,
+      color: green,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#level0', {
+      opacity: 1,
+    }, {
+      delay: 100,
+      duration: 500,
+    }],
+    ['animate', '#level1', {
+      opacity: 1,
+    }, {
+      delay: 600,
+      duration: 500,
+    }],
+
+    ['animate', 'axis', {
+      ticks: 2,
+    }, {
+      delay: 100,
+      duration: 500,
+    }],
+    ['animate', 'axis', {
+      ticks: 4,
+    }, {
+      delay: 100,
+      duration: 500,
+    }],
+
+    ['clone', '#zero-one', {
+      id: 'zero-one-2',
+      mathPosition: [0, 1 - 1/2, 0],
+      opacity: 0,
+      color: 0xc0c0c0,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['animate', '#zero-one-2', {
+      opacity: 1,
+    }, {
+      delay: 600,
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'level2',
+      n: 11,
+      expression: primeLevel(2),
+      points: true,
+      line: false,
+      pointSize: 15,
+      color: gold,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#level2', {
+      opacity: 1,
+    }, {
+      delay: 100,
+      duration: 500,
+    }],
+    ['animate', 'axis', {
+      tickUnit: 1/12,
+      tickScale: 5,
+      ticks: 12,
+    }, {
+      delay: 300,
+      duration: 1,
+    }],
+
+    ['clone', '#zero-one', {
+      id: 'zero-one-3',
+      mathPosition: [0, 1-1/6, 0],
+      opacity: 0,
+      color: 0xc0c0c0,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['animate', '#zero-one-3', {
+      opacity: 1,
+    }, {
+      delay: 100,
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'level3',
+      n: 59,
+      expression: primeLevel(3),
+      points: true,
+      line: false,
+      pointSize: 11,
+      color: orangered,
+      opacity: 0.001,
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#level3', {
+      opacity: 1,
+    }, {
+      delay: 100,
+      duration: 500,
+    }],
+
+    ['clone', '#zero-one', {
+      id: 'zero-one-4',
+      mathPosition: [0, 1-1/30, 0],
+      opacity: 0,
+      color: 0xc0c0c0,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['animate', '#zero-one-4', {
+      opacity: 1,
+    }, {
+      delay: 100,
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['animate', '#smallTicks', {
+      tickUnit: 1/60,
+      tickScale: 5,
+      ticks: 60,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#path', {
+      opacity: 1,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 1,
+      points: true,
+      line: false,
+      data: [[value3]],
+      pointSize: 15,
+      color: orangered,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target2',
+      n: 2,
+      points: false,
+      line: true,
+      data: [[value3, 0], [value3, 1]],
+      lineWidth: 2,
+      color: 0xeeeeee,
+      zIndex: -100,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['remove', '#target, #target2, #path', {
+      duration: 500,
+    }],
+  ],
+
+  // Show rational vs real axis
+  [
+    ['remove', '#zero-one-2, #zero-one-3, #zero-one-4', {
+      duration: 500,
+    }],
+    ['animate', '#edge', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#zero-one, #target', {
+      mathPosition: [0, .25, 0],
+    }, {
+      duration: 1000,
+    }],
+    ['remove', '#zero-one, #target, #target2, #path, #level0, #level1, #level2, #level3', {
+      duration: 500,
+    }],
+    ['clone', '#largeTicks, #smallTicks', {
+      opacity: 0,
+      offset: [0, .6, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#labels', {
+      id: 'labels-clone',
+      opacity: 0,
+      offset: [0, .6, 0],
+    }, {
+      duration: 1,
+    }],
+
+    ['animate', '#smallTicks, #largeTicks, #labels', {
+      offset: [0, .25, 0],
+    }, {
+      duration: 1000,
+    }],
+    ['set', '#labels-clone', {
+      lineWidth: 2,
+      line: true,
+    }],
+
+    ['animate', '#largeTicks-clone, #labels-clone', {
+      opacity: 1,
+    }, {
+      delay: 500,
+      duration: 1000,
+    }],
+
+  ],
+  */
+
+  // Show binary tree again
+  [
+    ['animate', '#edge', {
+      opacity: 1,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#labels', {
+      opacity: 0,
+      duration: 200,
+    }],
+    ['animate', '#smallTicks, #labels, #largeTicks', {
+      tickUnit: 1,
+      tickScale: 2,
+    }, {
+      delay: 200,
+      duration: 0,
+    }],
+    ['animate', '#labels', {
+      opacity: 1,
+      duration: 200,
+    }],
+    ['animate', '#smallTicks, #largeTicks, #labels', {
+      offset: [0, 0, 0],
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#binaryTree', {
+      color: 0xb0b0b0,
+      opacity: 1,
+    }, {
+      duration: 1000,
+    }],
+  ],
+
+  [
+    ['clone', '#binaryTree', {
+      id: 'c1',
+      opacity: 0.001,
+      mathPosition: [0, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c2',
+      opacity: 0.001,
+      mathPosition: [1/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c3',
+      opacity: 0.001,
+      mathPosition: [2/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c4',
+      opacity: 0.001,
+      mathPosition: [3/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c5',
+      opacity: 0.001,
+      mathPosition: [4/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c6',
+      opacity: 0.001,
+      mathPosition: [5/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c7',
+      opacity: 0.001,
+      mathPosition: [6/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c8',
+      opacity: 0.001,
+      mathPosition: [7/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c9',
+      opacity: 0.001,
+      mathPosition: [8/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c10',
+      opacity: 0.001,
+      mathPosition: [9/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c11',
+      opacity: 0.001,
+      mathPosition: [10/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c12',
+      opacity: 0.001,
+      mathPosition: [11/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c13',
+      opacity: 0.001,
+      mathPosition: [12/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c14',
+      opacity: 0.001,
+      mathPosition: [13/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c15',
+      opacity: 0.001,
+      mathPosition: [14/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c16',
+      opacity: 0.001,
+      mathPosition: [15/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c17',
+      opacity: 0.001,
+      mathPosition: [16/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c18',
+      opacity: 0.001,
+      mathPosition: [17/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c19',
+      opacity: 0.001,
+      mathPosition: [18/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c20',
+      opacity: 0.001,
+      mathPosition: [19/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c21',
+      opacity: 0.001,
+      mathPosition: [20/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c22',
+      opacity: 0.001,
+      mathPosition: [21/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c23',
+      opacity: 0.001,
+      mathPosition: [22/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c24',
+      opacity: 0.001,
+      mathPosition: [23/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c25',
+      opacity: 0.001,
+      mathPosition: [24/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c26',
+      opacity: 0.001,
+      mathPosition: [25/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c27',
+      opacity: 0.001,
+      mathPosition: [26/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c28',
+      opacity: 0.001,
+      mathPosition: [27/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c29',
+      opacity: 0.001,
+      mathPosition: [28/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c30',
+      opacity: 0.001,
+      mathPosition: [29/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c31',
+      opacity: 0.001,
+      mathPosition: [30/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#binaryTree', {
+      id: 'c32',
+      opacity: 0.001,
+      mathPosition: [31/32, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      duration: 1,
+    }],
+
+    ['set', '#c1, #c2, #c3, #c4, #c5, #c6, #c7, #c8, #c9, #c10, #c11, #c12, #c13, #c14, #c15, #c16, #c17, #c18, #c19, #c20, #c21, #c22, #c23, #c24, #c25, #c26, #c27, #c28, #c29, #c30, #c31, #c32', {
+      color: green,
+    }],
+    ['animate', '#c1, #c2, #c3, #c4, #c5, #c6, #c7, #c8, #c9, #c10, #c11, #c12, #c13, #c14, #c15, #c16, #c17, #c18, #c19, #c20, #c21, #c22, #c23, #c24, #c25, #c26, #c27, #c28, #c29, #c30, #c31, #c32', {
+      opacity: 1,
+    }, {
+      delay: 400,
+      duration: 700,
+    }],
+  ],
+
+  [
+    ['animate', '#c1, #c2, #c3, #c4, #c5, #c6, #c7, #c8, #c9, #c10, #c11, #c12, #c13, #c14, #c15, #c16, #c17, #c18, #c19, #c20, #c21, #c22, #c23, #c24, #c25, #c26, #c27, #c28, #c29, #c30, #c31, #c32', {
+      color: 0xb0b0b0,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+
+    // 0 / 1 limit
+    ['add', 'curve', {
+      id: 'limit1',
+      n: 7,
+      line: false,
+      points: true,
+      live: false,
+      pointSize: 15,
+      color: orangered,
+      zIndex: 50,
+      data: [[1/4, 1-1/2], [1/8, 1-1/4], [1/16, 1-1/8], [1/32, 1-1/16], [1/64, 1-1/32], [1/128, 1-1/64], [1/256, 1-1/128]]
+    }, {
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'limit2',
+      n: 7,
+      line: false,
+      points: true,
+      live: false,
+      pointSize: 15,
+      color: green,
+      zIndex: 40,
+      data: [[1-1/4, 1-1/2], [1-1/8, 1-1/4], [1-1/16, 1-1/8], [1-1/32, 1-1/16], [1-1/64, 1-1/32], [1-1/128, 1-1/64], [1-1/256, 1-1/128]]
+    }, {
+      delay: 300,
+      duration: 300,
+    }],
+  ],
+
+  // 1/2 limit
+  [
+    ['animate', '#limit1', {
+      mathPosition: [.5, 0, 0],
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#limit2', {
+      mathPosition: [-.5, 0, 0],
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // 1/4 limit
+  [
+    ['animate', 'axis', {
+      offset: [0, .75, 0],
+    }, {
+      delay: 1900,
+      duration: 800,
+    }],
+    ['animate', '#limit1', {
+      mathPosition: [.25, .5, 0],
+      mathScale: [.5, .5],
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#limit2', {
+      mathPosition: [-.25, .5, 0],
+      mathScale: [.5, .5],
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [2.4, -2, 0],
+      scale: [4.8, 3, 1],
+    }, {
+      delay: 700,
+      duration: 1500,
+    }],
+  ],
+
+  // no stop
+  [
+    ['add', 'curve', {
+      id: 'pathloop',
+      n: path8.length,
+      data: path8,
+      color: purple,
+      live: false,
+      lineWidth: 6,
+      zIndex: 30,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 1,
+      points: true,
+      line: false,
+      data: [[value8, 1]],
+      pointSize: 15,
+      color: purple,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 2,
+      points: false,
+      line: true,
+      data: [[value8, 1 - 1/8], [value8, 1]],
+      lineWidth: 2,
+      color: 0xeeeeee,
+      zIndex: -100,
+    }, {
+      delay: 0,
+      duration: 0,
+    }],
+  ],
+
+  // Zoom to full tree
+  // alternating limit
+  [
+    ['remove', '#target, #pathloop', {
+      duration: 300,
+    }],
+    ['animate', 'axis', {
+      offset: [0, 0, 0],
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [0, 0, 0],
+      scale: [1.6, 1, 1],
+    }, {
+      delay: 0,
+      duration: 1000,
+    }],
+    ['remove', '#limit1, #limit2', {
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'path2',
+      n: path4.length,
+      data: path4,
+      color: orangered,
+      live: false,
+      lineWidth: 6,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+  ],
+
+  // Add upper/lower bound 2/3
+  [
+    ['add', 'surface', {
+      id: 'bound',
+      n: [2, 2],
+      live: false,
+      data: [[[0.5, 0], [2/3, 1]], [[.8333, 0], [2/3, 1]]],
+      lineWidth: 3,
+      shaded: false,
+      zIndex: -100,
+      opacity: .5,
+      color: gold,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    // prepare 4/7th
+    ['add', 'surface', {
+      id: 'bound2',
+      n: [2, 2],
+      live: false,
+      data: [[[.5, 0], [4/7, 1]], [[1-1/14, 0], [4/7, 1]]],
+      lineWidth: 3,
+      shaded: false,
+      zIndex: -100,
+      opacity: 0,
+      color: gold,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+  ],
+
+  // Zoom in to 2/3
+  [
+    ['animate', 'axis', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      range: [[value4 - 1/6, value4 + 1/6], [1 - 1/6*1.25 - 1/6, 1 + 1/6*1.25 - 1/6], [-1, 1]],
+    }, {
+      delay: 500,
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 1,
+      points: true,
+      line: false,
+      data: [[value4, 1]],
+      pointSize: 15,
+      color: orangered,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 2,
+      points: false,
+      line: true,
+      data: [[value4, 1 - 1/8], [value4, 1]],
+      lineWidth: 2,
+      color: 0xeeeeee,
+      zIndex: -100,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+
+    ['add', 'axis', {
+      id: 'fractions',
+      offset: [0, 1 - 1/8, 0],
+      axis: 0,
+      n: 2,
+      line: true,
+      labels: true,
+      tickUnit: 1/3,
+      tickScale: 3,
+      color: 0xb0b0b0,
+      zIndex: -200,
+      formatter: formatter,
+      ticks: 3,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+    ['animate', '#fractions', {
+      ticks: 1,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+  ],
+
+  // 4/7
+  [
+    ['animate', '#fractions', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#fractions', {
+      tickUnit: 1/7,
+      tickScale: 7,
+      offset: [0, 1 - 1/4, 0],
+    }, {
+      delay: 500,
+      duration: 0,
+    }],
+    ['animate', '#fractions', {
+      opacity: 1,
+    }, {
+      delay: 1200,
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      range: [[value5 - 1/4, value5 + 1/4], [1 - 1/4*1.25 - 1/4, 1 + 1/4*1.25 - 1/4], [-1, 1]],
+    }, {
+      delay: 500,
+      duration: 1000,
+    }],
+    ['remove', '#target', {
+      duration: 1,
+    }],
+    ['remove', '#bound, #path2', {
+      duration: 500,
+    }],
+
+    ['animate', '#bound2', {
+      opacity: .5,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'path2',
+      n: path5.length,
+      data: path5,
+      color: orangered,
+      live: false,
+      lineWidth: 6,
+      zIndex: 30,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+
+    ['add', 'curve', {
+      id: 'target',
+      n: 1,
+      points: true,
+      line: false,
+      data: [[value5, 1]],
+      pointSize: 15,
+      color: orangered,
+    }, {
+      delay: 2000,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 2,
+      points: false,
+      line: true,
+      data: [[value5, 1 - 1/4], [value5, 1]],
+      lineWidth: 2,
+      color: 0xeeeeee,
+      zIndex: -100,
+    }, {
+      delay: 2500,
+      duration: 0,
+    }],
+  ],
+
+  // Multiple paths
+  [
+    ['remove', '#bound2', {
+      duration: 500,
+    }],
+
+    ['add', 'curve', {
+      id: 'path2',
+      n: path6.length,
+      data: path6,
+      color: green,
+      live: false,
+      lineWidth: 6,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 1,
+      points: true,
+      line: false,
+      data: [[value6, 1]],
+      pointSize: 15,
+      color: green,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 2,
+      points: false,
+      line: true,
+      data: [[value6, 1 - 1/4], [value6, 1]],
+      lineWidth: 2,
+      color: 0xeeeeee,
+      zIndex: -100,
+    }, {
+      delay: 1250,
+      duration: 0,
+    }],
+
+    ['add', 'curve', {
+      id: 'path2',
+      n: path7.length,
+      data: path7,
+      color: purple,
+      live: false,
+      lineWidth: 6,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 1,
+      points: true,
+      line: false,
+      data: [[value7, 1]],
+      pointSize: 15,
+      color: purple,
+    }, {
+      delay: 1250,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'target',
+      n: 2,
+      points: false,
+      line: true,
+      data: [[value7, 1 - 1/4], [value7, 1]],
+      lineWidth: 2,
+      color: 0xeeeeee,
+      zIndex: -100,
+    }, {
+      delay: 1000,
+      duration: 0,
+    }],
+  ],
+
+  // Zoom out again
+  [
+    ['animate', '#fractions', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      range: [[0, 1], [-.2, 1.05], [-1, 1]],
+    }, {
+      duration: 1000,
+    }],
+    ['remove', '#target, #fractions'],
+    ['animate', 'axis', {
+      opacity: 1,
+    }, {
+      delay: 1000,
+      duration: 300,
+    }],
+
+    // fractalception
+    ['animate', '#c1, #c2, #c3, #c4, #c5, #c6, #c7, #c8, #c9, #c10, #c11, #c12, #c13, #c14, #c15, #c16, #c17, #c18, #c19, #c20, #c21, #c22, #c23, #c24, #c25, #c26, #c27, #c28, #c29, #c30, #c31, #c32', {
+      opacity: 0,
+    }, {
+      delay: 1000,
+      duration: 1,
+    }],
+
+    // zoom out
+    ['set', '#smallTicks', {
+      ticks: 32,
+    }],
+    ['animate', '#smallTicks', {
+      ticks: 64,
+    }, {
+      delay: 2600,
+      duration: 1,
+    }],
+    ['remove', '#edge', {
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      range: [[0, 2], [-1.4, 1.1], [-1, 1]],
+    }, {
+      delay: 100,
+      duration: 1500,
+    }],
+
+    // add duped tree
+    ['clone', '#binaryTree', {
+      mathPosition: [1, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [1, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetailXS',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [1, 1-1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetailXS',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [1+1/4, 1-1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetailXS',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [1+1/2, 1-1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetailXS',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [1+3/4, 1-1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    // replace uberdetail with lower
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [0, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetailXS',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [0, 1-1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetailXS',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [1/4, 1-1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetailXS',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [1/2, 1-1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetailXS',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [3/4, 1-1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    // fade in cloned tree 1-2
+    ['animate', '#binaryTree-clone', {
+      opacity: 1,
+    }, {
+      delay: 2100,
+      duration: 500,
+    }],
+    ['animate', '#binaryDetail, #binaryDetailXS', {
+      opacity: 1,
+    }, {
+      delay: 2100,
+      duration: 500,
+    }],
+    ['animate', 'axis', {
+      offset: [0, -1, 0],
+    }, {
+      delay: 2100,
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      n: 3,
+      data: [[.5, 0], [1, -1], [1.5, 0]],
+      line: true,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+    }, {
+      delay: 3100,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'pathExtension',
+      n: 2,
+      data: [[.5, 0], [1, -1]],
+      line: true,
+      color: orangered,
+      lineWidth: 6,
+      zIndex: 10,
+    }, {
+      delay: 3100,
+      duration: 500,
+    }],
+  ],
+
+  // 2-.. extension
+  [
+    // major tree
+    ['clone', '#binaryTree', {
+      id: "binaryTreeBig",
+      mathPosition: [0, -7, 0],
+      mathScale: [8, 8, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    // 2-3 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree2",
+      mathPosition: [2, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail2',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [2, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    // 3-4 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree3",
+      mathPosition: [3, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    // 4-5 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree3",
+      mathPosition: [4, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    // 5-6 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree3",
+      mathPosition: [5, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail3',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [3, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail3',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [4, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail3',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [5, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    // fade in trees
+    ['animate', '#binaryTreeBig, #binaryTree2, #binaryDetail2, #binaryDetail2XS, #binaryTree3, #binaryDetail3', {
+      opacity: 1,
+    }, {
+      delay: 1600,
+      duration: 500,
+    }],
+    ['animate', '#binaryDetailXS', {
+      opacity: 0,
+    }, {
+      delay: 1600,
+      duration: 500,
+    }],
+
+    ['set', '#smallTicks', {
+      ticks: 32,
+    }],
+    ['set', '#labels, #largeTicks', {
+      ticks: 10,
+    }],
+
+    ['animate', 'viewport', {
+      range: [[0, 3.5], [-3.5*0.625-1, 3.5*0.625-1], [-1, 1]],
+    }, {
+      delay: 100,
+      duration: 1500,
+    }],
+
+  ],
+
+  // Negative trees
+  [
+    // -1-0 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree4",
+      mathPosition: [-1, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    // -2-1 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree4",
+      mathPosition: [-2, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    // -3-2 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree4",
+      mathPosition: [-3, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    // -4-3 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree4",
+      mathPosition: [-4, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    // -5-4 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree4",
+      mathPosition: [-5, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    // -6-5 tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree4",
+      mathPosition: [-6, 0, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    // major tree
+    ['clone', '#binaryTree', {
+      id: "binaryTree4Big",
+      mathPosition: [-8, -7, 0],
+      mathScale: [8, 8, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail4',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [-1, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail4',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [-2, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail4',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [-3, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail4',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [-4, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail4',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [-5, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'vector', {
+      n: 6*32,
+      id: 'binaryDetail4',
+      expression: binaryDetail,
+      color: 0xb0b0b0,
+      lineWidth: 3,
+      zIndex: -20,
+      opacity: 1,
+      arrow: false,
+      live: false,
+      mathPosition: [-6, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+      opacity: 0.0001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    // fade in trees
+    ['animate', '#binaryTree4, #binaryTree4Big, #binaryDetail4', {
+      opacity: 1,
+    }, {
+      delay: 1700,
+      duration: 500,
+    }],
+
+    // fade out detail
+    ['animate', '#binaryDetailXS, #binaryDetail2XS', {
+      opacity: 0,
+    }, {
+      delay: 200,
+      duration: 1500,
+    }],
+
+    // viewport
+    ['animate', 'viewport', {
+      range: [[-3.2, 3.2], [-3.2*1.25-1, 3.2*1.25-1], [-1, 1]],
+    }, {
+      delay: 200,
+      duration: 1500,
+    }],
+
+  ],
+
+  [
+    ['animate', '#path2, #pathExtension, ', {
+      lineWidth: 0.001,
+    }, {
+      duration: 400,
+    }],
+    ['animate', '#path2, #pathExtension', {
+      opacity: 0,
+    }, {
+      delay: 100,
+      duration: 400,
+    }],
+
+    ['animate', '#binaryTree, #binaryTree-clone, #binaryTreeBig, #binaryDetail, #binaryTree2, #binaryDetail2, #binaryTree3, #binaryDetail3, #binaryTree4, #binaryTree4Big, #binaryDetail4', {
+      color: 0xd0d0d0,
+    }, {
+      duration: 500,
+    }],
+
+    ['clone', '#binaryTree', {
+      id: 'minfinitree',
+      mathPosition: [-1, 1 - 5.5, 0],
+      mathScale: [2, 2, 0],
+      opacity: 0,
+      color: 0x909090,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#binaryTree', {
+      id: 'infinitree',
+      mathPosition: [-1/8, 1 - 1/4, 0],
+      mathScale: [1/4, 1/4, 0],
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#binaryDetail', {
+      id: 'infinidetail',
+      mathPosition: [-1/8, 1 - 1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#binaryDetail', {
+      id: 'infinidetail2',
+      mathPosition: [-2/8, 1 - 1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#binaryDetail', {
+      id: 'infinidetail3',
+      mathPosition: [1/8, 1 - 1/32/4, 0],
+      mathScale: [1/32/4, 1/32/4, 0],
+      opacity: 0.001,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['animate', '#infinitree, #infinidetail', {
+      opacity: 1,
+      color: green,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+
+    ['animate', '#infinitree', {
+      mathPosition: [-1/4, 1 - 1/2, 0],
+      mathScale: [1/2, 1/2, 0],
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['animate', '#infinitree', {
+      mathPosition: [-1/2, 1 - 1, 0],
+      mathScale: [1, 1, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinitree', {
+      mathPosition: [-1, 1 - 2, 0],
+      mathScale: [2, 2, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinitree', {
+      mathPosition: [-2, 1 - 4, 0],
+      mathScale: [4, 4, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinitree', {
+      mathPosition: [-4, 1 - 8, 0],
+      mathScale: [8, 8, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinitree', {
+      mathPosition: [-8, 1 - 16, 0],
+      mathScale: [16, 16, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+
+    ['animate', '#infinidetail', {
+      mathPosition: [-1/4, 1 - 1/32/2, 0],
+      mathScale: [1/32/2, 1/32/2, 0],
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail', {
+      mathPosition: [-1/2, 1 - 1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail', {
+      mathPosition: [-1, 1 - 1/16, 0],
+      mathScale: [1/16, 1/16, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail', {
+      mathPosition: [-2, 1 - 1/8, 0],
+      mathScale: [1/8, 1/8, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail', {
+      mathPosition: [-4, 1 - 1/4, 0],
+      mathScale: [1/4, 1/4, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail', {
+      mathPosition: [-8, 1 - 1/2, 0],
+      mathScale: [1/2, 1/2, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+
+    ['animate', '#infinidetail2', {
+      mathPosition: [-1/2, 1 - 1/32/2, 0],
+      mathScale: [1/32/2, 1/32/2, 0],
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail2', {
+      mathPosition: [-1, 1 - 1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail2', {
+      mathPosition: [-2, 1 - 1/16, 0],
+      mathScale: [1/16, 1/16, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail2', {
+      mathPosition: [-4, 1 - 1/8, 0],
+      mathScale: [1/8, 1/8, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail2', {
+      mathPosition: [-8, 1 - 1/4, 0],
+      mathScale: [1/4, 1/4, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail2', {
+      mathPosition: [-16, 1 - 1/2, 0],
+      mathScale: [1/2, 1/2, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+
+    ['animate', '#infinidetail3', {
+      mathPosition: [1/4, 1 - 1/32/2, 0],
+      mathScale: [1/32/2, 1/32/2, 0],
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail3', {
+      mathPosition: [1/2, 1 - 1/32, 0],
+      mathScale: [1/32, 1/32, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail3', {
+      mathPosition: [1, 1 - 1/16, 0],
+      mathScale: [1/16, 1/16, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail3', {
+      mathPosition: [2, 1 - 1/8, 0],
+      mathScale: [1/8, 1/8, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail3', {
+      mathPosition: [4, 1 - 1/4, 0],
+      mathScale: [1/4, 1/4, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['animate', '#infinidetail3', {
+      mathPosition: [8, 1 - 1/2, 0],
+      mathScale: [1/2, 1/2, 0],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+
+    ['animate', '#minfinitree', {
+      opacity: 1,
+    }, {
+      delay: 6500,
+      duration: 500,
+    }],
+
+    ['animate', '#binaryTree, #binaryTree-clone, #binaryTreeBig, #binaryDetail, #binaryTree2, #binaryDetail2, #binaryTree3, #binaryDetail3, #binaryTree4, #binaryTree4Big, #binaryDetail4', {
+      color: green,
+    }, {
+      delay: 6000,
+      duration: 500,
+    }],
+    ['animate', 'camera', {
+      theta: -1.2
+    }, {
+      delay: 1500,
+      duration: 4000,
+    }],
+    ['animate', 'camera', {
+      orbit: 2.5,
+    }, {
+      delay: 3000,
+      duration: 8000,
+    }],
+    ['animate', 'viewport', {
+      position: [0, -.3, 0],
+      rotation: [0, 0, .4],
+    }, {
+      delay: 3000,
+      duration: 8000,
+    }],
+    ['add', 'vector', {
+      id: 'vectors',
+      n: 64,
+      arrow: false,
+      lineWidth: 6,
+      expression: function (i, end) {
+        var x = -9/2+18/2*i/64;
+
+        var sd = x;
+        for (var i = 0; i < 4; ++i) sd = (sd*14202.347)%1000;
+
+        return [x, 1, end * (Math.cos(sd)*.25 + .25)];
+      },
+      opacity: 0.001,
+    }, {
+      duration: 1,
+    }],
+    ['animate', '#vectors', {
+      opacity: 1,
+    }, {
+      delay: 2000,
+      duration: 2000,
+    }],
+  ],
+
+  // Pause
+  [
+    ['remove', '#minfinitree', {
+      duration: 300,
+    }],
+    ['animate', '#infinitree, #infinidetail, #infinidetail2, #infinidetail3', {
+      color: 0xd0d0d0,
+    }],
+    ['remove', '#infinitree, #infinidetail, #infinidetail2, #infinidetail3', {
+      duration: 300,
+    }],
+    ['animate', '#binaryTree, #binaryTree-clone, #binaryTreeBig, #binaryDetail, #binaryTree2, #binaryDetail2, #binaryTree3, #binaryDetail3, #binaryTree4, #binaryTree4Big, #binaryDetail4', {
+      color: 0xb0b0b0,
+    }, {
+      delay: 300,
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      position: [0, .1, 0],
+      range: [[0, 2], [-1.4, 1.1], [-1, 1]],
+    }, {
+      duration: 3000,
+    }],
+  ],
+
+  // Show path to 4/5
+  [
+    ['remove', '#path', {
+      duration: 300,
+    }],
+    ['add', 'vector', {
+      id: 'path',
+      n: lpath2.length / 2,
+      data: lpath2,
+      live: false,
+      lineWidth: 4,
+      zIndex: 20,
+    }, {
+      delay: 300,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'path',
+      n: rpath2.length / 2,
+      data: rpath2,
+      live: false,
+      lineWidth: 4,
+      zIndex: 20,
+      color: green,
+    }, {
+      delay: 300,
+      duration: 500,
+    }],
+  ],
+
+  // Show path to π
+  [
+    ['animate', 'viewport', {
+      range: [[.5, 4], [-3.5*0.625-1, 3.5*0.625-1], [-1, 1]],
+    }, {
+      delay: 100,
+      duration: 1500,
+    }],
+    ['remove', '#path', {
+      duration: 300,
+    }],
+    ['add', 'vector', {
+      id: 'path',
+      n: lpath3.length / 2,
+      data: lpath3,
+      live: false,
+      lineWidth: 4,
+      zIndex: 20,
+    }, {
+      delay: 1600,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'path',
+      n: rpath3.length / 2,
+      data: rpath3,
+      live: false,
+      lineWidth: 4,
+      zIndex: 20,
+      color: green,
+    }, {
+      delay: 1600,
+      duration: 500,
+    }],
+  ],
+
+  // Zoom in
+  [
+    ['animate', 'viewport', {
+      range: [[.625+1.5, 2.375+1.5], [-1.75*0.625-.15, 1.75*0.625-.15], [-1, 1]],
+    }, {
+      delay: 100,
+      duration: 1500,
+    }],
+    ['animate', 'axis', {
+      offset: [0, -1, 0],
+    }, {
+      delay: 1600,
+      duration: 500,
+    }],
+  ],
+
+  // Show how to derive bounds
+  [
+    ['add', 'curve', {
+      id: 'limit0',
+      n: 1,
+      line: false,
+      points: true,
+      live: false,
+      pointSize: 20,
+      color: 0x404040,
+      data: [
+        [7/2, 0],
+      ],
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'limit1',
+      n: 6,
+      line: false,
+      points: true,
+      live: false,
+      pointSize: 12,
+      color: orangered,
+      zIndex: 50,
+      data: [
+        [7/2 - 1/4, 1 - 1/2],
+        [7/2 - 3/8, 1 - 1/4],
+        [7/2 - 7/16, 1 - 1/8],
+        [7/2 - 15/32, 1 - 1/16],
+        [7/2 - 31/64, 1 - 1/32],
+        [7/2 - 63/128, 1 - 1/64],
+      ],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'limit2',
+      n: 6,
+      line: false,
+      points: true,
+      live: false,
+      pointSize: 12,
+      color: green,
+      zIndex: 50,
+      data: [
+        [7/2 + 1/4, 1 - 1/2],
+        [7/2 + 3/8, 1 - 1/4],
+        [7/2 + 7/16, 1 - 1/8],
+        [7/2 + 15/32, 1 - 1/16],
+        [7/2 + 31/64, 1 - 1/32],
+        [7/2 + 63/128, 1 - 1/64],
+      ],
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+
+    ['animate', '#path', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+  ],
+
+  // Show bounds
+  [
+    ['remove', '#limit0, #limit1, #limit2', {
+      duration: 300,
+    }],
+    ['animate', '#path', {
+      opacity: 1,
+    }, {
+      duration: 300,
+    }],
+
+    // pre-add target line for z issues
+    ['add', 'curve', {
+      id: 'target',
+      n: 2,
+      points: false,
+      line: true,
+      data: [[0, 1], [0, 2]],
+      lineWidth: 2,
+      color: 0x000000,
+      zIndex: 100,
+      mathPosition: [π, 0, 0],
+      opacity: 0,
+    }, {
+      delay: 2600,
+      duration: 500,
+    }],
+
+    ['add', 'surface', {
+      id: 'bound1',
+      n: [3, 3],
+      data: tri,
+      mathPosition: [2, 0, 0],
+      mathScale: [1/1, 1/1, 1],
+      color: 0xe3e3e3,
+      opacity: .001,
+      shaded: false,
+      zIndex: -300,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'surface', {
+      id: 'bound2',
+      n: [3, 3],
+      data: tri,
+      mathPosition: [3, 1 - 1/2, 0],
+      mathScale: [1/2, 1/2, 1],
+      color: 0xcacaca,
+      opacity: .001,
+      shaded: false,
+      zIndex: -290,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'surface', {
+      id: 'bound3',
+      n: [3, 3],
+      data: tri,
+      mathPosition: [3, 1 - 1/4, 0],
+      mathScale: [1/4, 1/4, 1],
+      color: 0xb3b3b3,
+      opacity: .001,
+      shaded: false,
+      zIndex: -280,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'surface', {
+      id: 'bound4',
+      n: [3, 3],
+      data: tri,
+      mathPosition: [3, 1 - 1/8, 0],
+      mathScale: [1/8, 1/8, 1],
+      color: 0x9a9a9a,
+      opacity: .001,
+      shaded: false,
+      zIndex: -270,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'surface', {
+      id: 'bound5',
+      n: [3, 3],
+      data: tri,
+      mathPosition: [3 + 1/8, 1 - 1/16, 0],
+      mathScale: [1/16, 1/16, 1],
+      color: 0x838383,
+      opacity: .001,
+      shaded: false,
+      zIndex: -260,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'surface', {
+      id: 'bound6',
+      n: [3, 3],
+      data: tri,
+      mathPosition: [3 + 1/8, 1 - 1/32, 0],
+      mathScale: [1/32, 1/32, 1],
+      color: 0x6a6a6a,
+      opacity: .001,
+      shaded: false,
+      zIndex: -250,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'surface', {
+      id: 'bound7',
+      n: [3, 3],
+      data: tri,
+      mathPosition: [3 + 1/8, 1 - 1/64, 0],
+      mathScale: [1/64, 1/64, 1],
+      color: 0x505050,
+      opacity: .001,
+      shaded: false,
+      zIndex: -250,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'surface', {
+      id: 'bound8',
+      n: [3, 3],
+      data: tri,
+      mathPosition: [3 + 1/8 + 1/64, 1 - 1/128, 0],
+      mathScale: [1/128, 1/128, 1],
+      color: 0x3a3a3a,
+      opacity: .001,
+      shaded: false,
+      zIndex: -250,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'surface', {
+      id: 'bound9',
+      n: [3, 3],
+      data: tri,
+      mathPosition: [3 + 1/8 + 1/64, 1 - 1/256, 0],
+      mathScale: [1/256, 1/256, 1],
+      color: 0x3a3a3a,
+      opacity: .001,
+      shaded: false,
+      zIndex: -250,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#bound1', {
+      opacity: 1,
+    }, {
+      delay: 300,
+      duration: 500,
+    }],
+    ['animate', '#bound2', {
+      opacity: 1,
+    }, {
+      delay: 1100,
+      duration: 500,
+    }],
+    ['animate', '#bound3', {
+      opacity: 1,
+    }, {
+      delay: 1900,
+      duration: 500,
+    }],
+    ['animate', '#bound4', {
+      opacity: 1,
+    }, {
+      delay: 2700,
+      duration: 500,
+    }],
+    ['animate', '#bound5', {
+      opacity: 1,
+    }, {
+      delay: 3500,
+      duration: 500,
+    }],
+    ['animate', '#bound6', {
+      opacity: 1,
+    }, {
+      delay: 4300,
+      duration: 500,
+    }],
+    ['animate', '#bound7', {
+      opacity: 1,
+    }, {
+      delay: 5100,
+      duration: 500,
+    }],
+    ['animate', '#bound8', {
+      opacity: 1,
+    }, {
+      delay: 5900,
+      duration: 500,
+    }],
+    ['animate', '#bound9', {
+      opacity: 1,
+    }, {
+      delay: 5900,
+      duration: 500,
+    }],
+  ],
+
+  [],
+
+  // Animate to intervals
+  [
+    ['remove', '#path', {
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      range: [[.625+1.5, 2.375+1.5], [-1.75*0.625+1.5, 1.75*0.625+1.5], [-1, 1]],
+    }, {
+      delay: 100,
+      duration: 1500,
+    }],
+
+    ['animate', '#bound1, #bound2, #bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      data: strip,
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#bound1', {
+      mathPosition: [2, 0, 0],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#bound2', {
+      mathPosition: [3, 1, 0],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#bound3', {
+      mathPosition: [3, 1+1/2, 0],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#bound4', {
+      mathPosition: [3, 1 + 3/4, 0],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#bound5', {
+      mathPosition: [3+1/8, 1 + 7/8, 0],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#bound6', {
+      mathPosition: [3+1/8, 1 + 15/16, 0],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#bound7', {
+      mathPosition: [3+1/8, 1 + 31/32, 0],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#bound8', {
+      mathPosition: [3+1/8+1/64, 1 + 63/64, 0],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#bound9', {
+      mathPosition: [3+1/8+1/64, 1 + 127/128, 0],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+
+    ['animate', '#target', {
+      opacity: .25,
+    }, {
+      delay: 2600,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'targetpoint',
+      n: 1,
+      points: true,
+      line: false,
+      data: [[0, 1]],
+      pointSize: 15,
+      zIndex: 200,
+      mathPosition: [π, 0, 0],
+    }, {
+      delay: 2600,
+      duration: 500,
+    }],
+
+  ],
+
+  // animate to 10/3
+  [
+    ['animate', '#bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+
+    ['animate', '#bound1', {
+      mathPosition: [2, 0, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound2', {
+      mathPosition: [3, 1, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound3', {
+      mathPosition: [3, 1+1/2, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound4', {
+      mathPosition: [3+1/4, 1 + 3/4, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound5', {
+      mathPosition: [3+1/4, 1 + 7/8, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound6', {
+      mathPosition: [3+1/4+1/16, 1 + 15/16, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound7', {
+      mathPosition: [3+1/4+1/16, 1 + 31/32, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound8', {
+      mathPosition: [3+1/4+1/16+1/64, 1 + 63/64, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound9', {
+      mathPosition: [3+1/4+1/16+1/64, 1 + 127/128, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+
+    ['animate', '#target, #targetpoint', {
+      mathPosition: [10/3, 0, 0],
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 1,
+    }, {
+      duration: 500,
+    }],
+
+  ],
+
+  // animate to 3.999…
+  [
+    ['animate', '#bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+
+    ['animate', '#bound3', {
+      mathPosition: [4-1/2, 1+1/2, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound4', {
+      mathPosition: [4-1/4, 1+3/4, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound5', {
+      mathPosition: [4-1/8, 1+7/8, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound6', {
+      mathPosition: [4-1/16, 1+15/16, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound7', {
+      mathPosition: [4-1/32, 1+31/32, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound8', {
+      mathPosition: [4-1/64, 1+63/64, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound9', {
+      mathPosition: [4-1/128, 1+127/128, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+
+    ['animate', '#bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 1,
+    }, {
+      duration: 500,
+    }],
+
+    ['animate', '#target, #targetpoint', {
+      mathPosition: [4, 0, 0],
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // show infinity interval
+  [
+    ['animate', 'viewport', {
+      range: [[.625+1.5, 2.375+1.5], [-1.75*0.625+2, 1.75*0.625+2], [-1, 1]],
+    }, {
+      delay: 100,
+      duration: 1500,
+    }],
+
+    ['clone', '#bound1', {
+      id: 'infinity1',
+      opacity: 0,
+      mathPosition: [4-1/128, 1+127/128, 0],
+      mathScale: [1/256, 1/256, 1],
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#bound2', {
+      id: 'infinity2',
+      opacity: 0,
+      mathPosition: [2, 2.25, 0],
+      mathScale: [1/2, 1/2, 1],
+      color: orangered,
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#bound3', {
+      id: 'infinity3',
+      opacity: 0,
+      mathPosition: [3, 2.25, 0],
+      mathScale: [1/2, 1/2, 1],
+      color: green,
+    }, {
+      duration: 1,
+    }],
+
+    ['animate', '#infinity1', {
+      mathPosition: [2, 1.25, 0],
+      mathScale: [1, 1, 1],
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+    ['animate', '#infinity1', {
+      opacity: 1,
+    }, {
+      delay: 1600,
+      duration: 1000,
+    }],
+  ],
+
+  // show infinity interval divisions
+  [
+    ['animate', '#infinity2, #infinity3', {
+      opacity: .5,
+    }, {
+      delay: 0,
+      duration: 1000,
+    }],
+  ],
+
+  // hide left
+  [
+    ['animate', '#infinity2', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 1000,
+    }],
+    ['animate', '#infinity3', {
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 1000,
+    }],
+  ],
+
+  // animate to 4.000…
+  [
+    ['clone', '#binaryTree', {
+      id: 'binaryTree5',
+      mathPosition: [6, 0, 0],
+      mathScale: [1, 1, 1],
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#binaryDetail', {
+      id: 'binaryDetail5',
+      mathPosition: [6, 1-1/32, 0],
+      mathScale: [1/32, 1/32, 1],
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['animate', '#infinity1, #infinity3', {
+      opacity: 0,
+    }, {
+      delay: 100,
+      duration: 500,
+    }],
+    ['animate', '#infinity1', {
+      mathPosition: [4, 1.25, 0],
+    }, {
+      delay: 600,
+      duration: 1,
+    }],
+    ['animate', '#infinity2, #infinity3', {
+      mathPosition: [4, 2.25, 0],
+    }, {
+      delay: 600,
+      duration: 1,
+    }],
+    ['animate', '#infinity1', {
+      opacity: 1,
+    }, {
+      delay: 1900,
+      duration: 500,
+    }],
+    ['animate', '#infinity2', {
+      opacity: 1,
+    }, {
+      delay: 2900,
+      duration: 500,
+    }],
+
+    ['animate', '#bound1, #bound2, #bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 0,
+    }, {
+      delay: 100,
+      duration: 500,
+    }],
+
+    ['animate', 'viewport', {
+      range: [[.625+3.5, 2.375+3.5], [-1.75*0.625+2, 1.75*0.625+2], [-1, 1]],
+    }, {
+      delay: 200,
+      duration: 1500,
+    }],
+
+    ['animate', '#bound1', {
+      mathPosition: [4, 0, 0],
+    }, {
+      delay: 1800,
+      duration: 1,
+    }],
+    ['animate', '#bound2', {
+      mathPosition: [4, 1, 0],
+    }, {
+      delay: 1800,
+      duration: 1,
+    }],
+    ['animate', '#bound3', {
+      mathPosition: [4, 1+1/2, 0],
+    }, {
+      delay: 1800,
+      duration: 1,
+    }],
+    ['animate', '#bound4', {
+      mathPosition: [4, 1+3/4, 0],
+    }, {
+      delay: 1800,
+      duration: 1,
+    }],
+    ['animate', '#bound5', {
+      mathPosition: [4, 1+7/8, 0],
+    }, {
+      delay: 1800,
+      duration: 1,
+    }],
+    ['animate', '#bound6', {
+      mathPosition: [4, 1+15/16, 0],
+    }, {
+      delay: 1800,
+      duration: 1,
+    }],
+    ['animate', '#bound7', {
+      mathPosition: [4, 1+31/32, 0],
+    }, {
+      delay: 1800,
+      duration: 1,
+    }],
+    ['animate', '#bound8', {
+      mathPosition: [4, 1+63/64, 0],
+    }, {
+      delay: 1800,
+      duration: 1,
+    }],
+    ['animate', '#bound9', {
+      mathPosition: [4, 1+127/128, 0],
+    }, {
+      delay: 1800,
+      duration: 1,
+    }],
+
+    ['animate', '#bound1, #bound2, #bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 1,
+    }, {
+      delay: 1300,
+      duration: 500,
+    }],
+
+  ],
+
+  // animate to 10/3
+  [
+    ['animate', '#infinity1, #infinity2, #infinity3', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', '#infinity1', {
+      mathPosition: [2, 1.25, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#infinity2', {
+      mathPosition: [2, 2.25, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#infinity3', {
+      mathPosition: [3, 2.25, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+
+    ['animate', 'viewport', {
+      range: [[.625+1.5, 2.375+1.5], [-1.75*0.625+2, 1.75*0.625+2], [-1, 1]],
+    }, {
+      delay: 100,
+      duration: 1500,
+    }],
+
+    ['animate', '#bound1, #bound2, #bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+
+    ['animate', '#bound1', {
+      mathPosition: [2, 0, 0],
+    }, {
+      delay: 1700,
+      duration: 1,
+    }],
+    ['animate', '#bound2', {
+      mathPosition: [3, 1, 0],
+    }, {
+      delay: 1700,
+      duration: 1,
+    }],
+    ['animate', '#bound3', {
+      mathPosition: [3, 1+1/2, 0],
+    }, {
+      delay: 1700,
+      duration: 1,
+    }],
+    ['animate', '#bound4', {
+      mathPosition: [3+1/4, 1 + 3/4, 0],
+    }, {
+      delay: 1700,
+      duration: 1,
+    }],
+    ['animate', '#bound5', {
+      mathPosition: [3+1/4, 1 + 7/8, 0],
+    }, {
+      delay: 1700,
+      duration: 1,
+    }],
+    ['animate', '#bound6', {
+      mathPosition: [3+1/4+1/16, 1 + 15/16, 0],
+    }, {
+      delay: 1700,
+      duration: 1,
+    }],
+    ['animate', '#bound7', {
+      mathPosition: [3+1/4+1/16, 1 + 31/32, 0],
+    }, {
+      delay: 1700,
+      duration: 1,
+    }],
+    ['animate', '#bound8', {
+      mathPosition: [3+1/4+1/16+1/64, 1 + 63/64, 0],
+    }, {
+      delay: 1700,
+      duration: 1,
+    }],
+    ['animate', '#bound9', {
+      mathPosition: [3+1/4+1/16+1/64, 1 + 127/128, 0],
+    }, {
+      delay: 1700,
+      duration: 1,
+    }],
+
+    ['animate', '#target, #targetpoint', {
+      mathPosition: [10/3, 0, 0],
+    }, {
+      delay: 1600,
+      duration: 500,
+    }],
+    ['animate', '#bound1, #bound2, #bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 1,
+    }, {
+      delay: 2100,
+      duration: 500,
+    }],
+
+    ['animate', '#infinity1', {
+      opacity: 1,
+    }, {
+      delay: 2600,
+      duration: 500,
+    }],
+
+  ],
+
+  // animate to π
+  [
+    ['animate', '#bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+
+    ['animate', '#bound3', {
+      mathPosition: [3, 1 + 1/2, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound4', {
+      mathPosition: [3, 1 + 3/4, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound5', {
+      mathPosition: [3+1/8, 1 + 7/8, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound6', {
+      mathPosition: [3+1/8, 1 + 15/16, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound7', {
+      mathPosition: [3+1/8, 1 + 31/32, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound8', {
+      mathPosition: [3+1/8+1/64, 1 + 63/64, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+    ['animate', '#bound9', {
+      mathPosition: [3+1/8+1/64, 1 + 127/128, 0],
+    }, {
+      delay: 500,
+      duration: 1,
+    }],
+
+    ['animate', '#bound3, #bound4, #bound5, #bound6, #bound7, #bound8, #bound9', {
+      opacity: 1,
+    }, {
+      duration: 500,
+    }],
+
+    ['animate', '#target, #targetpoint', {
+      mathPosition: [π, 0, 0],
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // Pan down, add upper and lower bound sequence
+  [
+    ['animate', 'viewport', {
+      range: [[.625+1.5, 2.375+1.5], [-1.75*0.625+1, 1.75*0.625+1], [-1, 1]],
+    }, {
+      delay: 100,
+      duration: 1000,
+    }],
+    ['add', 'vector', {
+      id: 'lower',
+      n: 3,
+      data: [[2, 1], [3, 1], [3, 1], [3 + 1/8, 1], [3 + 1/8, 1], [3 + 1/8 + 1/64, 1]],
+      live: false,
+      color: orangered,
+      lineWidth: 4,
+    }, {
+      delay: 1100,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'upper',
+      n: 4,
+      data: [
+        [4, 1], [4 - 1/2, 1],
+        [4 - 1/2, 1], [4 - 3/4, 1],
+        [4 - 3/4, 1], [4 - 13/16, 1],
+        [4 - 13/16, 1], [4 - 27/32, 1]],
+      live: false,
+      color: green,
+      lineWidth: 4,
+    }, {
+      delay: 1100,
+      duration: 500,
+    }],
+  ],
+
+  // Show bound derivation again
+  [
+    ['add', 'curve', {
+      id: 'limit0',
+      n: 1,
+      line: false,
+      points: true,
+      live: false,
+      pointSize: 20,
+      color: 0x404040,
+      data: [
+        [7/2, 0],
+      ],
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'limit1',
+      n: 6,
+      line: false,
+      points: true,
+      live: false,
+      pointSize: 12,
+      color: orangered,
+      zIndex: 50,
+      data: [
+        [7/2 - 1/4, 1 - 1/2],
+        [7/2 - 3/8, 1 - 1/4],
+        [7/2 - 7/16, 1 - 1/8],
+        [7/2 - 15/32, 1 - 1/16],
+        [7/2 - 31/64, 1 - 1/32],
+        [7/2 - 63/128, 1 - 1/64],
+      ],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'limit2',
+      n: 6,
+      line: false,
+      points: true,
+      live: false,
+      pointSize: 12,
+      color: green,
+      zIndex: 50,
+      data: [
+        [7/2 + 1/4, 1 - 1/2],
+        [7/2 + 3/8, 1 - 1/4],
+        [7/2 + 7/16, 1 - 1/8],
+        [7/2 + 15/32, 1 - 1/16],
+        [7/2 + 31/64, 1 - 1/32],
+        [7/2 + 63/128, 1 - 1/64],
+      ],
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+  ],
+
+  // lower bound + red towers
+  [
+    ['remove', '#limit0, #limit1, #limit2', {
+      delay: 200,
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      range: [[.625+1.5, 2.375+1.5], [-1.75*0.625+2, 1.75*0.625+2], [-1, 1]],
+    }, {
+      delay: 200,
+      duration: 1500,
+    }],
+
+    ['animate', '#upper', {
+      opacity: 0,
+    }, {
+      delay: 1700,
+      duration: 500,
+    }],
+
+    ['clone', '#bound2', {
+      id: 'redbound',
+      mathPosition: [2, 1, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound3', {
+      id: 'redbound',
+      mathPosition: [2, 1 + 1/2, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound4', {
+      id: 'redbound',
+      mathPosition: [2, 1 + 3/4, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound5', {
+      id: 'redbound',
+      mathPosition: [2, 1 + 7/8, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound6', {
+      id: 'redbound',
+      mathPosition: [2, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'redbound',
+      mathPosition: [2, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'redbound',
+      mathPosition: [2, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound5', {
+      id: 'redbound',
+      mathPosition: [3, 1 + 7/8, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound6', {
+      id: 'redbound',
+      mathPosition: [3, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'redbound',
+      mathPosition: [3, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'redbound',
+      mathPosition: [3, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound8', {
+      id: 'redbound',
+      mathPosition: [3+1/8, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#redbound', {
+      opacity: 1,
+    }, {
+      delay: 1700,
+      duration: 500,
+    }],
+  ],
+
+  // lower bound limit interval
+  [
+    ['animate', '#infinity2', {
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+
+  ],
+
+  // upper bound
+  [
+    ['remove', '#redbound', {
+      duration: 300,
+    }],
+
+    ['clone', '#bound3', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/2, 1 + 1/2, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound4', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/4, 1 + 3/4, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound5', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/8, 1 + 7/8, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound6', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/16, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/32, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/64, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound4', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/2 - 1/4, 1 + 3/4, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound5', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/2 - 1/8, 1 + 7/8, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound6', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/2 - 1/16, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/2 - 1/32, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'greenbound',
+      mathPosition: [4 - 1/2 - 1/64, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound6', {
+      id: 'greenbound',
+      mathPosition: [4 - 3/4 - 1/16, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'greenbound',
+      mathPosition: [4 - 3/4 - 1/32, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'greenbound',
+      mathPosition: [4 - 3/4 - 1/64, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound7', {
+      id: 'greenbound',
+      mathPosition: [4 - 13/16 - 1/32, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'greenbound',
+      mathPosition: [4 - 13/16 - 1/64, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound8', {
+      id: 'greenbound',
+      mathPosition: [4 - 27/32 - 1/64, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#greenbound', {
+      opacity: 1,
+    }, {
+      delay: 800,
+      duration: 500,
+    }],
+    ['animate', '#lower, #infinity2', {
+      opacity: 0,
+    }, {
+      delay: 200,
+      duration: 500,
+    }],
+    ['animate', '#upper', {
+      opacity: 1,
+    }, {
+      delay: 200,
+      duration: 500,
+    }],
+    ['animate', '#infinity3', {
+      opacity: 1,
+    }, {
+      delay: 1200,
+      duration: 500,
+    }],
+  ],
+
+  // flip red/green
+  [
+    ['animate', '#infinity2, #infinity3', {
+      opacity: 0,
+    }, {
+      delay: 300,
+      duration: 500,
+    }],
+    ['remove', '#greenbound', {
+      delay: 300,
+      duration: 500,
+    }],
+    ['animate', '#lower', {
+      color: green,
+      opacity: 1,
+    }, {
+      delay: 300,
+      duration: 500,
+    }],
+    ['animate', '#upper', {
+      color: orangered,
+    }, {
+      delay: 300,
+      duration: 500,
+    }],
+
+    ['clone', '#bound2', {
+      id: 'greenbound',
+      mathPosition: [2, 1, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound3', {
+      id: 'greenbound',
+      mathPosition: [2+1/2, 1 + 1/2, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound4', {
+      id: 'greenbound',
+      mathPosition: [2+3/4, 1 + 3/4, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound5', {
+      id: 'greenbound',
+      mathPosition: [2+7/8, 1 + 7/8, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound6', {
+      id: 'greenbound',
+      mathPosition: [2+15/16, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'greenbound',
+      mathPosition: [2+31/32, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'greenbound',
+      mathPosition: [2+63/64, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound5', {
+      id: 'greenbound',
+      mathPosition: [3, 1 + 7/8, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound6', {
+      id: 'greenbound',
+      mathPosition: [3+1/16, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'greenbound',
+      mathPosition: [3+3/32, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'greenbound',
+      mathPosition: [3+7/64, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound8', {
+      id: 'greenbound',
+      mathPosition: [3+1/8, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: green,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound3', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2, 1 + 1/2, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound4', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2, 1 + 3/4, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound5', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2, 1 + 7/8, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound6', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound4', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2 - 1/4, 1 + 3/4, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound5', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2 - 1/4, 1 + 7/8, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound6', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2 - 1/4, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2 - 1/4, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'redbound',
+      mathPosition: [4 - 1/2 - 1/4, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound6', {
+      id: 'redbound',
+      mathPosition: [4 - 3/4 - 1/16, 1 + 15/16, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound7', {
+      id: 'redbound',
+      mathPosition: [4 - 3/4 - 1/16, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'redbound',
+      mathPosition: [4 - 3/4 - 1/16, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#bound7', {
+      id: 'redbound',
+      mathPosition: [4 - 13/16 - 1/32, 1 + 31/32, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#bound8', {
+      id: 'redbound',
+      mathPosition: [4 - 13/16 - 1/32, 1 + 63/64, 0],
+      opacity: 0.001,
+      color: orangered,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['animate', '#redbound, #greenbound', {
+      opacity: 1,
+    }, {
+      delay: 800,
+      duration: 500,
+    }],
+
+    ['animate', '#infinity2, #infinity3', {
+      opacity: 1,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+  ],
+
+  // scrub
+  [
+    ['remove', '#redbound, #greenbound, #upper, #lower', {
+      duration: 300,
+    }],
+    ['animate', '#infinity1, #infinity2, #infinity3', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+  ],
+
+  // Fade in bits
+  [
+    ['animate', '#infinity1, #infinity2, #infinity3', {
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+  ],
+
+  // Infinibitception
+  [
+    ['clone', '#infinity2', {
+      id: 'infinileft1',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity2', {
+      id: 'infinileft2',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity2', {
+      id: 'infinileft3',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity2', {
+      id: 'infinileft4',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity2', {
+      id: 'infinileft5',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity2', {
+      id: 'infinileft6',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    ['clone', '#infinity3', {
+      id: 'infiniright1',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity3', {
+      id: 'infiniright2',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity3', {
+      id: 'infiniright3',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity3', {
+      id: 'infiniright4',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity3', {
+      id: 'infiniright5',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#infinity3', {
+      id: 'infiniright6',
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+
+    // animate to new pos
+    ['animate', '#infinileft1', {
+      mathPosition: [2, 2 + 1/4 + 1/2, 0],
+      mathScale: [1/4, 1/4, 1],
+      color: orangered,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infinileft2', {
+      mathPosition: [2, 2 + 1/4 + 3/4, 0],
+      mathScale: [1/8, 1/8, 1],
+      color: orangered,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infinileft3', {
+      mathPosition: [2, 2 + 1/4 + 7/8, 0],
+      mathScale: [1/16, 1/16, 1],
+      color: orangered,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infinileft4', {
+      mathPosition: [2, 2 + 1/4 + 15/16, 0],
+      mathScale: [1/32, 1/32, 1],
+      color: orangered,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infinileft5', {
+      mathPosition: [2, 2 + 1/4 + 31/32, 0],
+      mathScale: [1/64, 1/64, 1],
+      color: orangered,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infinileft6', {
+      mathPosition: [2, 2 + 1/4 + 63/64, 0],
+      mathScale: [1/128, 1/128, 1],
+      color: orangered,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+
+    ['animate', '#infiniright1', {
+      mathPosition: [4 - 1/2, 2 + 1/4 + 1/2, 0],
+      mathScale: [1/4, 1/4, 1],
+      color: green,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infiniright2', {
+      mathPosition: [4 - 1/4, 2 + 1/4 + 3/4, 0],
+      mathScale: [1/8, 1/8, 1],
+      color: green,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infiniright3', {
+      mathPosition: [4 - 1/8, 2 + 1/4 + 7/8, 0],
+      mathScale: [1/16, 1/16, 1],
+      color: green,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infiniright4', {
+      mathPosition: [4 - 1/16, 2 + 1/4 + 15/16, 0],
+      mathScale: [1/32, 1/32, 1],
+      color: green,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infiniright5', {
+      mathPosition: [4 - 1/32, 2 + 1/4 + 31/32, 0],
+      mathScale: [1/64, 1/64, 1],
+      color: green,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+    ['animate', '#infiniright6', {
+      mathPosition: [4 - 1/64, 2 + 1/4 + 63/64, 0],
+      mathScale: [1/128, 1/128, 1],
+      color: green,
+    }, {
+      delay: 1400,
+      duration: 500,
+    }],
+
+    ['animate', 'viewport', {
+      range: [[.33333+1.5, 2.66666+1.5], [-1.75*0.625*1.3333+2, 1.75*0.625*1.3333+2], [-1, 1]],
+    }, {
+      delay: 300,
+      duration: 1000,
+    }],
+  ],
+
+  [],
+
+  [
+    ['animate', '#targetpoint', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+    ['animate', 'axis', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      range: [[1.5, 3+1.5], [-1.75*0.625*12/7+.18, 1.75*0.625*12/7+.18], [-1, 1]],
+    }, {
+      delay: 0,
+      duration: 1500,
+    }],
+    ['animate', '#binaryTree, #binaryTree-clone, #binaryDetail-clone, #binaryTreeBig, #binaryDetail, #binaryTree2, #binaryDetail2, #binaryTree3, #binaryDetail3, #binaryTree4, #binaryTree4Big, #binaryDetail4, #binaryTree5, #binaryDetail5', {
+      color: 0xe0e0e0,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  [],
+  [],
+  [],
+  [
+    ['animate', '#targetpoint', {
+      opacity: 1,
+    }, {
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      range: [[.33333+1.5, 2.66666+1.5], [-1.75*0.625*1.3333+2, 1.75*0.625*1.3333+2], [-1, 1]],
+    }, {
+      delay: 0,
+      duration: 1500,
+    }],
+  ],
+];
+
+
+
+</script>

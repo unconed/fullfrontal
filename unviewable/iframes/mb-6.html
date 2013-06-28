@@ -1,0 +1,88 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+  .viewport({
+    type: 'cartesian',
+    range: [[-2, 2], [-2, 2], [-1, 1]],
+    scale: [1, 1, 1],
+    position: [-.75, 0, 0],
+  })
+  .camera({
+    orbit: 3.5,
+    phi: τ/4,
+    theta: 0,
+  })
+  .transition(1000)
+
+}
+
+
+window.mathBoxScript = [
+
+  [],
+
+  [
+    ['add', 'grid', {
+      
+    }],
+  ],
+
+  [
+    ['add', 'axis', {
+      axis: 0,
+      labels: true,
+    }],
+    ['add', 'axis', {
+      axis: 1,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      domain: [-2, 2],
+      expression: function (x, i) {
+        return [x, Math.cos(2 * x)];
+      },
+      lineWidth: 5,
+    }],
+  ],
+
+  [
+    ['animate', 'camera', {
+      phi: τ/4 + .3,
+      theta: τ/16,
+    }, {
+      duration: 2000,
+    }],
+  ],
+
+  [
+    ['set', 'curve', {
+      id: 'staticCurve',
+    }],
+    ['animate', '#staticCurve', {
+      opacity: 0.5,
+      color: 0x2050C0,
+      expression: function (x, i) {
+        return [x, Math.sin(4 * x)];
+      },
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'dynamicCurve',
+      domain: [-2, 2],
+      color: 0x20C050,
+      expression: function (x, i) {
+        var t = director[0].clock(0);
+        return [x, Math.cos(2 * x + t)];
+      },
+      lineWidth: 5,
+    }],
+  ]
+];
+
+</script>

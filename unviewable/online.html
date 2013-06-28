@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=1480px">
+  
+  <title>Principles of MathBox</title>
+  
+  <!-- Required stylesheet -->
+  <link rel="stylesheet" href="../deck.js/core/deck.core.css">
+  
+  <!-- Theme -->
+  <link rel="stylesheet" href="resources/transition.css">
+  <link rel="stylesheet" href="resources/layout.css">
+  <link rel="stylesheet" href="resources/typography.css">
+  
+  <!-- Required Modernizr file -->
+  <script src="../deck.js/modernizr.custom.js"></script>
+
+  <!-- Typekit fonts -->
+  <script type="text/javascript" src="//use.typekit.net/nde6wmn.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
+  <!-- Required JS files. -->
+  <script src="../deck.js/jquery-1.7.2.min.js"></script>
+  <script src="../deck.js/core/deck.core.js"></script>
+  <script src="../mathbox/vendor/underscore.js"></script>
+  <script src="resources/slides.js"></script>
+  
+  <!-- MathJax typesetting -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      "HTML-CSS": { availableFonts: ["TeX"] },
+      extensions: ["tex2jax.js"],
+      jax: ["input/TeX","output/HTML-CSS"],
+      tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+//      messageStyle: 'none',
+    });
+  </script>
+  <!--<script type="text/javascript" src="../mathjax/MathJax.js?config=TeX-AMS_HTML"></script>-->
+
+  <script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>  
+  
+</head>
+<body>
+
+<div class="deck-container">
+
+<!-- Begin slides. -->
+
+<section class="slide page-cover">
+  <h1 class="white-outline">Principles of MathBox</h1>
+  <h2 class="recessed">Steven Wittens</h2>
+  <h3 class="recessed"><img src="images/github.png" width="48" height="48" class="inline"><img class="inline" src="images/twitter.png" width="48" height="48"> &nbsp;<span>unconed</span><br>http:// <span>acko.net</span></h3>
+</section>
+
+<!-- -->
+
+<section class="slide page-ref">
+  <div class="box images"><div><img src="images/julia.jpg" width="450" class="recessed"></div><div><img src="images/achilles.png" width="450" class="recessed"></div></div>
+  <div><img src="images/bicubic.png" width="900" style="padding-left: 170px"></div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <video src="videos/avs-preset.mov"></video>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <video src="videos/nfspace-blue.mov"></video>
+</section>
+
+<section class="slide page-ref zoom">
+  <div class="box images t-1"><div><img src="images/jacobian.png" width="780"></div></div>
+  <div class="slide abs-bc mj"><h3>Too Much Work</h3></div>
+</section>
+
+<section class="slide zoom">
+  <iframe src="iframes/mathbox.html#0" class="mathbox"></iframe>
+  <div class="slide"></div>
+  <div class="slide"></div>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide zoom">
+  <iframe src="iframes/1024b.html" class="overscan"></iframe>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide">
+  <iframe src="iframes/mathbox.html#1" class="mathbox"></iframe>
+  
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide temp abs-bc"><div>Longitude</div></div>
+  <div class="slide temp abs-bc"><div>Latitude</div></div>
+  <div class="slide temp abs-bc delay40"><h3 class="mj">Cake Is Not a Lie</h3></div>
+</section>
+
+<section class="slide t-2">
+  <h1><small><small><i>Media For</i></small></small>Thinking The Unthinkable</h1>
+
+  <div class="abs-bc"><h3>Bret Victor</h3></div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="spotlight"><img src="images/rosetta.jpg"></div>
+  <div class="abs-bc"><h2 class="mj"><big>Writing Made Thought Visible&nbsp;&nbsp;&nbsp;</big></h2></div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="spotlight"><img src="images/mfttu-0.png"></div>
+  <div class="abs-bc"><h2 class="mj"><big>Media Are Thinking Tools&nbsp;&nbsp;&nbsp;</big></h2></div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="spotlight t-2">
+   <img style="position: relative; top: -50px" src="images/mfttu-5.png">
+  </div>
+</section>
+
+<section class="slide">
+  <div class="box">
+    <blockquote style="padding: 3em 80px;">
+
+      "If we want powerful new ways of <strong>understanding complex systems</strong>, or if<br>
+      we want to <strong>build powerful new systems</strong>,<br>
+      
+    </blockquote>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="box">
+    <blockquote style="padding: 2em 80px;">
+
+      we need powerful <strong>new representations</strong> and<br>
+      we need a powerful <strong>new medium</strong> in which<br>
+      we can <strong>create and work</strong> with those representations."
+      
+    </blockquote>
+  </div>
+</section>
+
+<section class="slide t-2">
+  <h1><small><small><i>Symbolic</i><i>Visual</i><i>Interactive</i></small></small></h1>
+</section>
+
+<section class="slide page-ref zoom">
+  <div class="box images t2"><div><img src="images/mfttu-1.png" width="1000"></div></div>
+</section>
+
+<section class="slide page-ref zoom">
+  <div class="box images t4"><div><img src="images/mfttu-3.png" width="1000"></div></div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="spotlight t-2">
+    <img src="images/mfttu-4.png">
+  </div>
+  <div class="abs-bc mj"><h3>Go Watch <a target="_blank" href="http://vimeo.com/67076984">His Talk</a></h3></div>
+</section>
+
+<section class="slide">
+  <h1><small><small><i>MathBox</i></small></small>Viewing The Unviewable</h1>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="spotlight">
+    <img src="images/algebra.png">
+  </div>
+</section>
+
+<section class="slide zoom">
+  <iframe src="iframes/mathbox.html#4" class="mathbox"></iframe>
+  
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide abs-bc mj"><h3>Coherent Animation</h3></div>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide zoom">
+  <iframe src="iframes/mathbox.html#2" class="mathbox"></iframe>
+  
+  <div class="slide abs-bc mj temp"><big>$$ z $$</big></div>
+  <div class="slide abs-bc mj temp"><big>$$ z^{0.5} $$</big></div>
+  <div class="slide abs-bc mj temp"><big>$$ (z^{0.5})^{4} = z^{2}$$</big></div>
+  <div class="slide abs-bc mj temp"><big>$$ z^{\sqrt{2}}$$</big></div>
+  <div class="slide abs-bc mj temp"><big>$$ z^p = \,? $$</big></div>
+  <div class="slide abs-bc mj"><h3>Show, Don't Tell</h3></div>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide zoom">
+  <iframe src="iframes/mathbox.html#5" class="mathbox"></iframe>
+  
+  <div class="slide abs-c mj temp"><h3>Do The Impossible</h3></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide abs-bc mj temp"><h3>Persistence of Space</h3></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide abs-bc mj temp"><h3>Holographic Viewport</h3></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide zoom">
+  <iframe src="iframes/mathbox.html#3" class="mathbox"></iframe>
+  
+  <div class="slide"></div>
+  <div class="slide abs-bc mj temp"><h3>Persistence of Time</h3></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide abs-bc mj temp"><h3>Depth from Motion</h3></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide abs-bc mj temp"><h3>Semantics from Style</h3><img src="images/colormath.png" style="width: 70%"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+
+</section>
+
+<section class="slide t-1">
+  <h1 class="t6"><small><small><i>MathBox is About</i></small></small><small>Building A Picture</small><small><small><i style="margin-top: 0px; margin-bottom: -20px;">and</i></small></small><small>Showing Connections</small></h1>
+</section>
+
+<section class="slide t-1">
+  <h1><small><small><i>MathBox Helps Create</i></small></small><small>Mathematical Intuition</small></h1>
+</section>
+
+<section class="slide t-1">
+  <h1><small><small><i>MathBox is Your</i></small></small><small>Robot Assistant</small></h1>
+</section>
+
+<section class="slide">
+  <h1>MathBox Today</h1>
+</section>
+
+<section class="slide t-2">
+  <h1><small><small><i class="mj-orange">≈ Symbolic</i><i class="mj-green">✔ Visual</i><i class="mj-red">✘ Interactive</i></small></small></h1>
+</section>
+
+<section class="slide zoom">
+  <pre class="wrap overlay small zoom" style="margin-left: 200px; margin-top: 60px; margin-right: 200px; ">
+<span class="mj-blue">&lt;script src="</span><span class="mj-green">domready.js</span><span class="mj-blue">">&lt;/script>
+&lt;script src="</span><span class="mj-green">MathBox-bundle.js</span><span class="mj-blue">">&lt;/script>
+&lt;script></span>
+
+<span class="mj-red">DomReady</span>.<span class="mj-blue">ready</span>(function() {
+  <span class="mj-red">ThreeBox</span>.<span class="mj-blue">preload</span>([
+    <span class="mj-green">'MathBox.glsl.html'</span>,
+  ], function () {
+
+    var mathbox = <span class="mj-red">mathBox</span>().<span class="mj-blue">start</span>();
+
+    // Do stuff with mathbox here
+
+  });
+});
+<span class="mj-blue">&lt;/script></span></pre>
+</section>
+
+<section class="slide zoom">
+  <pre class="wrap overlay small zoom" style="margin-left: 200px; margin-top: 140px; margin-right: 200px; ">
+mathbox
+.<span class="mj-blue">viewport</span>({
+  type: <span class="mj-green">'cartesian'</span>,
+  range: [[-2, 2], [-2, 2]],
+  scale: [1, 1],
+})
+.<span class="mj-blue">camera</span>({
+  orbit: 3.5,
+  phi: τ/4,
+  theta: 0,
+})</pre>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide zoom">
+  <iframe src="iframes/mathbox.html#6" class="mathbox"></iframe>
+  <div class="slide temp inflate">
+    <pre class="wrap overlay halfR small" style="width: 440px">
+mathbox
+.<span class="mj-blue">grid</span>()
+
+
+
+// Tip: Open the JS console on
+// any example on Github
+// to play around.</pre>
+    </div>
+    <div class="slide temp inflate">
+      <pre class="wrap overlay halfR small" style="width: 440px">
+mathbox
+.<span class="mj-blue">axis</span>({
+  axis: 0,
+  labels: <span class="mj-green">true</span>,
+})
+.<span class="mj-blue">axis</span>({
+  axis: 1,
+})</pre>
+  </div>
+  <div class="slide temp inflate">
+    <pre class="wrap overlay halfR small" style="width: 440px">
+mathbox
+.<span class="mj-blue">curve</span>({
+  domain: [-2, 2],
+  expression: function (x, i) {
+    return [x, Math.<span class="mj-blue">cos</span>(2 * x)];
+  },
+  lineWidth: 5,
+})</pre>
+  </div>
+  <div class="slide temp inflate">
+    <pre class="wrap overlay halfR small" style="width: 440px">
+mathbox
+.<span class="mj-blue">animate</span>(<span class="mj-green">'camera'</span>, {
+  orbit: 5,
+  phi: τ/4 + 0.3,
+  theta: τ/16,
+}, {
+  duration: 2000,
+})</pre>
+  </div>
+  <div class="slide temp inflate">
+    <pre class="wrap overlay halfR small" style="width: 440px">
+mathbox
+.<span class="mj-blue">set</span>(<span class="mj-green">'curve'</span>, {
+  id: <span class="mj-green">'staticCurve'</span>,
+})
+.<span class="mj-blue">animate</span>(<span class="mj-green">'#staticCurve'</span>, {
+  opacity: 0.5,
+  color: 0x2050C0,
+  expression: function (x, i) {
+    return [x, Math.<span class="mj-blue">sin</span>(4 * x)];
+  },
+})</pre>
+  </div>
+  <div class="slide temp inflate">
+    <pre class="wrap overlay halfR small">
+var script = [
+  [<span class="mj-green">'add'</span>, <span class="mj-green">'curve'</span>, {
+    id: <span class="mj-green">'dynamicCurve'</span>,
+    domain: [-2, 2],
+    color: 0x20C050,
+    expression: function (x, i) {
+      var t = director.<span class="mj-blue">clock</span>(1);
+      return [x, Math.<span class="mj-blue">cos</span>(2 * x + t)];
+    },
+    lineWidth: 5,
+  }, { duration: 1000 }],
+];
+
+var director = new
+      <span class="mj-red">MathBox</span>.<span class="mj-blue">Director</span>(mathbox, script);
+director.<span class="mj-blue">forward</span>()</pre>
+  </div>
+</section>
+
+<section class="slide">
+  <div style="text-align: center;" class="t4">
+  <h3>Future</h3>
+  <p class="t2">Performance Optimization</p>
+  <p>Mouse / Touch Interaction</p>
+  <p>Stackable Transforms</p>
+
+  <p class="t3"><strong>Docs and Examples</strong></p>
+  <p><a target="_blank" href="https://github.com/unconed/MathBox.js/">github.com/unconed/MathBox.js</a></p>
+  <p><a target="_blank" href="http://acko.net">acko.net</a></p>
+  </div>
+</section>
+
+
+<!-- End slides. -->
+</div>
+
+<div id="message">
+  <script type="text/javascript">
+  if (!document.createElement('canvas').getContext('experimental-webgl')) {
+    document.write('<p class="error"><strong>Sorry! Your browser does not support WebGL, which is required to view this presentation.</strong><br>Video will be made available soon.<!--<br><br>You can <a href="http://youtube.com/watch?v=Zkx1aKv2z8o">view the video on YouTube</a> instead.<br><br>Or you can use Google Chrome or Mozilla Firefox.</p>-->');
+  }
+  else {
+    document.write('<p>Note: these slides use cutting edge CSS 3 and WebGL features. It is recommended to use Google Chrome to view them.</p>');
+  }
+  </script>
+</div>
+
+<div id="context">
+  Diagrams powered by <a href="http://acko.net/blog/making-mathbox" target="_blank">MathBox</a>.<br>Browse the slides source <a href="https://github.com/unconed/fullfrontal/tree/master/webwork" target="_blank">on Github</a>.
+</div>
+
+<!--
+<div id="video">
+  <!- -<a href="http://youtube.com/watch?v=Zkx1aKv2z8o" target="_blank"><span> ►</span> Watch Presentation Video</a></a>- ->
+  <a href="http://2013.jsconf.us/schedule"><em>Video available soon</em></a>
+</div>
+-->
+
+<div id="controls">
+  <a href="javascript:$.deck('prev')">‹</a>
+  <a href="javascript:$.deck('next')">›</a>
+</div>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-288349-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>

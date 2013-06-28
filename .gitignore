@@ -1,6 +1,8 @@
 /slides-net/videos/*
 /slides-local/videos/*
 /wdcode/videos/*
+/webglmath/videos/*
+/unviewable/videos/*
 /deck.js
 /mathjax
 /mathbox

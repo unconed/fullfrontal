@@ -1,0 +1,385 @@
+<html>
+<head>
+<meta charset="utf-8">
+<script type="text/javascript" charset="utf-8">
+
+var green = 0x20c050;
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'polar',
+      range: [[-4, 4], [-4, 4]],
+      scale: [1.29, .65],
+      polar: 0,
+    })
+    .grid({
+      id: 'g1',
+      n: 64,
+      color: 0xA0A0A0,
+      ticks: [6, 6],
+      zIndex: -1,
+      opacity: 0.001,
+    })
+    .axis({
+      id: 'a1',
+      axis: 0,
+      n: 64,
+      color: 0xB0B0B0,
+      ticks: 4,
+      lineWidth: 4,
+      opacity: 0.001,
+    })
+    .axis({
+      id: 'a2',
+      axis: 1,
+      n: 64,
+      color: 0xB0B0B0,
+      ticks: 4,
+      lineWidth: 4,
+      opacity: 0.001,
+      zIndex: -100,
+      labels: true,
+    })
+
+}
+
+function fractalS(x, shift, t, xscale, yscale) {
+  var clip = π;
+  x = x * xscale + shift;
+  x = Math.min(clip, Math.max(-clip, x));
+  var win = .5 + .5 * Math.cos(x);
+  return win * fractal(x, t) * yscale;
+};
+
+function fractal(x, t) {
+  return .5 + .25 * (
+    Math.cos(x+t+Math.cos(x*.71-t*.3))*.5 +
+    Math.cos(2.21*x-t+Math.cos(5.4*x+t))*.5+
+    Math.cos(4.37*x+t-Math.cos(11.4*x-1+t))*.32+
+    Math.sin(35.31*x-t + Math.cos(12.86*x-1-t))*.1
+  );
+}
+
+window.mathBoxScript = [
+
+  // Grid
+  [
+    ['animate', '#g1, axis, curve', {
+      opacity: 1,
+    }],
+    ['animate', 'viewport', {
+      range: [[-6, 6], [-6, 6]],
+      scale: [1.935, .975],
+    }, { duration: 1000 }],
+    ['add', 'curve', {
+      id: 'f',
+      n: 192,
+      domain: [-4, 4],
+      expression: function (x) {
+        return x;
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      zIndex: 2,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#f', {
+      domain: [-6, 6],
+    }, { duration: 1000 }],
+    ['add', 'curve', {
+      id: 'g',
+      n: 192,
+      domain: [-4, 4],
+      expression: function (x) {
+        return Math.sin(6*x);
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 4,
+      zIndex: 2,
+      color: 0x20C050,
+      opacity: 0.001,
+    }, {
+      duration: 1,
+    }],
+    ['animate', '#g', {
+      domain: [-6, 6],
+      opacity: 1,
+    }, {
+      duration: 1000,
+    }],
+  ],
+
+  // Add up f + g
+  [
+    ['add', 'curve', {
+      id: 'envelope',
+      n: 32,
+      domain: [-6, 6],
+      expression: function (x) {
+        return 2.5*Math.atan(x);
+      },
+      points: false,
+      line: true,
+      live: true,
+      color: 0x000000,
+      opacity: .35,
+      lineWidth: 4,
+      zIndex: 1,
+    }],
+    ['animate', '#f', {
+      expression: function (x) {
+        return 2.5*Math.atan(x)+Math.sin(6*x);
+      },
+      color: 0xC02050,
+    }, {
+      delay: 300,
+      duration: 1000,
+    }],
+    ['animate', '#g', {
+      opacity: .5,
+    }, {
+      duration: 200,
+    }],
+    ['animate', 'viewport', {
+      range: [[-2, 6], [-4, 4]],
+    }, {
+      delay: 1000,
+      duration: 1500,
+    }],
+  ],
+
+  [
+    ['remove', '#f, #g, #envelope'],
+    ['animate', 'viewport', {
+      range: [[-6, 6], [-1, 2]],
+      scale: [1.875, 1],
+      power: 1,
+      polar: 0,
+    }, {
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      id: 'f',
+      n: 128,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x, i) {
+        return Math.cos(x)*.5+.5;
+      },
+      zIndex: 5,
+    }, {
+      delay: 500,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'left',
+      n: 2,
+      lineWidth: 3,
+      color: 0xA0A0A0,
+      domain: [-1, 2],
+      live: true,
+      expression: function (x, i) {
+        var t = clock(1) - .2;
+        var rolloff = .5-.5*Math.cos(π*Math.max(0,Math.min(1,t*.7)));
+        var clip = 6+(π-6)*rolloff;
+        return [-clip, x];
+      },
+      zIndex: 4,
+    }],
+    ['add', 'curve', {
+      id: 'right',
+      n: 2,
+      lineWidth: 3,
+      color: 0xA0A0A0,
+      domain: [-1, 2],
+      live: true,
+      expression: function (x, i) {
+        var t = clock(1) - .2;
+        var rolloff = .5-.5*Math.cos(π*Math.max(0,Math.min(1,t*.7)));
+        var clip = 6+(π-6)*rolloff;
+        return [clip, x];
+      },
+      zIndex: 4,
+    }],
+    ['set', '#f', {
+      expression: function (x, i) {
+        var t = clock(1) - .2;
+        var rolloff = .5-.5*Math.cos(π*Math.max(0,Math.min(1,t*.7)));
+        var clip = 6+(π-6)*rolloff;
+        x = Math.min(clip, Math.max(-clip, x));
+        return Math.cos(x)*.5 + .5;
+      },
+    }]
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'g',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      color: 0x20C050,
+      expression: function (x, i) {
+        var t = clock(2);
+        return fractal(x, t);
+      },
+    }, {
+      delay: 350,
+      duration: 500,
+    }],    
+  ],
+
+  [
+    ['animate', '#f', {
+      opacity: .3,
+    }],
+    ['animate', '#g', {
+      expression: function (x, i) {
+        var t = clock(2);
+        var clip = π;
+        x = Math.min(clip, Math.max(-clip, x));
+        var win = .5 + .5 * Math.cos(x);
+        var val = fractal(x, t);
+        return win * val;
+      },
+      color: 0xC02050,
+    }, {
+      duration: 700,
+    }],
+  ],
+
+  [
+    ['remove', 'curve'],
+    ['add', 'curve', {
+      id: 'f',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      color: 0xC02050,
+      expression: function (x) { return fractalS(x, 2.4, 0, 1, 1.4); },
+    }, {
+      duration: 700,
+      zIndex: 0,
+    }],
+    ['add', 'curve', {
+      id: 'g',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x) { return fractalS(x, 0, 4, 1.5, -.75); },
+    }, {
+      delay: 350,
+      duration: 700,
+      zIndex: 1,
+    }],
+    ['add', 'curve', {
+      id: 'h',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      color: 0x20C050,
+      expression: function (x) { return fractalS(x, -1.5, 1, 0.5, 0.3); },
+      color: 0x20C050,
+      zIndex: 2,
+    }, {
+      delay: 700,
+      duration: 700,
+    }],
+  ],
+
+  [
+    ['animate', 'curve', {
+      opacity: .5,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'sum',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      color: 0x20C050,
+      expression: function (x) {
+        var a = fractalS(x, 2.4, 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75);
+        var c = fractalS(x, -1.5, 1, 0.5, 0.3);
+        return a+b+c;
+      },
+      color: 0x404040,
+      zIndex: 10,
+      lineWidth: 6,
+    }, {
+      delay: 500,
+      duration: 700,
+    }],
+  ],
+
+  [
+    ['set', '#f', {
+      expression: function (x) {
+        var t = director[0].clock(25);
+        t = t<1 ? t*t*.5 : t-.5;
+        var a = fractalS(x, 2.4 + Math.sin(t), 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75 * (1 + .85 * Math.sin(t * .141)));
+        var c = fractalS(x, -.5 - Math.cos(t * .331), 1, 0.5, 0.3);
+        return a;
+      },
+    }, {
+      duration: 500,
+    }],
+    ['set', '#g', {
+      expression: function (x) {
+        var t = director[0].clock(25);
+        t = t<1 ? t*t*.5 : t-.5;
+        var a = fractalS(x, 2.4 + Math.sin(t), 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75 * (1 + .85 * Math.sin(t * .141)));
+        var c = fractalS(x, -.5 - Math.cos(t * .331), 1, 0.5, 0.3);
+        return b;
+      },
+    }, {
+      duration: 500,
+    }],
+    ['set', '#h', {
+      expression: function (x) {
+        var t = director[0].clock(25);
+        t = t<1 ? t*t*.5 : t-.5;
+        var a = fractalS(x, 2.4 + Math.sin(t), 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75 * (1 + .85 * Math.sin(t * .141)));
+        var c = fractalS(x, -.5 - Math.cos(t * .331), 1, 0.5, 0.3);
+        return c;
+      },
+    }, {
+      duration: 500,
+    }],
+    ['set', '#sum', {
+      expression: function (x) {
+        var t = director[0].clock(25);
+        t = t<1 ? t*t*.5 : t-.5;
+        var a = fractalS(x, 2.4 + Math.sin(t), 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75 * (1 + .85 * Math.sin(t * .141)));
+        var c = fractalS(x, -.5 - Math.cos(t * .331), 1, 0.5, 0.3);
+        return a+b+c;
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+];
+
+</script>
