@@ -1,0 +1,1668 @@
+<script type="text/javascript" charset="utf-8">
+
+function init() {
+  
+}
+
+init();
+
+// Prepare mathbox
+var lastStep = 0, activePoint = [2, 1, 0];
+window.mathBoxSetup = function (mathbox, director) {
+
+  mathbox
+    .viewport({
+      type: 'projective',
+      range: [[-2, 2], [-2, 2], [-2, 2]],
+      scale: [.85, .85, .85],
+    })
+    .camera({
+      phi: τ/4,
+      orbit: 3.5,
+    })
+    .surface({
+      id: 'awesome',
+      n: 12,
+      domain: [[-2, 2], [-2, 2]],
+      expression: function (x, y, i, j) {
+        return [x, -y, 0];
+      },
+      shaded: false,
+    })
+    .surface({
+      id: 'awesome2',
+      n: 12,
+      opacity: 0,
+      domain: [[-2, 2], [-2, 2]],
+      expression: function (x, y, i, j) {
+        return [x, -y, 0];
+      },
+      shaded: false,
+    })
+
+  ThreeBox.preload([
+    '../images/awesome.png',
+  ], function (assets) {
+
+    var exports = window.exports = {
+      assets: assets,
+      world: mathbox.world(),
+      scene: mathbox.world().tScene(),
+    };
+
+    var cubeSurface = null;
+    exports.world.loop().hookPreRender(function () {
+
+      // Hackity hack to fix DV attributes disappearing
+      var s = mathbox.select('#surfaceW');
+      if (s.length) {
+        cubeSurface = s[0];
+      }
+      if (cubeSurface) {
+        cubeSurface.mesh.material.needsUpdate = true;
+      }
+
+    });
+    exports.world.loop().hookPostRender(function () {
+    });
+
+    mathbox.set('#awesome', {
+      map: assets.awesome,
+      mapColor: 1,
+      mapOpacity: 1,
+      color: 0xffffff,
+    });
+    mathbox.set('#awesome2', {
+      map: assets.awesome,
+      mapColor: 1,
+      mapOpacity: 1,
+      color: 0xffffff,
+    });
+  });
+
+  director.on('go', function (step, direction) {
+    lastStep = step;
+  });
+}
+
+var darkred = 0x220000, _darkred = '#200',
+    orangered = 0xc03000, _orangered = "#c03000",
+    green = 0x50c020, _green = "#50c020",
+    indigo = 0x7040f0,
+    gold = 0xD0A020,
+    land = 0x509000, _land = "#509000",
+    blue = 0x3080ff,
+    red = 0xC02050,
+    surfacered = 0xdf5000, _slate = '#efb030',
+    purple = 0xd040b0,
+    water = 0x103070,
+    gray = 0xa0a0a0,
+    white = 0xffffff,
+    black = 0x000000,
+    channelR = 0xff1010,
+    channelG = 0x10d010,
+    channelB = 0x1030f0,
+    creme = 0xffffdd;
+
+var box = [
+      [-2, -2],
+      [-2,  2],
+      [ 2,  2],
+      [ 2, -2],
+      [-2, -2],
+    ];
+
+var fd = 2, fo = -2;
+
+var frustum = [
+ [0, 0, fd+fo], [2, 2, -fd+fo],
+ [0, 0, fd+fo], [-2, 2, -fd+fo],
+ [0, 0, fd+fo], [2, -2, -fd+fo],
+ [0, 0, fd+fo], [-2, -2, -fd+fo],
+];
+
+var nullFrustum = [
+ [0, 0, fd+fo], [0, 0, fd+fo],
+ [0, 0, fd+fo], [0, 0, fd+fo],
+ [0, 0, fd+fo], [0, 0, fd+fo],
+ [0, 0, fd+fo], [0, 0, fd+fo],
+];
+
+var fo2 = .04, fd2 = 2, fr = .5, ar = 1.5;
+var frustum2 = [
+ [0, 0, fo2], [fr*ar, fr, fo2+fd2],
+ [0, 0, fo2], [-fr*ar, fr, fo2+fd2],
+ [0, 0, fo2], [fr*ar, -fr, fo2+fd2],
+ [0, 0, fo2], [-fr*ar, -fr, fo2+fd2],
+];
+
+var nullFrustum2 = [
+ [0, 0, fo2], [0, 0, fo2],
+ [0, 0, fo2], [0, 0, fo2],
+ [0, 0, fo2], [0, 0, fo2],
+ [0, 0, fo2], [0, 0, fo2],
+];
+
+function mToArray(m) {
+  m = m.flattenToArray([]);
+  return [m.slice(0, 4), m.slice(4, 8), m.slice(8, 12), m.slice(12, 16)];
+}
+
+var mi = new THREE.Matrix4();
+
+var m1 = new THREE.Matrix4(.86, .5, 0, 0,
+                           -.5, .86, 0, 0,
+                           0, 0, 1, 0,
+                           0, 0, 0, 1);
+var m2 = new THREE.Matrix4(1.5, 0, 0, 0,
+                           0, 1, 0, 0,
+                           0, 0, 1, 0,
+                           0, 0, 0, 1);
+var m3 = new THREE.Matrix4(1.1, 0, 0, 0,
+                           .5, 1, 0, 0,
+                           0, 0, 1, 0,
+                           0, 0, 0, 1);
+var m4 = new THREE.Matrix4(.7, .3, 0, 0,
+                           -.5, .5, 0, 0,
+                           0, 0, 1, 0,
+                           0, 0, 0, 1);
+
+var s1 = m1;
+var s2 = (new THREE.Matrix4()).multiply(m2, s1);
+var s3 = (new THREE.Matrix4()).multiply(m3, s2);
+
+function xp(x, i){
+  return [[1, 0], [2, 0]][i];
+}
+
+function yp(x, i){
+  return [[2], [2, 1]][i];
+}
+
+function rp(x, i){
+  return [[0], [2, 1]][i];
+}
+
+function pp() {
+  return [2, 1];
+}
+
+function xp2(x, i){
+  var p = pp2();
+  return [[0, 0], [p[0], 0]][i];
+}
+
+function yp2(x, i){
+  var p = pp2();
+  return [[p[0]], p][i];
+}
+
+function rp2(x, i){
+  var p = pp2();
+  return [[0], p][i];
+}
+
+function pp2() {
+  var t = Math.max(0, director[0].clock(10) - 1.75);
+  t = t<.5 ? t*t : t-.25;
+  return [Math.cos(t) * 1.75, -Math.sin(t) * 1.75];
+}
+
+
+window.mathBoxScript = [
+
+  [],
+
+  // Affine transform box
+  [
+    ['add', 'curve', {
+      id: 'adjust1',
+      n: 5,
+      data: box,
+      color: gray,
+      lineWidth: 3,
+      zIndex: 10,
+    }],
+    ['add', 'curve', {
+      id: 'adjust2',
+      n: 5,
+      data: box,
+      color: creme,
+      line: false,
+      points: true,
+      pointSize: 15,
+      zIndex: 40,
+    }],
+    ['add', 'curve', {
+      id: 'adjust3',
+      n: 5,
+      data: box,
+      color: gray,
+      line: false,
+      points: true,
+      pointSize: 20,
+      zIndex: 30,
+    }],
+  ],
+
+  // Rotate
+  [
+    ['animate', 'viewport', {
+      rotation: [0, 0, π/6],
+//      projective: mToArray(m1),
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+  ],
+
+  // Scale
+  [
+    ['animate', 'viewport', {
+      rotation: [0, 0, 0],
+      projective: mToArray(m2),
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+  ],
+
+  // Skew
+  [
+    ['animate', 'viewport', {
+      projective: mToArray(m3),
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+  ],
+
+  // Combine / grid overlay
+  [
+    ['animate', '#awesome', {
+      opacity: .5,
+    }],
+    ['add', 'grid', {
+      n: 2,
+      id: 'overlay',
+      axis: [0, 1],
+      lineWidth: 3,
+      ticks: [3, 3],
+      tickScale: [2, 2],
+      color: 0x000000,
+      opacity: .5,
+      zIndex: 20,
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      projective: mToArray(m4),
+    }, {
+      delay: 500,
+      duration: 1000,
+    }],
+  ],
+
+  // Identity vector basis
+  [
+    ['animate', '#adjust1, #adjust2, #adjust3', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'axis', {
+      id: 'xaxis',
+      axis: 0,
+      ticks: 3,
+      tickScale: 2,
+      color: 0x909090,
+      lineWidth: 3,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'axis', {
+      id: 'yaxis',
+      axis: 1,
+      ticks: 3,
+      tickScale: 2,
+      color: 0x909090,
+      lineWidth: 3,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'axis', {
+      id: 'zaxis',
+      axis: 2,
+      ticks: 3,
+      tickScale: 2,
+      color: 0x909090,
+      lineWidth: 3,
+      opacity: 0,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+
+    ['animate', 'viewport', {
+      projective: mToArray(mi),
+    }, {
+      delay: 0,
+      duration: 1000,
+    }],
+    ['animate', '#overlay', {
+      opacity: .25,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#awesome', {
+      opacity: .15,
+    }, {
+      delay: 0,
+      duration: 1000,
+    }],
+    ['add', 'vector', {
+      id: 'x',
+      n: 1,
+      color: blue,
+      lineWidth: 7,
+      size: .13,
+      data: [[], [1]],
+      zIndex: 60,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'y',
+      n: 1,
+      color: green,
+      lineWidth: 7,
+      size: .13,
+      data: [[], [0, 1]],
+      zIndex: 50,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'z',
+      n: 1,
+      color: red,
+      lineWidth: 7,
+      size: .13,
+      data: [[], [0, 0, 1]],
+      zIndex: 50,
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+  ],
+
+  // Splitscreen, alternate basis
+  [
+    ['animate', 'viewport', {
+      position: [-1, 0, 0],
+    }, {
+      duration: 1000,
+    }],
+    ['clone', '#x', {
+      id: 'x2',
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#y', {
+      id: 'y2',
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['animate', '#x2, #y2', {
+      worldPosition: [2, 0, 0],
+      opacity: 1,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#x2, #y2', {
+      worldScale: [.95, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'pp',
+      n: 1,
+      expression: pp,
+      line: false,
+      points: true,
+      pointSize: 25,
+      color: purple,
+      zIndex: 60,
+    }, {
+      delay: 1500,
+      duration: 300,
+    }],
+  ],
+
+  // Extend point, then grid + image
+  [
+    ['clone', '#overlay', {
+      id: 'overlay2',
+      opacity: 0,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      duration: 0.0001,
+    }],
+    ['set', '#awesome2', {
+      opacity: 0,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }],
+    ['animate', '#overlay2', {
+      opacity: .25,
+    }, {
+      delay: 2500,
+      duration: 500,
+    }],
+
+    ['animate', '#y, #y2', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+
+    ['add', 'vector', {
+      id: 'xp',
+      n: 1,
+      color: blue,
+      lineWidth: 7,
+      size: .13,
+      expression: xp,
+      zIndex: 60,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'yp',
+      n: 1,
+      color: green,
+      lineWidth: 7,
+      size: .13,
+      expression: yp,
+      zIndex: 50,
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'rp',
+      n: 1,
+      color: purple,
+      lineWidth: 7,
+      size: .13,
+      expression: rp,
+      zIndex: 50,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+
+    ['add', 'vector', {
+      id: 'xp2',
+      n: 1,
+      color: blue,
+      lineWidth: 7,
+      size: .13,
+      expression: xp,
+      zIndex: 60,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'yp2',
+      n: 1,
+      color: green,
+      lineWidth: 7,
+      size: .13,
+      expression: yp,
+      zIndex: 50,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 1000,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'rp2',
+      n: 1,
+      color: purple,
+      lineWidth: 7,
+      size: .13,
+      expression: rp,
+      zIndex: 50,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+
+    ['add', 'curve', {
+      id: 'pp2',
+      n: 1,
+      expression: pp,
+      line: false,
+      points: true,
+      pointSize: 25,
+      color: purple,
+      zIndex: 60,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 2200,
+      duration: 300,
+    }],
+  ],
+
+  // Animate
+  [
+    ['animate', '#awesome2', {
+      opacity: .5,
+    }, {
+      delay: 3000,
+      duration: 500,
+    }],
+    ['animate', '#xp, #xp2', {
+      expression: function (x, i) {
+        var p = pp();
+        return [[0, 0], [p[0], 0]][i];
+      },
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', '#xp, #xp2', {
+      expression: xp2,
+    }, {
+      delay: 500,
+      duration: 2000,
+    }],
+    ['animate', '#yp, #yp2', {
+      expression: yp2,
+    }, {
+      delay: 1000,
+      duration: 2000,
+    }],
+    ['animate', '#rp, #rp2', {
+      expression: rp2,
+    }, {
+      delay: 1000,
+      duration: 2000,
+    }],
+    ['animate', '#pp, #pp2', {
+      expression: pp2,
+    }, {
+      delay: 1000,
+      duration: 2000,
+    }],
+
+    ['animate', '#awesome,', {
+      opacity: .25,
+    }, {
+      delay: 1500,
+      duration: 500,
+    }],
+
+    ['animate', '#x, #x2', {
+      size: 0.001,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', '#x, #x2', {
+      opacity: 0,
+    }, {
+      delay: 250,
+      duration: 500,
+    }],
+  ],
+
+  // Make room
+  [
+    ['animate', '#xp2, #yp2', {
+      opacity: .75,
+      size: 0.001,
+    }, {
+      delay: 250,
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [-2.2, 0, 0],
+    }, {
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      id: 'po',
+      n: 1,
+      data: [[]],
+      line: false,
+      points: true,
+      pointSize: 25,
+      color: gray,
+      zIndex: 10,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'px',
+      n: 1,
+      data: [[1]],
+      line: false,
+      points: true,
+      pointSize: 25,
+      color: blue,
+      zIndex: 40,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'py',
+      n: 1,
+      data: [[0, 1]],
+      line: false,
+      points: true,
+      pointSize: 25,
+      color: green,
+      zIndex: 40,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['animate', '#overlay2', {
+      worldScale: [1, 1, 1],
+      mathRotation: [0, 0, 0],
+      mathScale: [1, 1, 1],
+    }, {
+      delay: 1000,
+      duration: 1000,
+    }],
+    ['add', 'axis', {
+      id: 'xaxis2',
+      axis: 0,
+      ticks: 3,
+      tickScale: 2,
+      color: 0x909090,
+      lineWidth: 3,
+      worldPosition: [2, 0, 0],
+    }, {
+      delay: 2000,
+      duration: 500,
+    }],
+    ['add', 'axis', {
+      id: 'yaxis2',
+      axis: 1,
+      ticks: 3,
+      tickScale: 2,
+      color: 0x909090,
+      lineWidth: 3,
+      worldPosition: [2, 0, 0],
+    }, {
+      delay: 2000,
+      duration: 500,
+    }],
+  ],
+
+  // Matrix vector mult
+  [
+    ['animate', '#pp, #rp', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#pp, #rp', {
+      worldPosition: [2, 0, 0],
+      color: orangered,
+      opacity: 0,
+    }, {
+      delay: 300,
+      duration: 0,
+    }],
+    ['animate', '#pp, #rp', {
+      opacity: 1,
+    }, {
+      duration: 300,
+    }],
+
+    ['animate', '#awesome', {
+      opacity: 0,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['animate', '#awesome', {
+      worldPosition: [2, 0, 0],
+    }, {
+      delay: 300,
+      duration: 0,
+    }],
+    ['animate', '#awesome', {
+      opacity: .15,
+      zIndex: -10,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+
+    ['animate', 'viewport', {
+      position: [-2.9, 0, 0],
+    }, {
+      duration: 1000,
+    }],
+  ],
+
+  [],
+
+  // Matrix matrix mult
+  [
+    ['animate', '#awesome2, #xp2, #yp2, #rp2, #pp2, #px, #py, #x2, #y2', {
+      worldRotation: [0, 0, -1.57]
+    }, {
+      duration: 1500,
+    }],
+    ['animate', '#overlay, #xaxis, #yaxis, #xp, #yp', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+  ],
+
+  // 3D mult
+  [
+    ['remove', '#xp2, #yp2, #rp2, #pp2, #rp, #pp', {
+      duration: 300,
+    }],
+    ['animate', '#awesome', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+
+    ['clone', '#overlay', {
+      id: 'overlay3',
+      opacity: 0,
+      axis: [0, 2],
+      worldPosition: [2, 0, 0],
+    }, {
+      duration: 0.0001,
+    }],
+    ['animate', '#overlay3', {
+      opacity: .25,
+    }, {
+      duration: 300,
+    }],
+
+    ['add', 'curve', {
+      id: 'pz',
+      n: 1,
+      data: [[0, 0, 1]],
+      line: false,
+      points: true,
+      pointSize: 25,
+      color: red,
+      zIndex: 40,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['animate', '#px, #py, #pz', {
+      pointSize: 15,
+    }, {
+      duration: 1500,
+    }],
+
+    ['animate', '#x2, #y2', {
+      size: .1,
+      opacity: 1,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['add', 'vector', {
+      id: 'z2',
+      n: 1,
+      color: red,
+      lineWidth: 7,
+      size: .13,
+      data: [[], [0, 0, 1]],
+      zIndex: 60,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+
+    ['animate', 'viewport', {
+      position: [-2.2, .1, .85]
+    }, {
+      duration: 1500,
+    }],
+    ['animate', 'camera', {
+      theta: .65,
+      phi: τ/4-.9,
+    }, {
+      duration: 1500,
+    }],
+
+    ['animate', '#awesome2', {
+      opacity: 1,
+    }, {
+      duration: 1000,
+    }],
+
+    ['animate', '#awesome2, #px, #py, #pz, #x2, #y2, #z2', {
+      worldRotation: [-1.37, .2, 1.57]
+    }, {
+      delay: 1500,
+      duration: 3000,
+    }],
+  ],
+
+  // 4D
+  [
+    ['animate', 'viewport', {
+      position: [-2.2, .3, .65],
+      projective: [[1, 0, 0, 0],
+                   [0, 1, 0, 0],
+                   [0, 0, .8, 0],
+                   [0, .2, -.2, 1]],
+    }, {
+      duration: 2500,
+    }],
+    ['animate', 'viewport', {
+      position: [-2.9, .3, -.3],
+    }, {
+      duration: 4000,
+    }],
+
+    ['animate', 'camera', {
+      theta: .35,
+      phi: τ/4+.9,
+    }, {
+      delay: 1500,
+      duration: 5000,
+    }],
+
+    ['add', 'vector', {
+      id: 'w2',
+      n: 1,
+      color: indigo,
+      lineWidth: 7,
+      size: .13,
+      data: [[], [0, .7, .7]],
+      zIndex: 60,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+
+    ['add', 'curve', {
+      id: 'pw',
+      n: 1,
+      data: [[0, .7, .7]],
+      line: false,
+      points: true,
+      pointSize: 15,
+      color: indigo,
+      zIndex: 40,
+      worldPosition: [2, 0, 0],
+      worldScale: [.9, 1, 1],
+      mathRotation: [0, 0, -π/6],
+      mathScale: [.7, .9, 1],
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+  ],
+
+  // Normal 2D
+  [
+    ['set', '#awesome', {
+      worldPosition: [0, 0, 0],
+    }],
+
+    ['animate', '#awesome2, #x2, #y2, #z2, #w2, #po, #px, #py, #pz, #pw, #xaxis2, #yaxis2, #overlay2, #overlay3', {
+      opacity: 0,
+    }, {
+      delay: 500,
+      duration: 1000,
+    }],
+
+    ['animate', '#overlay', {
+      opacity: .2,
+    }, {
+      delay: 500,
+      duration: 1000,
+    }],
+    ['animate', '#xaxis, #yaxis', {
+      opacity: .5,
+    }, {
+      delay: 500,
+      duration: 1000,
+    }],
+    ['animate', '#awesome', {
+      opacity: 1,
+    }, {
+      delay: 500,
+      duration: 1000,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4+.8,
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      position: [0, 0, 0],
+      projective: [[1, 0, 0, 0],
+                   [0, 1, 0, 0],
+                   [0, 0, 1, 0],
+                   [0, 0, 0, 1]],
+    }, {
+      duration: 2000,
+    }],
+  ],
+
+  // Projective 2D
+  [
+    ['set', '#x', {
+      size: .13,
+    }],
+    ['set', 'viewport', {
+      range: [[-2, 2], [-2, 2], [-4, 4]],
+      scale: [.85, .85, .85*2],
+    }],
+    ['animate', '#zaxis', {
+      opacity: .5,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', '#xaxis, #yaxis, #zaxis, #x, #y, #z', {
+      mathPosition: [0, 0, 0],
+      lineWidth: 6,
+    }, {
+      duration: 2000,
+    }],
+    ['animate', '#awesome, #overlay', {
+      mathPosition: [0, 0, -4],
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'camera', {
+      lookAt: [0, 0, -1],
+    }, {
+      duration: 2000,
+    }],
+    ['add', 'vector', {
+      id: 'frustum',
+      n: 4,
+      data: nullFrustum,
+      lineWidth: 6,
+      color: black,
+      opacity: .5,
+      arrow: false,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['animate', '#frustum', {
+      data: frustum,
+    }, {
+      delay: 2000,
+      duration: 2000,
+    }],
+    ['animate', 'camera', {
+      theta: .2,
+      phi: τ/4+.5,
+    }, {
+      delay: 2000,
+      duration: 2000,
+    }],
+
+    ['animate', '#x, #y, #z', {
+      opacity: 1,
+      size: .1,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // Move z
+  [
+    ['animate', '#x, #y', {
+      opacity: .25,
+    }, {
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      projective: [[1, 0, 0, 0],
+                   [0, 1, .5, 0],
+                   [0, 0, 1, 0],
+                   [0, 0, 0, 1]],
+    }, {
+      delay: 1000,
+      duration: 3000,
+    }],
+    ['animate', 'viewport', {
+      projective: [[1, 0, -.3, 0],
+                   [0, 1, -.5, 0],
+                   [0, 0, 1.1, 0],
+                   [0, 0, 0, 1]],
+    }, {
+      delay: 500,
+      duration: 3000,
+    }],
+    ['animate', 'viewport', {
+      projective: [[1, 0, -.3, 0],
+                   [0, 1, -.1, 0],
+                   [0, 0, 2.4, 0],
+                   [0, 0, 0, 1]],
+    }, {
+      delay: 500,
+      duration: 3000,
+    }],
+    ['animate', 'viewport', {
+      projective: [[1, 0, .2, 0],
+                   [0, 1, .4, 0],
+                   [0, 0, 2, 0],
+                   [0, 0, 0, 1]],
+    }, {
+      delay: 500,
+      duration: 3000,
+    }],
+    ['animate', 'viewport', {
+      projective: [[1, 0, 0, 0],
+                   [0, 1, 0, 0],
+                   [0, 0, 1, 0],
+                   [0, 0, 0, 1]],
+    }, {
+      delay: 500,
+      duration: 3000,
+    }],
+
+    ['animate', 'camera', {
+      phi: τ/4-.6,
+    }, {
+      duration: 17000,
+    }],
+  ],
+
+  // Move into perspective z
+  [
+    ['animate', '#x, #y', {
+      opacity: 1,
+    }, {
+      duration: 300,
+    }],
+    ['animate', '#z', {
+      opacity: .25,
+    }, {
+      duration: 300,
+    }],
+    ['animate', 'viewport', {
+      projective: [[1, 0, 0, 0],
+                   [0, 1, 0, 0],
+                   [.9, .9, 1, 0],
+                   [0, 0, 0, 1]],
+    }, {
+      delay: 3300,
+      duration: 2000,
+    }],
+
+    ['animate', 'camera', {
+      phi: τ/4+1.2,
+      theta: -.7,
+    }, {
+      duration: 3000,
+    }],
+  ],
+
+  // Reset to neutral
+  [
+    ['animate', 'viewport', {
+      range: [[-2, 2], [-2, 2], [-2, 2]],
+      scale: [.85, .85, .85],
+    }, {
+      duration: 2000,
+    }],
+    ['animate', '#z', {
+      opacity: 1,
+    }, {
+      duration: 1000,
+    }],
+
+    ['add', 'platonic', {
+      id: 'cube',
+      type: 'cube',
+      color: 0xefefef,
+      shaded: true,
+      mathScale: [.25, .25, .25],
+      zIndex: 50,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['animate', '#cube', {
+      opacity: .99,
+    }, {
+      duration: 1000,
+    }],
+
+    ['animate', '#xaxis, #yaxis, #zaxis, #x, #y, #z', {
+      mathPosition: [0, 0, 0],
+    }, {
+      duration: 2000,
+    }],
+    ['animate', '#awesome, #overlay', {
+      mathPosition: [0, 0, 0],
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'camera', {
+      lookAt: [0, .6, 0],
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4-.5,
+      theta: .3,
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      projective: [[1, 0, 0, 0],
+                   [0, 1, 0, 0],
+                   [0, 0, 1, 0],
+                   [0, 0, 0, 1]],
+    }, {
+      delay: 0,
+      duration: 2000,
+    }],
+
+    ['animate', '#frustum', {
+      data: nullFrustum,
+    }, {
+      delay: 0,
+      duration: 2000,
+    }],
+    ['animate', '#awesome, #frustum, #overlay', {
+      opacity: 0,
+    }, {
+      duration: 1000,
+    }],
+
+    ['animate', '#cube, #x, #y, #z', {
+      mathRotation: [0, .4, 1.57],
+    }, {
+      delay: 3000,
+      duration: 2000,
+    }],
+
+    ['animate', '#cube, #x, #y, #z', {
+      mathRotation: [3.4, -.4, 1.57],
+    }, {
+      delay: 1000,
+      duration: 3500,
+    }],
+    ['animate', '#cube, #x, #y, #z', {
+      mathRotation: [6.28, 0, 0],
+    }, {
+      delay: 1000,
+      duration: 3500,
+    }],
+
+    ['animate', '#x, #y, #z', {
+      mathScale: [2, .7, .9],
+    }, {
+      delay: 4000,
+      duration: 2300,
+    }],
+    ['animate', '#cube', {
+      mathScale: [2*.25, .7*.25, .9*.25],
+    }, {
+      delay: 4000,
+      duration: 2300,
+    }],
+
+    ['animate', '#x, #y, #z', {
+      mathScale: [.9, .7, 1.7],
+    }, {
+      duration: 2400,
+    }],
+
+    ['animate', '#x, #y, #z', {
+      mathScale: [1, 1, 1],
+    }, {
+      duration: 2200,
+    }],
+
+    ['animate', '#cube', {
+      mathScale: [.9*.25, .7*.25, 1.7*.25],
+    }, {
+      duration: 2400,
+    }],
+
+    ['animate', '#cube', {
+      mathScale: [.25, .25, .25],
+    }, {
+      duration: 2200,
+    }],
+
+    ['animate', '#cube, #x, #y, #z', {
+      worldRotation: [1.4, .7, 1.9],
+    }, {
+      delay: 5000,
+      duration: 2100,
+    }],
+    ['animate', '#cube, #x, #y, #z', {
+      worldRotation: [0, 0, 0],
+    }, {
+      delay: 2000,
+      duration: 2100,
+    }],
+
+    ['animate', '#cube, #x, #y, #z', {
+      worldPosition: [.4, .4, .9],
+    }, {
+      delay: 2000,
+      duration: 4700,
+    }],
+    ['animate', '#cube, #x, #y, #z', {
+      worldPosition: [.4, .1, -.2],
+    }, {
+      delay: 0,
+      duration: 4000,
+    }],
+    ['animate', '#cube, #x, #y, #z', {
+      worldPosition: [0, 0, 0],
+    }, {
+      delay: 0,
+      duration: 4000,
+    }],
+  ],
+
+  // World Space
+  [
+    ['add', 'surface', {
+      n: 4,
+      id: 'surfaceW',
+      domain: [[-2, 2], [-2, 2]],
+      expression: function (x, y, i, j) {
+        return [x, 0, y];
+      },
+      color: 0xefefef,
+      opacity: 0,
+      zIndex: -20,
+      mathPosition: [4.5, 0, 0],
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'grid', {
+      id: 'gridW',
+      n: 2,
+      ticks: [2, 2],
+      tickScale: [2, 2],
+      axis: [0, 2],
+      color: 0x404040,
+      opacity: 0,
+      lineWidth: 2,
+      mathPosition: [4.5, 0, 0],
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['add', 'grid', {
+      id: 'gridW2',
+      n: 2,
+      ticks: [10, 10],
+      tickScale: [2, 2],
+      axis: [0, 2],
+      color: 0x404040,
+      opacity: 0,
+      lineWidth: 2,
+      mathPosition: [4.5, 0, 0],
+      zIndex: 10,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['clone', '#cube', {
+      id: 'cubeW',
+      mathPosition: [4.5+.75, .125, -.3],
+      mathRotation: [0, 1.2, 0],
+      mathScale: [.25*.9, .25*.5, .25*2],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#x', {
+      id: 'xW',
+      mathPosition: [4.5+.75, .125, -.3],
+      mathRotation: [0, 1.2, 0],
+      mathScale: [.9, .5, 2],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#y', {
+      id: 'yW',
+      mathPosition: [4.5+.75, .125, -.3],
+      mathRotation: [0, 1.2, 0],
+      mathScale: [.9, .5, 2],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#z', {
+      id: 'zW',
+      mathPosition: [4.5+.75, .125, -.3],
+      mathRotation: [0, 1.2, 0],
+      mathScale: [.9, .5, 2],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#xaxis', {
+      id: 'xaxisW',
+      mathPosition: [4.5, 0, 0],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#yaxis', {
+      id: 'yaxisW',
+      mathPosition: [4.5, 0, 0],
+      opacity: 0,
+    }, {
+      duration: 1,
+      opacity: 0,
+    }],
+    ['clone', '#zaxis', {
+      id: 'zaxisW',
+      mathPosition: [4.5, 0, 0],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['animate', '#xaxis, #yaxis, #zaxis', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#cubeW, #xW, #yW, #zW', {
+      opacity: .99,
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+    ['animate', '#surfaceW', {
+      opacity: .25,
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+    ['animate', '#gridW', {
+      opacity: .3,
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+    ['animate', '#gridW2', {
+      opacity: .15,
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+    ['animate', '#xaxisW, #yaxisW, #zaxisW', {
+      opacity: .75,
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      position: [-1.5, 0, .3],
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+    ['animate', 'camera', {
+      lookAt: [0, 0, 0],
+      phi: τ/4-.95,
+      theta: .3,
+    }, {
+      delay: 100,
+      duration: 2000,
+    }],
+
+    ['add', 'surface', {
+      id: 'camBody',
+      n: [13, 8],
+      domain: [[0, τ], [0.000000001, .996]],
+      expression: function (x, y, i, j) {
+        var c = Math.cos(x);
+        var s = Math.sin(x);
+        var r = Math.pow(Math.sin(y*π),.1);
+        function p(x) { return Math.sqrt(Math.abs(x)) * (x>0?1:-1)}
+        return [p(c)*r, p(s)*r/1.2, y*2-1];
+      },
+      color: blue,
+      mathPosition: [5.5, 2, 2],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [.15, .15, .15],
+    }],
+    ['add', 'surface', {
+      id: 'camLens',
+      n: [13, 4],
+      domain: [[0, τ], [0.01, 1]],
+      expression: function (x, y, i, j) {
+        var c = Math.cos(x);
+        var s = Math.sin(x);
+        function p(x) { return Math.sqrt(Math.abs(x)) * (x>0?1:-1)}
+        return [p(c)*y, p(s)*y/1.33, y + .4];
+      },
+      color: blue,
+      mathPosition: [5.5, 2, 2],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [.15, .15, .15],
+    }],
+    ['set', '#frustum', {
+      opacity: 0,
+      color: blue,
+      data: frustum2,
+      mathPosition: [5.5, 2, 2],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [2, 2, 2],
+    }],
+    ['animate', '#frustum', {
+      opacity: .5,
+    }, {
+      delay: 100,
+      duration: 1000,
+    }],
+  ],
+
+  // View Space
+  [
+    ['animate', '#xaxisW, #yaxisW, #zaxisW, #gridW', {
+      opacity: 0,
+    }, {
+      duration: 500,
+    }],
+    ['clone', '#xaxis', {
+      id: 'xaxisV',
+      mathPosition: [5.5, 2*.95, 2*.95],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [.8, .8, .8],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['clone', '#yaxis', {
+      id: 'yaxisV',
+      mathPosition: [5.5, 2*.95, 2*.95],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [.8, .8, .8],
+      opacity: 0,
+    }, {
+      duration: 1,
+      opacity: 0,
+    }],
+    ['clone', '#zaxis', {
+      id: 'zaxisV',
+      mathPosition: [5.5, 2*.95, 2*.95],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [.8, .8, .8],
+      opacity: 0,
+    }, {
+      duration: 1,
+    }],
+    ['animate', '#xaxisV, #yaxisV, #zaxisV', {
+      opacity: .75,
+    }, {
+      duration: 500,
+    }],
+    ['animate', 'viewport', {
+      position: [0, 0, 0],
+    }, {
+      duration: 5000,
+    }],
+    ['animate', 'camera', {
+      lookAt: [5.5*.425, 2*.405, 2*.405],
+      orbit: .01,
+    }, {
+      delay: 500,
+      duration: 3000,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4,
+      theta: τ/8,
+    }, {
+      delay: 1500,
+      duration: 3000,
+    }],
+  ],
+
+  // Screen space
+  [
+    ['animate', '#xaxisV, #yaxisV, #zaxisV', {
+      opacity: 0,
+    }, {
+      duration: 300,
+    }],
+    ['add', 'grid', {
+      id: 'gridS',
+      n: 2,
+      ticks: [50, 50],
+      tickScale: [2, 2],
+      axis: [0, 1],
+      color: 0x404040,
+      opacity: 0,
+      lineWidth: 3,
+      mathPosition: [5.5, 0, 0],
+      mathRotation: [-τ/8, π, 0],
+      mathScale: [.75, .75, .75],
+      zIndex: 1000,
+    }, {
+      delay: 0,
+      duration: 1,
+    }],
+    ['animate', '#gridS', {
+      opacity: .6,
+    }, {
+      duration: 1000,
+    }],
+  ],
+
+  // closing
+  [
+    ['animate', '#gridS', {
+      lineWidth: 2,
+    }, {
+      duration: 3000,
+    }],
+    ['animate', 'viewport', {
+      position: [-1.5, .3, .3],
+    }, {
+      duration: 3000,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4-.7,
+      theta: .7,
+      lookAt: [0, 0, 0],
+      orbit: 3,
+    }, {
+      duration: 3000,
+    }],
+  ],
+];
+
+</script>
+
+
+
+
+
+
+
+
+
+
+

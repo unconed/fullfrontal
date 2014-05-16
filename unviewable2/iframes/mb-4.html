@@ -1,0 +1,81 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-2, 2], [-1, 1]],
+      scale: [1, .5],
+    });
+
+}
+
+var controlPoints = function (i) {
+  var t = director[0].clock(1) - 1.2;
+  t = -(Math.exp(-Math.abs(t*4))*.125 + Math.max(0, t)) - 2.2;
+  r1 = 1.6 + Math.cos(t*.71+3)*.2;
+  r2 = 1.6 + Math.cos(t*.87+1)*.2;
+  var points = [
+    [-2, 0],
+    [-2+(Math.cos(t*.5))*r1, r1*Math.sin(-t*.5)],
+    [2+(Math.cos(t*1.23+2))*r2, r2*Math.sin(t*1.23+2)],
+    [2, 0],
+  ];
+
+  return points[i];
+}
+var controlPointsOffset = function (offset) {
+  return function (i) {
+    return controlPoints(i + offset);
+  };
+}
+
+window.mathBoxScript = [
+
+
+  // Animated bezier curve
+  [
+    ['add', 'curve', {
+      n: 4,
+      line: false,
+      points: true,
+      domain: [0, 3],
+      live: true,
+      expression: controlPoints,
+      color: 0x303030,
+      pointSize: 15,
+    }],
+    ['add', 'curve', {
+      n: 2,
+      line: true,
+      points: false,
+      domain: [0, 1],
+      live: true,
+      expression: controlPoints,
+      color: 0x606060,
+      lineWidth: 4,
+    }],
+    ['add', 'curve', {
+      n: 2,
+      line: true,
+      points: false,
+      domain: [0, 1],
+      live: true,
+      expression: controlPointsOffset(2),
+      color: 0x606060,
+      lineWidth: 4,
+    }],
+    ['add', 'bezier', {
+      n: 100,
+      order: 3,
+      live: true,
+      expression: controlPoints,
+      lineWidth: 6,
+    }],
+  ],
+
+  // 
+];
+
+</script>

@@ -1,0 +1,217 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-2, 2], [-1, 1], [-1, 1]],
+      scale: [1.8, 1, 1],
+    })
+    .camera({
+      phi: τ/4,
+      orbit: 4.5,
+    });
+
+}
+
+var orangered = 0xc03000,
+    blue = 0x3090ff;
+
+window.mathBoxScript = [
+
+  [
+    // Rectangle
+    ['add', 'curve', {
+      id: "rect",
+      n: 5,
+      live: true,
+      domain: [-π, π],
+      line: true,
+      points: false,
+      expression: function (x, i) {
+        return [Math.cos(x + π/4) * 2 * 1.414, Math.sin(x + π/4) * 1.414];
+      },
+      lineWidth: 5,
+      color: 0xb0b0b0,
+    }, {
+      duration: 500,
+    }],
+
+  ],
+
+  [
+
+    // Triangle
+    ['add', 'curve', {
+      id: "tri",
+      n: 4,
+      live: true,
+      domain: [-π, π],
+      line: true,
+      points: false,
+      data: [
+        [-2, -1, 0],
+        [ 2, -1, 0],
+        [ 1,  1, 0],
+        [-2, -1, 0],
+      ],
+      lineWidth: 5,
+      color: 0x404040,
+      zIndex: 5,
+    }, {
+      duration: 500,
+    }],
+
+  ],
+
+  [
+    // Height
+    ['add', 'curve', {
+      id: "h",
+      n: 2,
+      data: [
+        [1,  1, 0],
+        [1, -1, 0],
+      ],
+      lineWidth: 5,
+      color: 0x808080,
+    }],
+  ],
+
+  [
+    // Fill in
+    ['add', 'surface', {
+      id: 'l1',
+      n: [2, 2],
+      data: [
+        [
+          [-2, -1, 0],
+          [ 1, -1, 0],
+        ],
+        [
+          [ 1,  1, 0],
+          [-2, -1, 0],
+        ],
+      ],
+      shaded: false,
+      color: orangered,
+      opacity: .5,
+      zIndex: -10,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'l2',
+      n: [2, 2],
+      data: [
+        [
+          [-2,  1, 0],
+          [-2, -1, 0],
+        ],
+        [
+          [ 1,  1, 0],
+          [-2,  1, 0],
+        ],
+      ],
+      shaded: false,
+      color: orangered,
+      opacity: .2,
+      zIndex: -11,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+  ],
+
+  [
+    // Fill in
+    ['add', 'surface', {
+      id: 'r1',
+      n: [2, 2],
+      data: [
+        [
+          [ 2, -1, 0],
+          [ 1, -1, 0],
+        ],
+        [
+          [ 1,  1, 0],
+          [ 2, -1, 0],
+        ],
+      ],
+      shaded: false,
+      color: blue,
+      opacity: .65,
+      zIndex: -10,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'r2',
+      n: [2, 2],
+      data: [
+        [
+          [ 1,  1, 0],
+          [ 2,  1, 0],
+        ],
+        [
+          [ 2, -1, 0],
+          [ 1,  1, 0],
+        ],
+      ],
+      shaded: false,
+      color: blue,
+      opacity: .2,
+      zIndex: -10,
+    }, {
+      delay: 500,
+      duration: 500,
+    }],
+  ],
+
+  // simplify
+  [
+    ['remove', '#l1, #l2, #r1, #r2, #rect', {
+      duration: 500,
+    }],
+    ['animate', '#tri', {
+      color: 0x404040,
+    }],
+    ['animate', '#h', {
+      color: 0x808080,
+    }],
+    ['set', '#tri', {
+      data: [],
+      expression: function (x, i) {
+        var data = [
+          [-2, -1, 0],
+          [ 2, -1, 0],
+          [ 1,  1, 0],
+          [-2, -1, 0],
+        ];
+        var t = Math.max(0, director[0].clock(6) - 2);
+        t = t<1 ? t*t*.5 : t-.5;
+        data[2][0] = 1 - Math.sin(t)*.7;
+        return data[i];
+      },
+    }],
+    ['set', '#h', {
+      data: [],
+      expression: function (x, i) {
+        var data = [
+        [1,  1, 0],
+        [1, -1, 0],
+        ];
+        var t = Math.max(0, director[0].clock(6) - 2);
+        t = t<1 ? t*t*.5 : t-.5;
+        data[0][0] = 1 - Math.sin(t)*.7;
+        data[1][0] = data[0][0];
+        return data[i];
+      },
+    }],
+  ],
+
+  [],
+];
+
+</script>

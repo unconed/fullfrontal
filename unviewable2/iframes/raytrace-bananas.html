@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Raytracer</title>
+
+  <script type="text/javascript" src="lib/domready.js"></script>
+  <script type="text/javascript" src="lib/tquery-bundle.js"></script>
+  <script type="text/javascript" src="lib/ShaderGraph.js/build/ShaderGraph.js"></script>
+  <script type="text/javascript" src="lib/ThreeBox.js/build/ThreeBox.js"></script>
+  <script type="text/javascript" src="lib/ThreeRTT.js/build/ThreeRTT-tquery.js"></script>
+
+  <style type="text/css" media="screen">
+    html, body {
+      height: 100%;
+    }
+  </style>
+
+  <script type="application/x-glsl" charset="utf-8" id="rt-test">
+  uniform vec2 cameraViewport;
+  uniform mat4 cameraWorld;
+  uniform vec3 shiftOffset;
+  uniform float shiftAngle;
+
+  varying vec2 vUV;
+
+  // geometrical transforms
+
+  vec4 fold(vec4 z) {
+    return vec4(2.*clamp(z.xyz, -1., 1.) - z.xyz, z.w);
+  }
+
+  vec4 warp(vec4 z) {
+    float th = cos(clamp(z.y, -1., 1.) * 3.14) * .1 + .1;
+    float c = cos(th);
+    float s = sin(th);
+    z.xz *= mat2(c, s, -s, c);
+    z.w *= 1.1;
+    return z;
+  }
+
+  vec4 rotate(vec4 z, float th) {
+    float c = cos(th);
+    float s = sin(th);
+    z.xz *= mat2(c, s, -s, c);
+    return z;
+  }
+
+  vec4 affine(vec4 z, float factor, vec3 offset) {
+    z.xyz *= factor * vec3(-1., -1., -1.);
+    z.xyz += offset;
+    z.w *= abs(factor);
+    return z;
+  }
+
+  vec4 mandel(vec4 z, vec3 offset) {
+    float x = z.x;
+    float y = z.y;
+
+    z.w = 2. * length(z.xy) * z.w + 1.;
+
+    z.x = x*x - y*y + offset.x;
+    z.y = 2.*x*y + offset.y;
+
+    return z;
+  }
+
+  vec4 invert(vec4 z, float factor) {
+    float r2 = dot(z.xyz, z.xyz);
+    float f = factor / r2;
+    return z * f;
+  }
+
+  vec4 invertRadius(vec4 z, float radius2, float limit) {
+    float r2 = dot(z.xyz, z.xyz);
+    float f = clamp(radius2 / r2, 1., limit);
+    return z * f;
+  }
+
+  // solids
+
+  float plane(vec3 pos, vec3 normal, float offset) {
+    return dot(pos, normal) - offset;
+  }
+
+  float box(vec3 pos, float radius) {
+    vec3 u = abs(pos);
+    return max(max(u.x, u.y), u.z) - radius;
+  }
+
+  float sphere(vec3 pos, float radius) {
+    return length(pos) - radius;
+  }
+
+  float torus(vec2 pos1, float pos2, float radius1, float radius2) {
+    float r = length(pos1) - radius1;
+    return (length(vec2(r, pos2)) - radius2);
+  }
+
+  float cross2(vec2 pos, float radius) {
+    return length(pos) - radius;
+  }
+
+  float cross3(vec3 pos, float radius) {
+    return min(min(cross2(pos.xy, radius), cross2(pos.xz, radius)), cross2(pos.yz, radius));
+  }
+
+  // distance estimator func
+
+    float distance(vec3 pos, out float scale) {
+      vec3 offset = pos;
+      vec4 z = vec4(pos, 1.);
+
+//      z = fold(z);
+//      z = invert(z, 2.);
+
+      z = fold(z);
+      z = invert(z, 3.);
+
+      z = fold(z);
+      z = rotate(z, shiftAngle * 1.7 + 2.43);
+
+      z = fold(z);
+      z = rotate(z, shiftAngle * 1.7 + 2.43);
+      z = invert(z, 1.3);
+      z = affine(z, 1.45, offset);
+      z.w += 1.;
+
+
+      z.xyz += shiftOffset;
+
+      z = fold(z);
+      z = invert(z, 1.138);
+      z = affine(z, 1.5, offset);
+      z.w += 1.;
+
+      z = fold(z);
+      z = rotate(z, shiftAngle * 1.7 + 2.43);
+
+      scale = z.w;
+
+      return min(
+        torus(z.xy, z.z, 1., .3),
+//        box(z.xyz*vec3(1.25, .85, 1.25), .35),
+        cross2(z.xy, .1)//,
+//        box(z.xyz, .35))
+      ) / z.w * .75;
+//      return plane(z.xyz, vec3(0, -1., 0), 1.) / z.w;
+//      return min(sphere(z.xyz), cross2(z.xz)) / z.w;
+    }
+
+    vec3 tone(vec3 x) {
+      x = min(vec3(1.), max(vec3(0.), x));
+      return (3.-2.*x)*x*x;
+    }
+
+  void main() {
+
+    // raytracing set up
+    vec2 xy = -(vUV * 2. - 1.) * cameraViewport * 4.15;
+    vec3 ray = normalize((cameraWorld * vec4(xy, 1., 1.)).xyz);
+    vec3 pos = -(cameraWorld * vec4(0, 0, 0., 1.)).xyz;
+
+    float scale;
+    float y = distance(pos, scale);
+    float travel = 0.;
+    float inv = y > 0. ? 1. : -1.;
+
+    float step = 1., y2, dy, inv2, occ = 1.;
+
+    // ray marching
+    for (int i = 0; i < 48; ++i) {
+
+      if (abs(step) < .000001) {
+        break;
+      }
+
+      step = y * inv;
+      pos += ray * step;
+      travel += step;
+      y = distance(pos, scale);
+      occ += .02;
+    }
+
+    // normal for shading
+    float epsilon = .00001 * inv;
+    float base = y;
+    vec3 norm = normalize(vec3(
+        distance(pos + vec3(epsilon, 0, 0), scale),
+        distance(pos + vec3(0, epsilon, 0), scale),
+        distance(pos + vec3(0, 0, epsilon), scale)
+      ) - base);
+
+    // ambient occlusion
+    float ao = 0.2, radius = .003;
+    for (int i = 0; i < 4; ++i) {
+      pos += norm * radius;
+      ao += max(0., distance(pos, scale) - base) / radius;
+      radius *= 2.;
+    }
+    ao *= .25;
+    ao = min(1., ao);
+
+    // coloring
+    vec3 back = vec3(.5, .2, .4);
+    vec3 front = vec3(1.7, 1.2, .5);
+//    vec3 color = front + (back - front) * max(0., min(1.1, abs(travel * .5 * max(1., ( (1. + log(scale))) / max(1., ao + .5)))));
+
+    vec3 color = front + (back - front) * max(0., min(1.1, abs(travel * .5 * max(1., ( (1. + log(scale))) / max(1., ao + .5)))));
+
+//    color.y += color.z * .75;
+
+    // shading + fog
+    float diffuse = max(0., dot(norm, normalize(vec3(1., -2., -1.))));
+    float fog = min(1., max(0., exp(-travel) * .95));
+
+    gl_FragColor = vec4(
+      sqrt(tone(
+        color * (diffuse * (ao+.5) * .5 + ao * .35) * fog
+        + (color * color + vec3(.3, .1, -.1)) * .5 * max(0., 2.0 - fog * 2.15)
+        )),
+      1.
+    );
+  }
+  </script>
+
+  <script type="text/javascript" charset="utf-8">
+
+    DomReady.ready(function () {
+      ThreeBox.preload([
+        'lib/ThreeRTT.js/build/ThreeRTT.glsl.html',
+      ], function (assets) {
+
+        var world = window.world = threeBox({
+          cameraControls: true,
+          stats: false,
+          orbit: 1.5,
+          theta: 0,
+          phi: τ/4,
+          scale: 2,
+        });
+        setTimeout(function () {
+          world.start();
+        }, 500);
+
+        var opts = {
+        };
+
+        var uniforms = {
+          shiftAngle: {
+            type: 'f',
+            value: 0,
+          },
+          shiftOffset: {
+            type: 'v3',
+            value: new THREE.Vector3(),
+          },
+        };
+
+        var raytrace = window.raytrace = world.rtt(opts).raytrace('rt-test', {}, uniforms);
+        var camera = raytrace.tCamera();
+
+        var key = false;
+
+        var start = +new Date();
+        var last = start;
+        world.loop().hookPreRender(function () {
+          var time = +new Date() - start;
+          var delta = time - last;
+          var th = +(new Date() - start) * .0001 + 18.014;
+          last = time;
+
+          var v = uniforms.shiftOffset.value;
+          v.x = Math.cos(th) * .5;
+          v.y = Math.sin(th * .124 + v.x) * .5;
+          v.z = Math.sin(th * .357 + v.y + v.x) * .5;
+
+          if (!window.tt || t < 2) {
+            world._cameraControls.orbit = 2.65;
+            world._cameraControls.theta = .1;
+            world._cameraControls.phi = -1.5895;
+
+            world._cameraControls.lookAt.x = 0;
+            world._cameraControls.lookAt.y = 1.;
+            world._cameraControls.lookAt.z = -.3;
+          }
+          window.tt = true;
+
+          var factor = (1000/60) / delta / 3;
+
+          var t = (+new Date() - start) * .001;
+          if (!key && t > 2 && t < 22) {
+            var ease = Math.sqrt(Math.sqrt(.5 - .5*Math.cos(2*π * (t - 2) / 20)));
+            ease *= factor;
+            world._cameraControls.orbit -= .000625 * ease;
+            world._cameraControls.phi -= .000375 * ease;
+            world._cameraControls.theta += .000625 * ease;
+            world._cameraControls.lookAt.y += .0022 * ease;
+          }
+          if (!key && t > 22 && t < 52) {
+            var ease = Math.sqrt(.5 - .5*Math.cos(2*π * (t - 22) / 30));
+            ease *= factor;
+            world._cameraControls.phi += .0042 * ease;
+            world._cameraControls.theta -= .0012 * ease;
+          }
+
+          if (!key && t > 13 && t < 21) {
+            var ease = Math.sqrt(.5 - .5*Math.cos(2*π * (t - 13) / 8));
+            ease *= factor;
+            world._cameraControls.phi += .005 * ease;
+          }
+
+//          uniforms.shiftAngle.value = Math.max(t - 20, 0) * .02;
+
+          if (keys[87] || keys[32]) {
+            var z = camera.matrixWorld.getColumnZ();
+            world._cameraControls.lookAt.x -= z.x * .003;
+            world._cameraControls.lookAt.y -= z.y * .003;
+            world._cameraControls.lookAt.z -= z.z * .003;
+            key = true;
+          }
+          if (keys[83]) {
+            var z = camera.matrixWorld.getColumnZ();
+            world._cameraControls.lookAt.x += z.x * .003;
+            world._cameraControls.lookAt.y += z.y * .003;
+            world._cameraControls.lookAt.z += z.z * .003;
+            key = true;
+          }
+          if (keys[65]) {
+            var z = camera.matrixWorld.getColumnX();
+            world._cameraControls.lookAt.x -= z.x * .003;
+            world._cameraControls.lookAt.y -= z.y * .003;
+            world._cameraControls.lookAt.z -= z.z * .003;
+            key = true;
+          }
+          if (keys[68]) {
+            var z = camera.matrixWorld.getColumnX();
+            world._cameraControls.lookAt.x += z.x * .003;
+            world._cameraControls.lookAt.y += z.y * .003;
+            world._cameraControls.lookAt.z += z.z * .003;
+            key = true;
+          }
+          if (keys[81]) {
+            var z = camera.matrixWorld.getColumnY();
+            world._cameraControls.lookAt.x -= z.x * .003;
+            world._cameraControls.lookAt.y -= z.y * .003;
+            world._cameraControls.lookAt.z -= z.z * .003;
+            key = true;
+          }
+          if (keys[69]) {
+            var z = camera.matrixWorld.getColumnY();
+            world._cameraControls.lookAt.x += z.x * .003;
+            world._cameraControls.lookAt.y += z.y * .003;
+            world._cameraControls.lookAt.z += z.z * .003;
+            key = true;
+          }
+
+        })
+
+        world._cameraControls.camera = raytrace.tCamera();
+
+        world.compose(raytrace);
+
+        var keys = {};
+
+        document.addEventListener('keydown', function (e) {
+          keys[e.keyCode] = true;
+        })
+        document.addEventListener('keyup', function (e) {
+          keys[e.keyCode] = false;
+        })
+      });
+    });
+
+  </script>
+
+</head>
+<body>
+</body>
+</html>

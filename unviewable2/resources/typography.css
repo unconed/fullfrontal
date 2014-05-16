@@ -1,0 +1,190 @@
+/* colors */
+body .deck-container {
+  color: #243540;
+}
+body .deck-container .slide.page-cover h2,
+body .deck-container .slide.page-cover h3 span {
+  color: #39537d;
+}
+body .deck-container .slide {
+  color: #333;
+}
+body .deck-container .slide h3 {
+  color: #39537d;
+}
+body .deck-container .slide.page-cover h3 {
+  color: #728491;
+}
+
+.deck-container .slide pre {
+  border-color: #ccc;
+  background: #f7f7f7;
+}
+.deck-container .slide pre.overlay {
+  background-color: rgba(247, 247, 247, .9);
+}
+.csstransitions.csstransforms .deck-container > .slide.invert {
+  background: #000;
+  color: #fff;
+}
+.csstransitions.csstransforms .deck-container > .slide.invert h1 {
+  color: #fff;
+  -webkit-text-stroke: 0;
+}
+
+/* fonts */
+body .deck-container h1, body .deck-container h2, body .deck-container h3, body .deck-container h4 {
+  font-family: 'klavika-web', 'Klavika Web Basic', sans-serif;
+  font-weight: bold;
+  font-style: italic;
+}
+
+body .deck-container {
+  font-family: 'klavika-web', 'Klavika Web Basic', sans-serif;
+  font-weight: normal;
+  font-style: italic;
+
+  line-height: 1.5;
+  font-size: 32px;
+  background: #fff;
+
+/*  box-shadow: 0px 2px 30px rgba(0, 0, 0, .3);*/
+}
+
+/* white outline */
+body .deck-container .slide.mj, body .deck-container .slide .mj {
+  font-size: 38px;
+  text-shadow:
+    3px 0px 1px rgb(255, 255, 255),
+    -3px 0px 1px rgb(255, 255, 255),
+    0px -3px 1px rgb(255, 255, 255),
+    0px 3px 1px rgb(255, 255, 255),
+    2px 2px 1px rgb(255, 255, 255),
+    -2px 2px 1px rgb(255, 255, 255),
+    2px -2px 1px rgb(255, 255, 255),
+    -2px -2px 1px rgb(255, 255, 255),
+    3px 2px 1px rgb(255, 255, 255),
+    -3px 2px 1px rgb(255, 255, 255),
+    3px -2px 1px rgb(255, 255, 255),
+    -3px -2px 1px rgb(255, 255, 255),
+    1px 3px 1px rgb(255, 255, 255),
+    -1px 3px 1px rgb(255, 255, 255),
+    1px -3px 1px rgb(255, 255, 255),
+    -1px -3px 1px rgb(255, 255, 255),
+    -1px -1px 1px rgb(255, 255, 255),
+    -1px 1px 1px rgb(255, 255, 255),
+    1px -1px 1px rgb(255, 255, 255),
+    1px 1px 1px rgb(255, 255, 255);
+}
+body .deck-container .MathJax {
+  font-style: normal;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+body .deck-container .slide h1 .MathJax {
+  font-style: normal;
+  font-weight: normal;
+}
+body .deck-container .slide {
+  word-spacing: 2px;
+}
+body .deck-container .slide h1 {
+  font-size: 96px;
+  font-weight: bold;
+  -webkit-text-stroke: 2px #333;
+  text-align: center;
+  word-spacing: 5px;
+}
+body .deck-container .slide h1 i, body .deck-container .slide h4 i {
+  display: block;
+  margin-top: -20px;
+  margin-bottom: 10px;
+}
+h1 i, h4 i, .i {
+  opacity: .6;
+}
+
+body .deck-container .slide h2 {
+  border: none;
+  font-size: 56px;
+  word-spacing: 2px;
+  font-weight: bold;
+  padding: 50px 50px 0;
+  text-align: center;
+}
+
+body .deck-container .slide h3 {
+  border: none;
+  font-weight: bold;
+  z-index: 11;
+}
+
+body .deck-container .slide h4 {
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  word-spacing: 2px;
+}
+
+/* cover page */
+body .deck-container .slide.page-cover h3 span {
+  -webkit-text-stroke: 0;
+  letter-spacing: 0px;
+}
+
+body .deck-container .slide.page-cover h2 {
+  text-align: right;
+}
+
+body .deck-container .slide.page-cover h3 {
+  text-align: left;
+  font-size: 36px;
+  word-spacing: 3px;
+  -webkit-text-stroke: 1px #fff;
+  letter-spacing: -1px;
+}
+
+/* blocks */
+.deck-container .box.images>div {
+  text-align: center;
+}
+
+/* pre elements */
+.deck-container .slide pre {
+  border-radius: 2px;
+  -webkit-box-shadow: inset 0 1px 5px rgba(0, 0, 0, .15), inset 0 2px 30px rgba(0, 0, 0, .05);
+  font-family: "Bitstream Vera Sans Mono", monospace;
+  font-style: normal;
+}
+pre.small {
+  font-size: 70%;
+}
+pre em {
+  color: #a9d;
+}
+
+/* math coloring */
+.mj-purple {
+  color: #B040D0;
+}
+.mj-green {
+  color: #20C050;
+}
+.mj-gold {
+  color: #D0A020;
+}
+.mj-indigo {
+  color: #4040e0;
+}
+.mj-blue {
+  color: #3080Ff;
+}
+.mj-red {
+  color: #C02060;
+}
+.mj-orangered {
+  color: #c04000;
+}
+
+.right {
+  text-align: right;
+}

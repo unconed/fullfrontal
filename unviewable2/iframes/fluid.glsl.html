@@ -1,0 +1,461 @@
+<script type="application/x-glsl" id="cfd-seed">
+uniform sampler2D texture;
+varying vec2 vUV;
+
+void main() {
+  vec4 sample = texture2D(texture, vUV);
+
+  gl_FragColor = vec4(0, 0, sample.r, 1.);
+}
+</script>
+
+<!-- stretch/compress density -->
+<script type="application/x-glsl" id="cfd-stretch">
+uniform sampler2D field;
+uniform sampler2D divergence;
+uniform float timeStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec4 sample = texture2D(field, vUV);
+
+  float density = sample.z;
+  float divergence = texture2D(divergence, vUV).x;
+
+  density *= (1.0 + divergence * timeStep * .125);
+
+  gl_FragColor = vec4(sample.xy, density * .995, sample.w);
+}
+</script>
+
+<!-- advect field -->
+<script type="application/x-glsl" id="cfd-advect">
+uniform sampler2D texture;
+uniform vec2 sampleStep;
+uniform float timeStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec4 sample = texture2D(texture, vUV);
+  vec4 source = texture2D(texture, vUV + sample.xy * timeStep * sampleStep);
+
+  gl_FragColor = source;
+}
+</script>
+
+<!-- mccormack advection, resolve pass -->
+<script type="application/x-glsl" id="cfd-mccormack">
+uniform sampler2D field[3];
+uniform vec2 sampleStep;
+uniform float timeStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec4 pn = texture2D(field[2], vUV);
+  vec4 pn1hat = texture2D(field[1], vUV);
+  vec4 pnhat = texture2D(field[0], vUV);
+
+  vec2 offset = floor(vUV / sampleStep + pn.xy * timeStep) * sampleStep;
+
+  vec4 p1 = texture2D(field[2], offset);
+  vec4 p2 = texture2D(field[2], offset + vec2(sampleStep.x, 0.0));
+  vec4 p3 = texture2D(field[2], offset + vec2(0.0, sampleStep.y));
+  vec4 p4 = texture2D(field[2], offset + vec2(sampleStep.x, sampleStep.y));
+
+  vec4 pn1 = pn1hat + 0.5*(pn - pnhat);
+//  gl_FragColor = pn1;
+
+  vec4 pmin = min(min(p1, p2), min(p3, p4));
+  vec4 pmax = max(max(p1, p2), max(p3, p4));
+
+  gl_FragColor = max(pmin, min(pmax, pn1));
+}
+</script>
+
+<!-- mccormack advection, resolve pass + vorticity confinement -->
+<script type="application/x-glsl" id="cfd-mccormack-vorticity">
+uniform sampler2D field[4];
+uniform vec2 sampleStep;
+uniform float timeStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec4 pn = texture2D(field[3], vUV);
+  vec4 pn1hat = texture2D(field[1], vUV);
+  vec4 pnhat = texture2D(field[0], vUV);
+
+  vec2 offset = floor(vUV / sampleStep + pn.xy * timeStep) * sampleStep;
+
+  vec4 p1 = texture2D(field[3], offset);
+  vec4 p2 = texture2D(field[3], offset + vec2(sampleStep.x, 0.0));
+  vec4 p3 = texture2D(field[3], offset + vec2(0.0, sampleStep.y));
+  vec4 p4 = texture2D(field[3], offset + vec2(sampleStep.x, sampleStep.y));
+
+  vec4 pn1 = pn1hat + 0.5*(pn - pnhat);
+//  gl_FragColor = pn1;
+
+  vec4 pmin = min(min(p1, p2), min(p3, p4));
+  vec4 pmax = max(max(p1, p2), max(p3, p4));
+
+  vec4 value = max(pmin, min(pmax, pn1));
+
+  vec2 dx = vec2(sampleStep.x, 0);
+  vec2 dy = vec2(0, sampleStep.y);
+
+  float c1 = texture2D(field[2], vUV).x;
+  float c2 = texture2D(field[2], vUV + dx).x;
+  float c3 = texture2D(field[2], vUV + dy).x;
+
+  vec2 n = vec2(c2 - c1, c3 - c1);
+
+  if (length(n) > 0.0001) {
+    n = normalize(n);
+    value.x += c1 * n.y * .03;
+    value.y -= c1 * n.x * .03;
+  }
+
+  value.z *= .999;
+
+  gl_FragColor = value;
+}
+</script>
+
+<!-- calculate divergence -->
+<script type="application/x-glsl" id="cfd-divergence">
+uniform sampler2D texture;
+uniform vec2 sampleStep;
+uniform float timeStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec2 dx = vec2(sampleStep.x, 0);
+  vec2 dy = vec2(0, sampleStep.y);
+
+  float ux1 = texture2D(texture, vUV - dx).x;
+  float ux2 = texture2D(texture, vUV + dx).x;
+
+  float vy1 = texture2D(texture, vUV - dy).y;
+  float vy2 = texture2D(texture, vUV + dy).y;
+
+  float div = -((ux2 - ux1) + (vy2 - vy1)) * .5;
+
+  gl_FragColor = vec4(div, 0.0, 0.0, 1.0);
+}
+</script>
+
+<!-- calculate divergence/curl -->
+<script type="application/x-glsl" id="cfd-divergence-curl">
+uniform sampler2D texture;
+uniform vec2 sampleStep;
+uniform float timeStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec2 dx = vec2(sampleStep.x, 0);
+  vec2 dy = vec2(0, sampleStep.y);
+
+  float ux1 = texture2D(texture, vUV - dx).x;
+  float ux2 = texture2D(texture, vUV + dx).x;
+
+  float vy1 = texture2D(texture, vUV - dy).y;
+  float vy2 = texture2D(texture, vUV + dy).y;
+
+  float div = -((ux2 - ux1) + (vy2 - vy1)) * .5;
+
+  float vx1 = texture2D(texture, vUV - dx).y;
+  float vx2 = texture2D(texture, vUV + dx).y;
+
+  float uy1 = texture2D(texture, vUV - dy).x;
+  float uy2 = texture2D(texture, vUV + dy).x;
+
+  float curl = vx2 - vx1 - uy2 + uy1;
+
+  gl_FragColor = vec4(div, curl, 0.0, 1.0);
+}
+</script>
+
+<!-- reset pressure -->
+<script type="application/x-glsl" id="cfd-pressure-reset">
+void main() {
+  gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+}
+</script>
+
+<!-- relax pressure -->
+<script type="application/x-glsl" id="cfd-pressure-relax">
+uniform sampler2D pressure;
+uniform sampler2D divergence;
+
+uniform vec2 sampleStep;
+uniform float timeStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec2 dx = vec2(sampleStep.x, 0);
+  vec2 dy = vec2(0, sampleStep.y);
+
+  float p1 = texture2D(pressure, vUV - dx).x;
+  float p2 = texture2D(pressure, vUV + dx).x;
+  float p3 = texture2D(pressure, vUV - dy).x;
+  float p4 = texture2D(pressure, vUV + dy).x;
+
+  float div = texture2D(divergence, vUV).x;
+
+  float p = (div + p1 + p2 + p3 + p4) / 4.0;
+
+  gl_FragColor = vec4(p, 0.0, 0.0, 1.0);
+}
+</script>
+
+<!-- project field to divergence free -->
+<script type="application/x-glsl" id="cfd-project">
+uniform sampler2D pressure;
+uniform sampler2D field;
+
+uniform vec2 sampleStep;
+uniform float timeStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec2 dx = vec2(sampleStep.x, 0);
+  vec2 dy = vec2(0, sampleStep.y);
+
+  float p1 = texture2D(pressure, vUV - dx).x;
+  float p2 = texture2D(pressure, vUV + dx).x;
+  float p3 = texture2D(pressure, vUV - dy).x;
+  float p4 = texture2D(pressure, vUV + dy).x;
+
+  vec4 sample = texture2D(field, vUV);
+
+  sample.x -= .5 * (p2 - p1);
+  sample.y -= .5 * (p4 - p3);
+
+  gl_FragColor = sample;
+}
+</script>
+
+<!-- calculate curl -->
+<script type="application/x-glsl" id="cfd-curl">
+uniform sampler2D texture;
+uniform vec2 sampleStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec2 dx = vec2(sampleStep.x, 0);
+  vec2 dy = vec2(0, sampleStep.y);
+
+  float vx1 = texture2D(texture, vUV - dx).y;
+  float vx2 = texture2D(texture, vUV + dx).y;
+
+  float uy1 = texture2D(texture, vUV - dy).x;
+  float uy2 = texture2D(texture, vUV + dy).x;
+
+  float curl = vx2 - vx1 - uy2 + uy1;
+
+  gl_FragColor = vec4(curl, 0, 0, 1.0);
+}
+
+</script>
+
+<!-- debug -->
+<script type="application/x-glsl" id="cfd-debug">
+uniform sampler2D texture;
+
+varying vec2 vUV;
+
+void main() {
+  vec2 uv = vUV * 2.0 * vec2(1.7, 1.0);
+  float fmax = max(uv.x, uv.y);
+  float fmin = min(uv.x, uv.y);
+
+  float alpha = (fmax < 1.0 && fmin >= 0.0) ? 1.0 : 0.0;
+
+  vec4 sample = texture2D(texture, uv);
+  float p = sample.z;
+  vec3 color = vec3(1.0, .5, 0) + vec3(-1.0, 0, 1.0) * sample.w;
+
+  gl_FragColor = vec4(p * color * 1.6, alpha);
+}
+</script>
+
+<!-- debug: show density -->
+<script type="application/x-glsl" id="cfd-density-debug">
+uniform sampler2D texture;
+
+varying vec2 vUV;
+
+void main() {
+  float p = texture2D(texture, vUV).z;
+
+  gl_FragColor = vec4(p, p, p, 1.0);
+}
+</script>
+
+<!-- debug: show divergence -->
+<script type="application/x-glsl" id="cfd-divergence-debug">
+uniform sampler2D texture;
+
+varying vec2 vUV;
+
+void main() {
+  float div = texture2D(texture, vUV).x;
+
+  float value = (div * 100.0);
+
+  gl_FragColor = vec4(value, max(value * .2, -value * .3), -value, 1.0);
+}
+</script>
+
+<!-- debug: show curl -->
+<script type="application/x-glsl" id="cfd-curl-debug">
+uniform sampler2D texture;
+uniform vec2 sampleStep;
+uniform float timeStep;
+
+varying vec2 vUV;
+
+void main() {
+  vec2 dx = vec2(sampleStep.x, 0);
+  vec2 dy = vec2(0, sampleStep.y);
+
+  float vx1 = texture2D(texture, vUV - dx).y;
+  float vx2 = texture2D(texture, vUV + dx).y;
+
+  float uy1 = texture2D(texture, vUV - dy).x;
+  float uy2 = texture2D(texture, vUV + dy).x;
+
+  float curl = vx2 - vx1 - uy2 + uy1;
+
+  float value = (curl * 10.0);
+
+  gl_FragColor = vec4(value, max(value * .2, -value * .3), -value, 1.0);
+}
+</script>
+
+<script type="application/x-glsl" id="vis-fragment-compel">
+
+uniform float convection;
+uniform float strength;
+uniform float angle;
+const float seed = 133.;
+
+uniform sampler2D texture;
+varying vec2 vUV;
+
+float step(float x) {
+  return x*x*x*(x*(x*6. - 15.) + 10.);
+//  return (3.-2.*x)*x*x;
+}
+
+vec2 gradient(vec2 uv, mat2 m) {
+  return m * (vec2(
+    fract(sin(dot(uv.xy, vec2(12.9898 + seed, 78.233 - seed)) + seed) * 43758.5453),
+    fract(cos(dot(uv.xy, vec2(10.5198 + seed, 54.143 - seed)) + seed) * 43758.5453)
+  ) * 2. - 1.);
+}
+
+float perlin(vec2 uv, mat2 m) {
+  uv *= 2.;
+
+  vec2 iuv = floor(uv);
+  vec2 fuv = fract(uv);
+
+  float g11 = dot(gradient(iuv, m), fuv);
+  float g21 = dot(gradient(iuv + vec2(1., 0), m), fuv - vec2(1., 0));
+  float g12 = dot(gradient(iuv + vec2(0, 1.), m), fuv - vec2(0, 1.));
+  float g22 = dot(gradient(iuv + vec2(1., 1.), m), fuv - vec2(1., 1.));
+
+  float sx = step(fuv.x);
+  float sy = step(fuv.y);
+
+  float a = mix(g11, g21, sx);
+  float b = mix(g12, g22, sx);
+  float h = mix(a, b, sy);
+
+  return h;
+}
+
+float noise(vec2 uv, mat2 m) {
+  return perlin(uv, m)
+       + perlin(uv * 2., m) * .5
+       + perlin(uv * 4., m) * .25
+       + perlin(uv * 8., m) * .125
+       + perlin(uv * 16., m) * .0625
+       ;
+}
+
+void main() {
+
+  float co = cos(angle);
+  float si = sin(angle);
+  mat2 m = mat2(co, -si, si, co);
+
+  vec2 force = vec2(0, 0);
+  vec2 uv = (vUV - .5) * 2.0;
+  vec2 uvp = uv * 3.14;
+  float density = 0.0;
+  float charm = 0.0;
+  float r2 = dot(uv, uv);
+  float r = sqrt(r2);
+
+  float epsilon = .001;
+
+  float a = noise(uv, m);
+  float b = noise(uv + vec2(epsilon, 0), m);
+  float c = noise(uv + vec2(0, epsilon), m);
+
+  float cx = (c-a)/epsilon;
+  float cy = (b-a)/epsilon;
+
+  // Stirring
+  force = vec2(cx, cy) * strength;
+
+  // Boom
+  uv -= vec2(0, -1.);
+  force -= (normalize(uv) * max(0., 1. - length(uv))) * strength * 5.;
+
+  // Convection
+  vec4 sample = texture2D(texture, vUV);
+  force.y -= sample.z * convection;
+
+  force *= 0.2;
+
+  gl_FragColor = vec4(force, density, charm);
+}
+</script>
+
+<!-- smoke -->
+<script type="application/x-glsl" id="vis-fragment-smoke">
+uniform sampler2D texture;
+varying vec2 vUV;
+uniform vec2 sampleStep;
+
+float tone(float x) {
+  float v = max(0., 1.-x);
+  return 1.-(v+sqrt(v))*.5;
+}
+
+void main() {
+
+  vec2 dx = vec2(sampleStep.x, 0);
+  vec2 dy = vec2(0, sampleStep.y);
+
+  vec4 sample1 = texture2D(texture, vUV);
+  vec4 sample2 = texture2D(texture, vUV + dx);
+  vec4 sample3 = texture2D(texture, vUV + dy);
+
+  vec3 n = normalize(vec3(vec2(sample1.z - sample2.z, sample1.z - sample3.z), .25));
+  float diffuse = max(0., dot(n, vec3(0, .7, .7))) * .15 + .6;
+
+  gl_FragColor = vec4(diffuse, diffuse*1.05, diffuse*1.1, tone(sample1.z));
+}
+</script>

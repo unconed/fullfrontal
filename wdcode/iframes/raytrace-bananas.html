@@ -169,7 +169,7 @@
     float step = 1., y2, dy, inv2, occ = 1.;
 
     // ray marching
-    for (int i = 0; i < 46; ++i) {
+    for (int i = 0; i < 48; ++i) {
 
       if (abs(step) < .000001) {
         break;
@@ -237,7 +237,7 @@
           orbit: 1.5,
           theta: 0,
           phi: τ/4,
-          scale: 2.5,
+          scale: 2,
         });
         setTimeout(function () {
           world.start();
@@ -263,8 +263,12 @@
         var key = false;
 
         var start = +new Date();
+        var last = start;
         world.loop().hookPreRender(function () {
+          var time = +new Date() - start;
+          var delta = time - last;
           var th = +(new Date() - start) * .0001 + 18.014;
+          last = time;
 
           var v = uniforms.shiftOffset.value;
           v.x = Math.cos(th) * .5;
@@ -274,7 +278,7 @@
           if (!window.tt || t < 2) {
             world._cameraControls.orbit = 2.65;
             world._cameraControls.theta = .1;
-            world._cameraControls.phi = -1.6;
+            world._cameraControls.phi = -1.5895;
 
             world._cameraControls.lookAt.x = 0;
             world._cameraControls.lookAt.y = 1.;
@@ -282,9 +286,12 @@
           }
           window.tt = true;
 
+          var factor = (1000/60) / delta / 3;
+
           var t = (+new Date() - start) * .001;
           if (!key && t > 2 && t < 22) {
             var ease = Math.sqrt(Math.sqrt(.5 - .5*Math.cos(2*π * (t - 2) / 20)));
+            ease *= factor;
             world._cameraControls.orbit -= .000625 * ease;
             world._cameraControls.phi -= .000375 * ease;
             world._cameraControls.theta += .000625 * ease;
@@ -292,12 +299,14 @@
           }
           if (!key && t > 22 && t < 52) {
             var ease = Math.sqrt(.5 - .5*Math.cos(2*π * (t - 22) / 30));
+            ease *= factor;
             world._cameraControls.phi += .0042 * ease;
             world._cameraControls.theta -= .0012 * ease;
           }
 
           if (!key && t > 13 && t < 21) {
             var ease = Math.sqrt(.5 - .5*Math.cos(2*π * (t - 13) / 8));
+            ease *= factor;
             world._cameraControls.phi += .005 * ease;
           }
 

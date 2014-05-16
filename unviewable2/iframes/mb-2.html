@@ -1,0 +1,606 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox, director) {
+
+  mathbox
+    .viewport({
+      type: 'polar',
+      range: [[-2, 2], [0, 1], [-2, 2]],
+      scale: [1, .5],
+      polar: 0,
+    })
+    .camera({
+      phi: τ/4,
+    });
+
+  ThreeBox.preload([
+    'fluid.glsl.html',
+    '../images/leaf.png',
+  ], function (assets) {
+
+    var exports = window.exports = {
+      assets: assets,
+      world: mathbox.world(),
+      scene: mathbox.world().tScene(),
+    };
+
+    fluidSetup(mathbox, exports);
+    compelSetup(mathbox, exports);
+    composeSetup(mathbox, exports);
+
+    director.on('go', function (step, direction) {
+      if (step == 8) {
+        activeFluid = true;
+        setTimeout(function () {
+          exports.compelUniforms.strength.value = .02;
+          exports.compelUniforms.convection.value = .02;
+        }, 100);
+        setTimeout(function () {
+          exports.compelUniforms.strength.value = .02;
+          exports.compelUniforms.convection.value = .005;
+        }, 300);
+      }
+      if (step == 7) {
+        activeFluid = false;
+      }
+    });
+
+    var activeFluid = false;
+    exports.world.loop().hookPreRender(function () {
+
+      if (activeFluid) {
+        exports.field.render();
+        exports.divergence.render();
+        exports.pressure.render();
+      }
+      exports.fluidDisplay.visible = activeFluid;
+
+    });
+    exports.world.loop().hookPostRender(function () {
+      exports.compelUniforms.strength.value = 0;
+      exports.compelUniforms.convection.value *= .95;
+      exports.compelUniforms.angle.value += .001;
+    });
+  });
+
+}
+
+function fluidSetup(mathbox, exports) {
+
+  var world = mathbox.world();
+
+  var timeStep = 6.;
+
+  var bufferOpts = {
+    width: 512,
+    height: 512,
+    history: -1,
+    autoRendering: false,
+    texture: {
+      minFilter: THREE.NearestFilter,
+      magFilter: THREE.NearestFilter,
+      type: THREE.FloatType,
+      format: THREE.RGBAFormat,
+      wrapS: THREE.RepeatWrapping,
+      wrapT: THREE.RepeatWrapping,
+    },
+  };
+
+  var fieldOpts = _.extend({}, bufferOpts, {
+    history: 3,
+    texture: {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      type: THREE.FloatType,
+      format: THREE.RGBAFormat,
+      wrapS: THREE.RepeatWrapping,
+      wrapT: THREE.RepeatWrapping,
+    },
+  });
+
+  var pressureOpts = _.extend({}, bufferOpts, {
+    history: 0,
+  });
+
+  // Buffer: Velocity/Density
+  var field = world
+    .rtt(fieldOpts)
+    .fragment('cfd-seed', exports.assets.leaf)
+    .render()
+    .reset();
+
+  // Buffer: Divergence
+  var divergence = world.rtt(bufferOpts).fragment('cfd-divergence', field).render();
+
+  // Buffer: Iterative pressure relaxation
+  var pressure = world
+    .rtt(pressureOpts);
+  pressure
+    .iterate(24, 'cfd-pressure-relax', {
+      pressure: pressure,
+      divergence: divergence,
+    })
+    .render();
+
+  // Density painter placeholder
+  var brush = new THREE.Object3D();
+
+  // Prepare uniforms
+  var uniforms = {
+    timeStep: { type: 'f', value: timeStep },
+  };
+  var uniforms2 = {
+    timeStep: { type: 'f', value: -timeStep },
+  };
+  var uniforms3 = {
+    timeStep: { type: 'f', value: timeStep },
+    field: field.uniform(),
+  };
+  var uniforms4 = {
+    timeStep: { type: 'f', value: timeStep },
+  };
+  var uniforms5 = {
+    timeStep: { type: 'f', value: timeStep },
+  };
+
+  var textures4 = {
+    field: field,
+    divergence: divergence,
+  };
+
+  // Project and advect density + velocity field
+  field
+//    .fragment('cfd-stretch', textures4, uniforms4)
+    .fragment('cfd-project', {
+      pressure: pressure,
+      field: field,
+    })
+    .fragment('cfd-curl',      field, uniforms)
+    .fragment('cfd-advect',    { texture: field.read(-1) }, uniforms)
+    .fragment('cfd-advect',    field, uniforms2)
+    .fragment('cfd-mccormack-vorticity', field, uniforms3)
+    .paint(brush)
+    .render();
+
+  exports.field = field;
+  exports.divergence = divergence;
+  exports.pressure = pressure;
+  exports.brush = brush;
+
+}
+
+function compelSetup(mathbox, exports) {
+
+  // Compel
+  var compelUniforms = exports.compelUniforms = {
+    strength: {
+      type: 'f',
+      value: 0,
+    },
+    convection: {
+      type: 'f',
+      value: 0,
+    },
+    angle: {
+      type: 'f',
+      value: 0,
+    },
+  };
+
+  var geometry4 = new ThreeRTT.ScreenGeometry();
+  var material4 = new ThreeRTT.FragmentMaterial(exports.field, 'vis-fragment-compel', {}, compelUniforms);
+  material4.side = THREE.DoubleSide;
+  material4.depthTest = false;
+  material4.depthWrite = false;
+  material4.transparent = true;
+  material4.blending = THREE.CustomBlending;
+  material4.blendEquation = THREE.AddEquation;
+  material4.blendSrc = THREE.OneFactor;
+  material4.blendDst = THREE.OneFactor;
+
+  var compel = new THREE.Mesh(geometry4, material4);
+  compel.frustumCulled = false;
+  compel.renderDepth = -3;
+
+  exports.brush.add(compel);
+  exports.compelUniforms = compelUniforms;
+}
+
+function composeSetup(mathbox, exports) {
+
+  var geometry = new ThreeRTT.ScreenGeometry();
+  var material = new ThreeRTT.ShaderMaterial(exports.field, 'generic-vertex', 'vis-fragment-smoke', {})
+//  var material = new ThreeRTT.ShaderMaterial(exports.field, 'generic-vertex', 'generic-fragment-texture', {})
+  var mesh = new THREE.Mesh(geometry, material);
+
+  mesh.scale.x = 1.5;
+  mesh.scale.y = 1.5;
+
+  exports.scene.add(mesh);
+  exports.fluidDisplay = mesh;
+}
+
+window.mathBoxScript = [
+
+  // Circle + preload curves/grid
+  [
+    ['add', 'curve', {
+      id: "circle",
+      n: 100,
+      domain: [-π, π],
+      expression: function (x) { return [ Math.cos(x), Math.sin(x)*.5 + .5 ] },
+      lineWidth: 5,
+    }],
+    ['add', 'grid', {
+      n: [ 96, 2 ],
+      lineWidth: 3,
+      tickUnit: [π, 1],
+      tickScale: [2, 10],
+      ticks: [4, 8],
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'bump',
+      n: 512,
+      live: true,
+      domain: [-π*2, π*2],
+      expression: function (x) {
+        return [ x, .5- .5 * Math.cos(x) ];
+      },
+      lineWidth: 5,
+      opacity: 0.001,
+      zIndex: 3,
+    }],
+    ['add', 'axis', {
+      id: 'axis0',
+      axis: 0,
+      n: 96,
+      ticks: 4,
+      tickUnit: π,
+      tickScale: 2,
+      opacity: 0.001,
+      zIndex: 2,
+    }, {
+      delay: 2800,
+      duration: 600,
+    }],
+    ['add', 'axis', {
+      id: 'axis1',
+      axis: 1,
+      n: 2,
+      ticks: 8,
+      opacity: 0.001,
+      zIndex: 2,
+    }, {
+      delay: 2800,
+      duration: 600,
+    }],
+  ],
+
+  // Point on circle
+  [
+    ['animate', '#circle', {
+      opacity: .6,
+    }],
+    ['add', 'curve', {
+      id: "dot",
+      n: 1,
+      live: true,
+      line: false,
+      points: true,
+      domain: [0,0],
+      expression: function (x) {
+        var t = director[0].clock(2);
+        var a = Math.max(0, x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), Math.sin(-a) *.5 + .5 ];
+      },
+      color: 0x0040A0,
+      pointSize: 20,
+      zIndex: -50,
+    }, { duration: 500 }],
+  ],
+
+  // Turn 90 degrees, show tail
+  [
+    ['animate', '#dot', {
+      zIndex: -50,
+    }, {
+      duration: 500,
+    }],
+    ['animate', '#circle, #dot', {
+      worldRotation: new THREE.Vector3(0, -τ/4, 0),
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: "spiral",
+      n: 128,
+      live: true,
+      line: true,
+      points: false,
+      domain: [0, 16],
+      expression: function (x) {
+        var t = director[0].clock(2), q = director[0].clock(3);
+        x = Math.min((q*2-3)*1.8, x);
+        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), Math.sin(-a) *.5 + .5, x * .5 ];
+      },
+      color: 0x0040A0,
+      lineWidth: 5,
+      worldRotation: [0, -τ/4, 0],
+      opacity: 1,
+    }, {
+      delay: 1500, duration: 500
+    }],
+    ['add', 'curve', {
+      id: 'shadow1',
+      n: 128,
+      live: true,
+      line: true,
+      points: false,
+      domain: [0, 16],
+      expression: function (x) {
+        var t = director[0].clock(2), q = director[0].clock(3);
+        x = Math.min((q*2-3)*1.8, x);
+        var a = Math.max(0, - x + Math.exp(-t) * 4 + t * 3.5);
+        return [ Math.cos(a), (-Math.sin(-a) -2.02) *.5 + .5, x * .5 ];
+      },
+      color: 0x000000,
+      lineWidth: 10,
+      worldRotation: [0, -τ/4, 0],
+      opacity: 0.07,
+    }, {
+      delay: 1500, duration: 500
+    }],
+    ['add', 'curve', {
+      id: 'shadow2',
+      n: 100,
+      domain: [-π, π],
+      expression: function (x) { return [ Math.cos(x), (Math.sin(x) -2.05) *.5 + .5 ] },
+      lineWidth: 10,
+      worldRotation: [0, -τ/4, 0],
+      color: 0x000000,
+      opacity: 0.04,
+    }, {
+      delay: 1500, duration: 500
+    }],
+    ['animate', '#circle, #dot, #spiral, #shadow1, #shadow2', {
+      worldPosition: [1.6, 0, 0],
+    }, {
+      delay: 1000,
+      duration: 4000,
+    }],
+  ],
+
+  // Rotate back 90 degrees, show graph
+  [
+    ['animate', '#circle, #dot, #spiral, #shadow1, #shadow2', {
+      worldPosition: [1.8, 0, -3],
+      worldScale: [1, 2, 2],
+    }, {
+      delay: 0,
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      range: [[-π, π], [0, 1], [-2, 2]],
+      scale: [1, .5],
+    }, {
+      delay: 1200,
+      duration: 900,
+    }],
+    ['remove', '#circle, #dot, #spiral, #shadow1, #shadow2', {
+      delay: 1100,
+      duration: 2000,
+    }],
+    ['animate', '#bump', {
+      opacity: 1,
+    }, {
+      delay: 2200,
+      duration: 600,
+    }],
+    ['animate', '#axis0', {
+      opacity: 1,
+    }, {
+      delay: 800,
+      duration: 600,
+    }],
+    ['animate', '#axis1', {
+      opacity: 1,
+    }, {
+      delay: 800,
+      duration: 600,
+    }],
+    ['animate', 'grid', {
+      opacity: 1,
+    }, {
+      delay: 800,
+      duration: 600,
+    }],
+  ],
+
+  // Polar warp
+  [
+    ['animate', '#bump', {
+      domain: [-π, π],
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', 'camera', {
+      lookAt: [0, -.1, 0],
+    }, {
+      duration: 1700,
+    }],
+    ['animate', 'viewport', {
+      range: [[-π, π], [-1, 1], [-2, 2]],
+      scale: [1.1, 1.1],
+      polar: 1,
+    }, {
+      duration: 1700,
+    }],
+  ],
+
+  // Flower spread
+  [
+    ['animate', 'camera', {
+      lookAt: [0, 0, 0],
+    }, {
+      duration: 1400,
+    }],
+    ['animate', 'viewport', {
+      scale: [1, 1],
+    }, {
+      duration: 1400,
+    }],
+    ['set', '#bump', {
+      expression: function (x) {
+        var domain = this.get().domain;
+        var scale = π / domain[1];
+        var fraction = (domain[1] - π) / 7;
+        return [ x * scale, .5-.5*Math.cos(x + fraction)];
+      },
+    }],
+
+    ['animate', '#bump', {
+      domain: [-π*8, π*8],
+    }, {
+      delay: 0,
+      duration: 1600,
+    }],
+  ],
+
+  // Leafs spread
+  [
+    ['animate', 'viewport', {
+      range: [[-π, π], [-.1, 1]],
+      scale: [.7, .7],
+      polar: 1,
+    }, {
+      delay: 300,
+      duration: 2000,
+    }],
+    ['animate', 'grid', {
+      opacity: .75,
+    }],
+    ['animate', 'axis', {
+      opacity: .5,
+    }],
+    ['set', '#bump', {
+      expression: function (x, i) {
+        var t = director[0].clock(7);
+        var fraction = Math.min(1, t);
+        var modulate = Math.max(0, Math.min(1, t - 2.5));
+        var y = .5-.5*Math.cos(x + τ/2);
+        y = y+(Math.asin(y)/π*2-y)*fraction;
+        m = 1+modulate*(-.5+.5*Math.cos(x/8));
+        return [ x / 8, y*m];
+      },
+    }],
+    ['animate', '#bump', {
+      lineWidth: 10,
+      color: 0x40C000,
+    }, {
+      delay: 3300,
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      id: 'modulate',
+      n: 128,
+      live: true,
+      domain: [-π, π],
+      expression: function (x) {
+        return [ x, .5+.5*Math.cos(x) ];
+      },
+      lineWidth: 5,
+      worldRotation: [0, 0, π],
+      color: 0x20C050,
+      zIndex: 4,
+    }, {
+      delay: 0,
+      duration: 500,
+    }],
+    ['animate', '#modulate', {
+      worldRotation: [0, 0, 0],
+    }, {
+      delay: 250,
+      duration: 1000,
+    }],
+    ['animate', '#modulate', {
+      opacity: 0,
+    }, {
+      delay: 2000,
+      duration: 2500,
+    }],
+    ['add', 'curve', {
+      n: 256,
+      live: true,
+      domain: [-π*8, π*8],
+      lineWidth: 10,
+      color: 0x40C000,
+      expression: function (x, i) {
+        var t = director[0].clock(3);
+        var fraction = Math.min(1, t);
+        var modulate = Math.max(0, Math.min(1, t - 1.5));
+        var y = .5-.5*Math.cos(x + τ/2);
+        y = y+(Math.asin(y)/π*2-y)*fraction;
+        m = 1+modulate*(-.5+.5*Math.cos(x/8));
+        return [ x / 8 - Math.sin(x) * .05, y*m * .8 ];
+      },
+      zIndex: 4,
+    }, {
+      delay: 3600,
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      n: 256,
+      live: true,
+      domain: [-π*8, π*8],
+      lineWidth: 10,
+      color: 0x40C000,
+      expression: function (x, i) {
+        var t = director[0].clock(3);
+        var fraction = Math.min(1, t);
+        var modulate = Math.max(0, Math.min(1, t - 1.5));
+        var y = .5-.5*Math.cos(x + τ/2);
+        y = y+(Math.asin(y)/π*2-y)*fraction;
+        m = 1+modulate*(-.5+.5*Math.cos(x/8));
+        return [ x / 8 - Math.sin(x) * .1, y*m * .6 ];
+      },
+      zIndex: 4,
+    }, {
+      delay: 3600,
+      duration: 500,
+    }],
+  ],
+
+  // Poof
+  [
+    ['set', 'curve', {
+      live: false,
+    }],
+    ['animate', 'curve', {
+      color: 0xffff00,
+    }, {
+      delay: 100,
+      duration: 200,
+    }],
+    ['animate', 'curve', {
+      opacity: 0,
+    }, {
+      delay: 150,
+      duration: 200,
+    }],
+    ['animate', 'grid, axis', {
+      color: 0xeeeeee,
+    }, {
+      delay: 100,
+      duration: 200,
+    }],
+  ],
+
+
+  // 
+];
+
+</script>
+

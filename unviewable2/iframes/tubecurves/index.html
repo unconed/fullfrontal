@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Tubecurves</title>
+  <style type="text/css" media="screen">
+    html, body { height: 100%; overflow: hidden }
+  </style>
+  <script type="text/javascript" charset="utf-8" src="domready.js"></script>
+  <script type="text/javascript" charset="utf-8" src="requestanimationframe.js"></script>
+  <script type="text/javascript" charset="utf-8" src="Three.js"></script>
+  <script type="text/javascript" charset="utf-8" src="tubecurves.js"></script>
+  
+<script type="application/x-glsl" id="ribbon-vertex">
+uniform float time;
+uniform float offset;
+
+varying vec3 vColor;
+
+float wrap(float x) {
+  if (abs(x) < 1.0) return x*1.5708;
+  if (x > 0.0) return (2.0 - 1.0/x)*1.5708;
+  return (-2.0 - 1.0/x)*1.5708;
+}
+
+void main() {
+
+    float q = position.x + offset,
+          t = position.y,
+          p = sin(time), r = cos(p+cos(time*.71)+time*.141), s = cos(time + p*1.23 - r);
+    
+    float f = ((t-q*1.71+p)*(t-q*2.91-r)*(1.0+t+q*q*r*2.1+p*r)*.6+(t-q*1.35-s)*(t-p*q*1.14-2.0+s)*.6);
+    
+    vec3 ribbon = vec3(
+      -cos(wrap(f)+time)*q*2.0,
+      t,
+      sin(wrap(f)+time)*q*2.0
+    );
+
+    vColor = color;
+    gl_Position = projectionMatrix *
+                  modelViewMatrix *
+                  vec4(ribbon, 1.0);
+}
+</script>
+
+<script type="application/x-glsl" id="ribbon-pixel">
+uniform float time;
+varying vec3 vColor;
+
+void main() {
+    gl_FragColor = vec4(vColor, 1.0);
+}
+</script>
+</head>
+<body>
+  
+</body>
+</html>

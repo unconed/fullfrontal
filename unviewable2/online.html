@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=1480px">
+  
+  <title>Viewing the Unviewable</title>
+  
+  <!-- Required stylesheet -->
+  <link rel="stylesheet" href="../deck.js/core/deck.core.css">
+  
+  <!-- Theme -->
+  <link rel="stylesheet" href="resources/transition.css">
+  <link rel="stylesheet" href="resources/layout.css">
+  <link rel="stylesheet" href="resources/typography.css">
+  
+  <!-- Required Modernizr file -->
+  <script src="../deck.js/modernizr.custom.js"></script>
+
+  <!-- Typekit fonts -->
+  <script type="text/javascript" src="//use.typekit.net/nde6wmn.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
+  <!-- Required JS files. -->
+  <script src="../deck.js/jquery-1.7.2.min.js"></script>
+  <script src="../deck.js/core/deck.core.js"></script>
+  <script src="../mathbox/vendor/underscore.js"></script>
+  <script src="resources/slides.js"></script>
+  
+  <!-- MathJax typesetting -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      "HTML-CSS": { availableFonts: ["TeX"] },
+      extensions: ["tex2jax.js"],
+      jax: ["input/TeX","output/HTML-CSS"],
+      tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+//      messageStyle: 'none',
+    });
+  </script>
+  <!--<script type="text/javascript" src="../mathjax/MathJax.js?config=TeX-AMS_HTML"></script>-->
+
+  <script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>  
+  
+</head>
+<body>
+
+<div class="deck-container">
+
+  <!-- Begin slides. -->
+
+
+
+  <section class="slide page-cover">
+    <h1 class="white-outline">Viewing the Unviewable</h1>
+    <h2 class="recessed">Steven Wittens</h2>
+    <h3 class="recessed"><img src="images/github.png" width="48" height="48" class="inline"><img class="inline" src="images/twitter.png" width="48" height="48"> &nbsp;<span>unconed</span><br>http:// <span>acko.net</span></h3>
+  </section>
+
+
+
+
+
+
+
+
+  <section class="slide t-5">
+    <div class="slide solid abs t-6"><img class="l8" src="images/software.png"></div>
+    <div class="slide solid abs t-6"><img class="r8" src="images/graphics.png"></div>
+    <div class="slide abs t6"><img src="images/math.png"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom instant">
+    <iframe src="http://acko.net/" class="mathbox"></iframe>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/crysis3.jpg"></div>
+    <div class="slide temp abs-bc"><h3 class="mj">Video Games = Applied Experimental Math</h3></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/shadowfall.jpg"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/starcraft.jpg"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/navmesh.png"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <video src="videos/bipedal-locomotion.mov"></video>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/kerbal-1.jpg"></div>
+    <div class="zoom overlay dark temp abs-tc"><img src="images/kerbal-0.png" width="400"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/kerbal-2.jpg"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/kerbal-3.png"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/kerbal-4.jpg"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/kerbal-5.jpg"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/kerbal-6.jpg"></div>
+    <div class="slide zoom overlay dark temp abs-tc"><img style="opacity: .9" class="t2" src="images/kerbal-7.jpg" width="400"></div>
+  </section>
+
+  <section class="slide">
+    <div class="box">
+      <blockquote class="small">
+        In <strong>Hamiltonian mechanics</strong>, the time evolution is obtained by computing the Hamiltonian of the system in the generalized coordinates and inserting it in the Hamiltonian equations. It is important to point out that this approach is equivalent to the one used in <strong>Lagrangian mechanics</strong>. In fact, as will be shown below, the Hamiltonian is the <strong>Legendre transform</strong> of the Lagrangian, and thus both approaches give the same equations for the same generalized momentum. The main motivation to use Hamiltonian mechanics instead of Lagrangian mechanics comes from the <strong>symplectic structure</strong> of Hamiltonian systems.
+      </blockquote>
+      <p class="signature i">Wikipedia</p>
+    </div>  
+  </section>
+
+  <section class="slide">
+    <div class="box">
+      <blockquote class="small">
+  <strong>Lagrangian mechanics</strong> is a re-formulation of classical mechanics using the principle of stationary action (also called the principle of least action). Lagrangian mechanics applies to systems whether or not they conserve energy or momentum, and it provides conditions under which energy, momentum or both are conserved.<br>
+  <span class="i">[…]</span><br>
+  The fundamental lemma of the calculus of variations shows that solving the Lagrange equations is equivalent to finding the path for which the <strong>action functional is stationary</strong>, a quantity that is the integral of the Lagrangian over time.</blockquote>
+      <p class="signature i">Wikipedia</p>
+    </div>
+    <div class="slide zoom overlay dark temp abs-tc"><img style="background: #fff;" class="t1" src="images/lagrangian.png" width="600"></div>
+
+  </section>
+
+
+
+
+
+
+
+
+
+
+
+  <section class="slide">
+    <h1>MathBox</h1>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <iframe src="iframes/mathbox.html#complexcircle" class="mathbox"></iframe>
+    <div class="slide"></div>
+  </section>
+
+  <section class="slide">
+    <div class="box">
+      <blockquote>“I don’t see how it’s doing society any good<br> to have its members walking around with <br><strong>vague memories</strong> of algebraic formulas and geometric diagrams, and clear memories of <strong>hating them</strong>.”</blockquote>
+      <p class="signature">Paul Lockhart, “A Mathematician's Lament”</p>
+    </div>
+  </section>
+
+  <section class="slide zoom">
+    <iframe src="iframes/1024b.html" class="overscan"></iframe>
+  </section>
+
+  <section class="slide zoom">
+    <div class="abs-tl">→</div>
+  </section>
+
+  <section class="slide">
+    <iframe src="iframes/mathbox.html#2" class="mathbox"></iframe>
+    <div class="slide"></div>
+    <div class="slide"></div>
+
+    <div class="slide mj temp delay40 abs-tl">$$ y = 0.5 - 0.5 \cdot \cos x $$</div>  
+    <div class="slide mj temp abs-tl">$$ r = 0.5 - 0.5 \cdot \cos \theta $$</div>
+    <div class="slide mj temp abs-tl">$$ r = 0.5 + 0.5 \cdot \cos 8 \theta $$</div>
+    <div class="slide mj temp abs-tl">
+      $$ \begin{array}{rl}
+      r = & \arcsin(0.5 + 0.5 \cos 8 \theta) \\
+          & ( 0.5 + 0.5 \cos \theta) \\
+      \end{array} $$
+    </div>
+    <div class="slide mj temp abs-bc">$$ \frac{\partial \mathbf{v}}{\partial t} + \mathbf{v} \cdot \nabla \mathbf{v} = -\frac{1}{\rho} \nabla p + \nu \nabla^2 \mathbf{v} + \mathbf{f} $$</div>
+  </section>
+
+  <section class="slide zoom">
+    <div class="abs-tl">→</div>
+  </section>
+
+  <section class="slide">
+    <iframe src="iframes/mathbox.html#3" class="mathbox"></iframe>
+
+    <div class="slide mj temp abs-br">
+      $$ 
+      y = \frac{x+1}{x-3} \frac{1}{x} \frac{1}{x+2}
+      $$
+    </div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+  </section>
+
+  <section class="slide zoom">
+    <div class="abs-tl">→</div>
+  </section>
+
+  <section class="slide">
+    <iframe src="iframes/tubecurves/index.html" class="mathbox"></iframe>
+  </section>
+
+  <section class="slide">
+    <h1>Math Machines</h1>
+  </section>
+
+  <section class="slide">
+    <h2 class="temp">Bezier Curves</h2>
+    <iframe src="iframes/mathbox.html#4" class="mathbox"></iframe>
+  </section>
+
+  <section class="slide page-floats">
+    <div class="box r t2">
+      <div><img src="images/citroen-ds19.jpg" width="620"></div>
+    </div>
+    <div class="box images l t1">
+      <div><img src="images/decasteljau.jpg" width="195"><br>Paul de Casteljau</div>
+      <div><img src="images/citroen.gif" style="padding: 25px 0;"><br>1959</div>
+    </div>
+    <div class="box images l cl t-1">
+      <div><img src="images/pierre-bezier.gif" width="195" style="padding: 0 17px;"><br>Pierre Bézier</div>
+      <div><img src="images/renault.jpg" style="padding: 3px 0;" width="163" height="260"><br>1962</div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <h2 class="temp">Vectors</h2>
+    <iframe src="iframes/mathbox.html#5" class="mathbox"></iframe>
+
+    <div class="slide mj temp abs-bc">$$ \class{mj-blue}{\vec a} $$</div>
+    <div class="slide mj temp abs-bc">$$ \class{mj-blue}{\vec a} , \class{mj-red}{\vec b} $$</div>
+    <div class="slide mj temp abs-bc">$$ \class{mj-blue}{\vec a} = \class{mj-red}{\vec b} $$</div>
+    <div class="slide mj temp abs-bc">$$ \class{mj-blue}{\vec a} \neq \class{mj-red}{\vec b} $$</div>
+    <div class="slide mj temp abs-bc">$$ \class{mj-blue}{\vec a} + \class{mj-red}{\vec b} = \class{mj-green}{\vec c} $$</div>
+    <div class="slide mj temp abs-bc">$$ \class{mj-green}{\vec c} - \class{mj-red}{\vec b} = \class{mj-blue}{\vec a} $$</div>
+    <div class="slide mj temp abs-bc">$$ \class{mj-blue}{\vec a} + \class{mj-blue}{\vec a} + \class{mj-blue}{\vec a} = 3 \cdot \class{mj-blue}{\vec a} = \class{mj-green}{\vec b} $$</div>
+    <div class="slide mj temp abs-bc">$$ \class{mj-blue}{\vec a} = \frac{\class{mj-green}{\vec b}}{3} = \frac{1}{3} \cdot \class{mj-green}{\vec b} $$</div>
+
+  </section>
+
+  <section class="slide">
+    <iframe src="iframes/mathbox.html#6" class="mathbox"></iframe>
+
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide mj temp abs-bc">$$ \class{mj-red}{\vec b} - \class{mj-blue}{\vec a} = \class{mj-green}{\vec c} $$</div>
+    <div class="slide temp abs-bc">$$ \class{mj-purple}{\vec d} = \class{mj-blue}{\vec a} + \frac{1}{3} \cdot (\class{mj-red}{\vec b} - \class{mj-blue}{\vec a})  $$</div>
+    <div class="slide temp abs-bc"><div>Linear interpolation</div>$$ lerp({\vec a}, {\vec b}, t) = \vec a + t \cdot (\vec b - \vec a) $$</div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide delay20 temp abs-bc">
+      <div>Quadratic Bezier Curve</div>
+      <img src="images/lerp2.png" width="362">
+    </div>
+    <div class="slide"></div>
+    <div class="slide delay20 temp abs-bc">
+      <div>Cubic Bezier Curve</div>
+      <img src="images/lerp3.png" width="480">
+    </div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+  </section>
+
+  <section class="slide">
+    <iframe src="iframes/mathbox.html#7" class="mathbox"></iframe>
+
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide temp abs-bc"><div>Bicubic Bezier Surface</div></div>
+    <div class="slide zoom overlay temp abs-tc"><img style="opacity: .9" class="t2" src="images/3d-surfaces-warner.jpg" width="600"></div>
+    <div class="slide zoom overlay temp abs-tc"><img style="opacity: .8" class="t3" src="images/lerp-bicubic.png" width="800"></div>
+    <div class="slide"></div>
+  </section>
+
+
+
+
+
+
+
+
+
+
+  <section class="slide">
+    <h1>Matrices</h1>
+  </section>
+
+  <section class="slide zoom">
+    <iframe src="iframes/mathbox.html#algebra" class="mathbox"></iframe>
+
+    <div class="slide temp abs-tc"><h3 class="mj">Affine Transforms</h3></div>
+    <div class="slide temp abs-tc"></div>
+    <div class="slide temp abs-tc"></div>
+    <div class="slide temp abs-tc"></div>
+    <div class="slide temp abs-tc"><h3 class="mj">Parallel Lines</h3></div>
+    <div class="slide temp abs-tc"><h3 class="mj">Vector Basis</h3></div>
+    <div class="slide temp abs-tc"></div>
+    <div class="slide temp-delay abs-tc"><h3 class="mj">Disassemble and Reassemble</h3></div>
+    <div class="slide"></div>
+
+    <div class="slide inflate temp delay10">
+      <div class="abs-tc"><h3 class="mj">Matrix</h3></div>
+      <div class="mj abs-r">
+        $$
+        \begin{bmatrix}
+          \class{mj-blue}{0.53} & \class{mj-green}{0.42} \\
+         \class{mj-blue}{-0.32} & \class{mj-green}{0.77}
+        \end{bmatrix}
+        $$
+      </div>
+    </div>
+
+    <div class="slide inflate temp">
+      <div class="abs-tc"><h3 class="mj">Matrix-Vector Multiply</h3></div>
+      <div class="mj abs" style="margin-left: 50px; top: 300px">
+        $$
+        \class{mj-purple}{\vec v'} = \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+        $$<br><br>
+        $$
+
+        \begin{bmatrix}
+          \class{mj-purple}{x'} \\ \class{mj-purple}{y'}
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+          \class{mj-blue}{0.53} & \class{mj-green}{0.42} \\
+         \class{mj-blue}{-0.32} & \class{mj-green}{0.77}
+        \end{bmatrix}
+        \cdot
+        \begin{bmatrix}
+          \class{mj-orangered}{x} \\ \class{mj-orangered}{y}
+        \end{bmatrix}
+        $$
+      </div>
+    </div>
+
+    <div class="slide inflate temp">
+      <div class="abs-tc"><h3 class="mj">Disassemble and Reassemble</h3></div>
+      <div class="mj abs" style="margin-left: 0px; top: 300px;">
+        $$
+        \class{mj-purple}{\vec v'} = \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+        $$<br><br>
+        $$
+        \begin{bmatrix}
+          \class{mj-purple}{x'} \\ \class{mj-purple}{y'}
+        \end{bmatrix}
+        =
+        \class{mj-orangered}{x} \cdot
+        \begin{bmatrix}
+          \class{mj-blue}{0.53} \\ \class{mj-blue}{-0.32}
+        \end{bmatrix}
+        +
+        \class{mj-orangered}{y} \cdot
+        \begin{bmatrix}
+         \class{mj-green}{0.42} \\ \class{mj-green}{0.77}
+        \end{bmatrix}
+        $$
+      </div>
+    </div>
+
+    <div class="slide inflate temp">
+      <div class="abs-tc"><h3 class="mj">Matrix-Matrix Multiply</h3></div>
+      <div class="mj abs" style="margin-left: 20px; top: 300px;">
+        $$
+        \class{mj-purple}{\vec v'} = \mathbf{M'} \cdot \class{mj-orangered}{\vec v} = \mathbf{R} \cdot \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+        $$
+        <br><br>
+        $$
+
+        \begin{bmatrix}
+          \class{mj-purple}{x'} \\ \class{mj-purple}{y'}
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+          \class{mj-blue}{-0.32} & \class{mj-green}{0.77} \\
+         \class{mj-blue}{-0.53} & \class{mj-green}{-0.42}
+        \end{bmatrix}
+        \begin{bmatrix}
+          \class{mj-orangered}{x} \\ \class{mj-orangered}{y}
+        \end{bmatrix}
+        $$<br>
+        $$
+        =
+        \begin{bmatrix}
+          \class{mj-blue}{0} & \class{mj-green}{1} \\
+         \class{mj-blue}{-1} & \class{mj-green}{0}
+        \end{bmatrix}
+        \begin{bmatrix}
+          \class{mj-blue}{0.53} & \class{mj-green}{0.42} \\
+         \class{mj-blue}{-0.32} & \class{mj-green}{0.77}
+        \end{bmatrix}
+        \begin{bmatrix}
+          \class{mj-orangered}{x} \\ \class{mj-orangered}{y}
+        \end{bmatrix}
+        $$
+      </div>
+    </div>
+
+    <div class="slide inflate temp">
+      <div class="abs-tc"><h3 class="mj">3D</h3></div>
+      <div class="mj abs" style="margin-left: 20px; top: 300px;">
+        $$
+        \class{mj-purple}{\vec v'} = \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+        $$
+        <br><br>
+        $$
+
+        \begin{bmatrix}
+          \class{mj-purple}{x'} \\ \class{mj-purple}{y'} \\ \class{mj-purple}{z'}
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+          \class{mj-blue}{a} & \class{mj-green}{d} & \class{mj-red}{g}  \\
+         \class{mj-blue}{b} & \class{mj-green}{e} & \class{mj-red}{h} \\
+         \class{mj-blue}{c} & \class{mj-green}{f} & \class{mj-red}{i}
+        \end{bmatrix}
+        \begin{bmatrix}
+          \class{mj-orangered}{x} \\ \class{mj-orangered}{y} \\ \class{mj-orangered}{z}
+        \end{bmatrix}
+        $$
+      </div>
+    </div>
+
+    <div class="slide inflate temp">
+      <div class="abs-tc"><h3 class="mj">4D?</h3></div>
+      <div class="mj abs" style="margin-left: 20px; top: 300px;">
+        $$
+        \class{mj-purple}{\vec v'} = \mathbf{M} \cdot \class{mj-orangered}{\vec v}
+        $$
+        <br><br>
+        $$
+
+        \begin{bmatrix}
+          \class{mj-purple}{x'} \\ \class{mj-purple}{y'} \\ \class{mj-purple}{z'} \\ \class{mj-purple}{w'}
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+          \class{mj-blue}{a} & \class{mj-green}{e} & \class{mj-red}{i} & \class{mj-indigo}{m} \\
+         \class{mj-blue}{b} & \class{mj-green}{f}  & \class{mj-red}{j} & \class{mj-indigo}{n} \\
+         \class{mj-blue}{c} & \class{mj-green}{g}  & \class{mj-red}{k} & \class{mj-indigo}{o} \\
+         \class{mj-blue}{d} & \class{mj-green}{h}  & \class{mj-red}{l} & \class{mj-indigo}{p}
+        \end{bmatrix}
+        \begin{bmatrix}
+          \class{mj-orangered}{x} \\ \class{mj-orangered}{y} \\ \class{mj-orangered}{z} \\ \class{mj-orangered}{w}
+        \end{bmatrix}
+        $$
+      </div>
+    </div>
+
+    <div class="slide temp abs-tc"><h3 class="mj">Ordinary 2D Space</h3></div>
+    <div class="slide temp abs-tc"><h3 class="mj">Projective 2D Space</h3></div>
+    <div class="slide temp abs-tc"><h3 class="mj">Z Vector = Translation + Scale</h3></div>
+    <div class="slide temp abs-tc"><h3 class="mj">X/Y Vector = Perspective</h3></div>
+
+    <div class="slide inflate temp">
+      <div class="abs-tc"><h3 class="mj">Projective 3D Transform = 3D <span class="mj-blue">X</span><span class="mj-green">Y</span><span class="mj-red">Z</span> Matrix + <span class="mj-indigo">Translation</span> + <span class="mj-orangered">Perspective</span></h3></div>
+      <div class="mj abs-tc">
+        <br><br>
+        $$
+
+        \begin{bmatrix}
+          \class{mj-blue}{a} & \class{mj-green}{e} & \class{mj-red}{i} & \class{mj-indigo}{m} \\
+         \class{mj-blue}{b} & \class{mj-green}{f}  & \class{mj-red}{j} & \class{mj-indigo}{n} \\
+         \class{mj-blue}{c} & \class{mj-green}{g}  & \class{mj-red}{k} & \class{mj-indigo}{o} \\
+         \class{mj-orangered}{d} & \class{mj-orangered}{h}  & \class{mj-orangered}{l} & 1
+        \end{bmatrix}
+
+        $$
+      </div>
+    </div>
+
+    <div class="slide temp abs-tc"><h3 class="mj">Object Space to World Space</h3></div>
+    <div class="slide temp delay10 abs-bc"><h3 class="mj">World Space to View Space</h3></div>
+    <div class="slide temp delay10 abs-bc"><h3 class="mj">View Space to Screen Space</h3></div>
+    <div class="slide temp delay10 abs-bc"><h3 class="mj">Or Back Again</h3></div>
+
+  </section>
+
+
+
+
+
+
+
+
+
+
+
+
+  <section class="slide">
+    <h1>Procedural Generation</h1>
+  </section>
+
+  <section class="slide">
+    <div class="box">
+      <h2>Iñigo Quílez, Pixar</h2>
+      <blockquote style="padding-left: 180px">“To make a film, we have to direct <br>almost <strong>200 billion pixels</strong>.<br>That's a lot of mathematics.”</blockquote>
+    </div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/brave720.jpg"></div>
+    <div class="slide zoom overlay temp abs-tc"><img class="t5" style="opacity: .9" src="images/pixel.png"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/brave2.jpg"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/musicprod.png"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/proccity.png"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/proccity2.png"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/flakes1.jpg"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/flakes2.jpg"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/flakes3.jpg"></div>
+    <div class="mj temp abs-tc">
+      <h2>“Doodling in Math Class” — Vihart</h2>
+      <h3>YouTube.com / user / Vihart</strong></h3>
+    </div>
+  </section>
+
+  <section class="slide zoom">
+    <div class="abs-tl">→</div>
+  </section>
+
+  <section class="slide zoom">
+    <iframe src="iframes/raytrace-creepy.html" class="mathbox punch"></iframe>
+  </section>
+
+  <section class="slide zoom">
+    <div class="abs-tl">→</div>
+  </section>
+
+  <section class="slide zoom">
+    <iframe src="iframes/raytrace-bananas.html" class="mathbox punch"></iframe>
+  </section>
+
+  <section class="slide">
+    <iframe src="iframes/mathbox.html#8" class="mathbox"></iframe>
+
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide temp abs-bc"><div>Longitude</div></div>
+    <div class="slide temp abs-bc"><div>Latitude</div></div>
+  </section>
+
+  <section class="slide">
+    <pre class="overlay t1">
+  <em>longitude</em> <span style="color: #77A">=</span> cos(<em>time</em> <span style="color: #77A">+</span> sin(<em>time</em> <span style="color: #77A">*</span> <span style="color: #933">0.31</span>)) <span style="color: #77A">*</span> <span style="color: #933">2</span>
+            <span style="color: #77A">+</span> sin(<em>time</em> <span style="color: #77A">*</span> <span style="color: #933">0.83</span>) <span style="color: #77A">*</span> <span style="color: #933">3</span> <span style="color: #77A">+</span> <em>time</em> <span style="color: #77A">*</span> <span style="color: #933">0.02</span>
+  <em>latitude</em>  <span style="color: #77A">=</span> sin(<em>time</em> <span style="color: #77A">*</span> <span style="color: #933">0.7</span> <span style="color: #77A">+</span> <span style="color: #933">1</span>)
+            - cos(<span style="color: #933">3</span> <span style="color: #77A">+</span> <em>time</em> <span style="color: #77A">*</span> <span style="color: #933">0.43</span> <span style="color: #77A">+</span> sin(<em>time</em>) <span style="color: #77A">*</span> <span style="color: #933">0.13</span>) <span style="color: #77A">*</span> <span style="color: #933">2.3</span></pre>
+    <div class="box images slide"><div><img src="images/longitude-calc.png" width="650"></div></div>
+  </section>
+
+
+
+  <section class="slide">
+    <h1>$$ x $$</h1>
+  </section>
+
+  <section class="slide">
+    <h1>$$ x =\hspace{3 pt}? $$</h1>
+  </section>
+
+  <section class="slide">
+    <div class="slide solid slow">
+      <iframe src="iframes/mathbox.html#9" class="mathbox"></iframe>
+    </div>
+    <h1 class="temp">$$ x = $$</h1>
+    <div class="box images equalTicks down160 shrinkmath">
+      <div class="mj temp">$$ \ldots $$</div>
+      <div class="mj">$$ -4 $$</div>
+      <div class="mj">$$ -3 $$</div>
+      <div class="mj">$$ -2 $$</div>
+      <div class="mj">$$ -1 $$</div>
+      <div class="mj">$$ 0 $$</div>
+      <div class="mj">$$ 1 $$</div>
+      <div class="mj">$$ 2 $$</div>
+      <div class="mj">$$ 3 $$</div>
+      <div class="mj">$$ 4 $$</div>
+      <div class="mj temp">$$ \ldots $$</div>
+    </div>
+    <div class="slide mj temp solid abs-tl delay10">
+      $$ f(x) = x $$
+    </div>
+    <div class="slide mj temp solid abs-tl">
+      $$ f(x) = 1 $$
+    </div>
+    <div class="slide mj temp abs-tl">
+      $$ f(x) = 2x $$
+    </div>
+    <div class="slide mj temp abs-tl">
+      $$ f(x) = 2x + 1 $$
+    </div>
+    <div class="slide mj temp abs-tl">
+      $$ f(x) = \left|2x + 1\right| $$
+    </div>
+    <div class="slide mj temp abs-tl">
+      $$ f(x) = \left| 2x + 1 \right| - 4 $$
+    </div>
+    <div class="slide mj temp abs-tl">
+      $$ f(x) = \left| \left| 2x + 1 \right| - 4 \right| $$
+    </div>
+    <div class="slide mj temp abs-tl">
+      $$ f(x) = \left| \left| 2x + 1 \right| - 4 \right| - 2.5 $$
+    </div>
+    <div class="slide mj temp-delay abs-tl">
+      $$ f(x) = \left| \left| \left| 2x + 1 \right| - 4 \right| - 2.5 \right| $$
+    </div>
+    <div class="slide"></div>
+
+    <div class="slide mj temp-delay solid abs-tl">
+      $$ \class{mj-blue}{f(x) = 2.5 \cdot \arctan x} $$
+    </div>
+    <div class="slide mj temp abs-tl t2">
+      $$
+        \class{mj-green}{g(x) = x} 
+      $$
+    </div>
+    <div class="slide temp"></div>
+
+    <div class="slide mj temp solid abs-tl">
+      $$ \class{mj-blue}{f(x) = 2.5 \cdot \arctan x} $$
+      $$ \class{mj-green}{g(x) = \sin 6x} $$
+    </div>
+    <div class="slide mj temp abs-tl">
+      $$ \class{mj-red}{f(x) + g(x)} $$
+    </div>
+    <div class="slide temp"></div>
+     <div class="slide mj temp solid abs-tl">
+      $$
+        \class{mj-blue}{ f(x) = 0.5 + 0.5 \cdot \cos x }
+      $$
+    </div>
+    <div class="slide mj temp solid abs-tl">
+      $$
+        \class{mj-blue}{ f(x) = 0.5 + 0.5 \cdot \cos ( max(-\pi, min(\pi, x))) }
+      $$
+    </div>
+    <div class="slide mj temp solid abs-tl">
+      $$
+        \class{mj-blue}{ f(x) = 0.5 + 0.5 \cdot \cos ( max(-\pi, min(\pi, x))) } $$
+      $$
+        \class{mj-green}{ g(x) = thing(x, t) }
+      $$
+    </div>
+    <div class="slide mj temp solid abs-tl">
+      $$
+        \class{mj-blue}{ f(x) = 0.5 + 0.5 \cdot \cos ( max(-\pi, min(\pi, x))) }  $$
+      $$
+        \class{mj-red}{ g(x) = f(x) \cdot thing(x, t) }
+      $$
+    </div>
+
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide mj solid abs-tc delay10">
+      <h3 class="mj">Catmull Rom Spline</h3>
+    </div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+
+  </section>
+
+  <section class="slide zoom">
+    <div class="abs-tl">→</div>
+  </section>
+
+  <section class="slide">
+    <iframe src="iframes/mathbox.html#10" class="mathbox"></iframe>
+    <div class="slide temp solid abs-bc"></div>
+    <div class="slide temp solid abs-bc"></div>
+    <div class="slide"></div>
+    <div class="slide temp solid abs-tc"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide mj temp solid abs-br delay40">
+      <h3 class="mj">Stacked Value Noise</h3>
+    </div>
+  </section>
+
+  <section class="slide zoom">
+    <div class="box images t0">
+      <div>
+        <img src="images/spore.jpg">
+      </div>
+    </div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <video src="videos/nfspace-blue.mov"></video>
+  </section>
+
+
+
+
+
+
+
+
+  <section class="slide">
+    <h1>Direct Live Visualization</h1>
+  </section>
+
+
+  <section class="slide">
+    <iframe src="iframes/mathbox.html#11" class="mathbox"></iframe>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+  </section>
+
+
+  <section class="slide zoom">
+    <iframe src="iframes/mathbox.html#complex" class="mathbox"></iframe>
+
+    <div class="slide abs-bc mj temp"><big>$$ z $$</big></div>
+    <div class="slide abs-bc mj temp"><big>$$ z^{0.5} $$</big></div>
+    <div class="slide abs-bc mj temp"><big>$$ (z^{0.5})^{4} = z^{2}$$</big></div>
+    <div class="slide abs-bc mj temp"><big>$$ z^{\sqrt{2}}$$</big></div>
+    <div class="slide abs-bc mj temp"><big>$$ z^p = \,? $$</big></div>
+    <div class="slide abs-bc mj"><h3>Show, Don't Tell</h3></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="spotlight"><img src="images/linear.png"></div>
+    <div class="slide zoom overlay temp abs-bc"><img src="images/concepts-1.png" width="1200"></div>
+  </section>
+
+  <section class="slide page-centerfold zoom">
+    <div class="box images"><div><div><img src="images/concepts-2.png" class="" width="900"></div></div>
+  </section>
+
+  <section class="slide zoom">
+    <div class="abs-tl">→</div>
+  </section>
+
+
+  <section class="slide page-centerfold zoom instant">
+    <iframe src="http://acko.net/files/dump/mathbox2/spherical.html" class="mathbox punch"></iframe>
+  </section>
+
+
+
+
+  <section class="slide page-ref">
+    <h1>References</h1>
+  </section>
+
+  <section class="slide page-ref">
+    <h2><small>“Media for Thinking the Unthinkable”<br>Bret Victor</small></h2>
+    <h3><small>Worry Dream.com / MediaForThinkingTheUnthinkable</small></h3>
+    <div class="box images"><div><img src="images/mfttu-4.png" class="recessed"></div></div>
+  </section>
+
+  <section class="slide page-ref">
+    <h2>Red Blob Games - Amit Patel</h2>
+    <h3>Red Blob Games.com</h3>
+    <div class="box images"><div><img src="images/redblob.png" class="recessed"></div></div>
+  </section>
+
+  <section class="slide page-ref">
+    <h2>Syntopia —  Mikael Hvidtfeldt Christensen</h2>
+    <h3>Blog.Hvidtfeldts.Net</h3>
+    <div class="box images"><div><img src="images/hvidtfeldts.jpg" class="recessed"></div></div>
+  </section>
+
+
+
+  <section class="slide page-ref">
+    <h2>Thanks!</h2>
+    <h3>Acko.net – Slides @ <a href="http://bit.do/acko">http://bit.do/acko</a></h3>
+    <div class="box images"><div><img src="images/julia.jpg" width="500" class="recessed"><br>“How to Fold a Julia Fractal”</div><div><img src="images/achilles.png" width="500" class="recessed"><br>“To Infinity And Beyond”</div></div>
+    <div class="mj" style="text-align: center"><small><span class="i">Powered by <strong>MathBox.js</strong> and <strong>Three.js</strong></small></div>
+  </section>
+
+
+<!-- End slides. -->
+</div>
+
+<div id="message">
+  <script type="text/javascript">
+  if (!document.createElement('canvas').getContext('experimental-webgl')) {
+    document.write('<p class="error"><strong>Sorry! Your browser does not support WebGL, which is required to view this presentation.</strong><br>Video will be made available soon.<!--<br><br>You can <a href="http://youtube.com/watch?v=Zkx1aKv2z8o">view the video on YouTube</a> instead.<br><br>Or you can use Google Chrome or Mozilla Firefox.</p>-->');
+  }
+  else {
+    document.write('<p>Note: these slides use cutting edge CSS 3 and WebGL features. It is recommended to use Google Chrome to view them.</p>');
+  }
+  </script>
+</div>
+
+<div id="context">
+  Diagrams powered by <a href="http://acko.net/blog/making-mathbox" target="_blank">MathBox</a>.<br>Browse the slides source <a href="https://github.com/unconed/fullfrontal/tree/master/unviewable2" target="_blank">on Github</a>.
+</div>
+
+<!--
+<div id="video">
+  <!- -<a href="http://youtube.com/watch?v=Zkx1aKv2z8o" target="_blank"><span> ►</span> Watch Presentation Video</a></a>- ->
+  <a href="http://2013.jsconf.us/schedule"><em>Video available soon</em></a>
+</div>
+-->
+
+<div id="controls">
+  <a href="javascript:$.deck('prev')">‹</a>
+  <a href="javascript:$.deck('next')">›</a>
+</div>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-288349-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,492 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'sphere',
+      range: [[-π, π], [-π/2, π/2], [-1, 1]],
+      scale: [.5, .25, .25],
+      sphere: 1,
+    })
+    .camera({
+      phi: -τ/8,
+      theta: .3,
+    });
+
+}
+
+
+function tentacle(x, d, o) {
+  var t = director[0].clock(1)*.6 + 20;
+  var Q = .43, P = .05;
+
+  var i = x * 13;
+
+  var time = t - i * .08 - o*3;
+
+  if (o == 0) {
+    time *= 3;
+  }
+
+  var radius = i*.15 + .43;
+  var longitude = Math.cos(time + Math.sin(time * .31)) * 2 + Math.sin(time * .83) * 3 + time*.02;
+  var latitude = Math.sin(time * .7 + 1) - Math.cos(3 + time *.43 + Math.sin(time) * .13) * 2.3;
+
+  if (o == 0) {
+    longitude = (longitude - time*.02) * .3;
+    latitude = latitude * .3 + .3;
+  }
+
+  return [longitude, latitude, radius*2];
+}
+
+function tentacleSeed(o) {
+  return function (x, i) {
+    var t = .5-.5*Math.cos(π * Math.min(1, Math.max(0, director[0].clock(2)*.5-1)));
+    return tentacle(Math.min(t, x), i, o);
+  }
+}
+
+function tentacleShadow(o) {
+  return function (x, i) {
+    var t = .5-.5*Math.cos(π * Math.min(1, Math.max(0, director[0].clock(2)*.5-1)));
+    var p = tentacle(Math.min(t, x), i, o);
+    p[2] = .85;
+    return p;
+  }
+}
+
+function tentacleExtend(o) {
+  return function (x, i) {
+    var t = director[0].clock(5)*.58;
+    return tentacle(Math.min(1 + t, x), i, o);
+  }
+}
+
+function tentacleShadowExtend(o) {
+  return function (x, i) {
+    var t = director[0].clock(5)*.58;
+    var p = tentacle(Math.min(1 + t, x), i, o);
+    p[2] = .85;
+    return p;
+  }
+}
+
+window.mathBoxScript = [
+
+  // Setup sphere grid
+  [
+    ['add', 'grid', {
+      axis: [0, 1],
+      n: 64,
+      offset: [0, 0, .85],
+      tickUnit: [π, π],
+      ticks: [10, 10],
+      lineWidth: 2,
+      zIndex: -3,
+    }],
+    ['add', 'axis', {
+      axis: 0,
+      n: 64,
+      offset: [0, 0, .85],
+      tickUnit: π,
+      size: .03,
+      arrow: false,
+    }],
+    ['add', 'axis', {
+      axis: 1,
+      n: 64,
+      tickUnit: π,
+      offset: [0, 0, .85],
+      size: .03,
+      arrow: false,
+    }],
+    ['add', 'surface', {
+      domain: [[-π, π], [-π/2, π/2]],
+      expression: function (x, y, i, j) {
+        return [x, y, .85];
+      },
+      opacity: 1,
+      doubleSided: true,
+      flipSided: true,
+      zIndex: -50,
+      color: 0xffffff,
+      shaded: false,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // Fade in tentacles
+  [
+    ['add', 'curve', {
+      id: 'single',
+      domain: [0, 10],
+      n: 280,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(0),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(1),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(2),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(3),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(4),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(5),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(6),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(7),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(8),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(9),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'extra',
+      n: 28,
+      points: true,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleSeed(10),
+      opacity: 0.001,
+    }],
+    ['add', 'curve', {
+      id: 'shadow',
+      domain: [0, 10],
+      n: 280,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(0),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(1),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(2),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(3),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(4),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(5),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(6),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(7),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(8),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(9),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['add', 'curve', {
+      id: 'extrashadow',
+      n: 28,
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      pointSize: 8,
+      expression: tentacleShadow(10),
+      opacity: 0.001,
+      color: 0x20C050,
+    }],
+    ['animate', '#single', {
+      opacity: 1,
+    }, {
+      delay: 300,
+    }],
+    ['animate', '#extra', {
+      opacity: 1,
+    }, {
+      delay: 300,
+    }],
+    ['animate', '#shadow', {
+      opacity: .75,
+    }, {
+      delay: 300,
+    }],
+    ['animate', '#extrashadow', {
+      opacity: .75,
+    }, {
+      delay: 300,
+    }],
+    ['animate', 'surface', {
+      zIndex: -80,
+    }, {
+      delay: 600,
+      duration: 7000,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4-τ/8,
+      orbit: 1.5,
+    }, {
+      delay: 1600,
+      duration: 5000,
+    }],
+  ],
+
+  // Isolate strand
+  [
+    ['remove', '#extra', {
+      duration: 300,
+    }],
+    ['remove', '#extrashadow', {
+      duration: 300,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4,
+    }, {
+      duration: 5000,
+    }],
+  ],
+
+  // Unwrap sphere + expand grid
+  [
+    ['animate', 'viewport', {
+      range: [[-π, π], [-π/2, π/2], [-3, 3]],
+      sphere: 0,
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      position: [-.15, .12, -.1],
+    }, {
+      delay: 0,
+      duration: 2000,
+    }],
+    ['animate', 'camera', {
+      phi: τ/4+τ/8+.2,
+    }, {
+      duration: 5000,
+    }],
+  ],
+
+  // Extend strand
+  [
+    ['set', '#single', {
+      expression: tentacleExtend(0),
+    }],
+    ['set', '#shadow', {
+      expression: tentacleShadowExtend(0),
+    }],
+    ['set', '#single', {
+      points: false,
+    }],
+  ],
+
+  // X projection
+  [
+    ['animate', 'camera', {
+      phi: 0,
+      theta: τ/4,
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      position: [0, 0, 0],
+      range: [[-1.5*π, 1.5*π], [-π, π], [11, 27]],
+      scale: [.5, .125, .25],
+//      scale: [.6, .3*1.2, .3],
+    }, {
+      duration: 2000,
+    }],
+  ],
+
+  // Y projection
+  [
+    ['animate', 'viewport', {
+      range: [[-π, π], [-2*π, 2*π], [11, 27]],
+      rotation: [0, 0, τ/4],
+      scale: [.125, 1, .25],
+    }, {
+      duration: 1000,
+    }],
+  ],
+];
+
+</script>

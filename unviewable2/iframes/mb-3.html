@@ -1,0 +1,170 @@
+<script type="text/javascript" charset="utf-8">
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'polar',
+      range: [[-π, π], [-1, 1], [-4, 4]],
+      scale: [1, 1, 2],
+      polar: 0,
+      rotation: [0, 0, π/2],
+    })
+    .camera({
+      phi: τ/2,
+      orbit: 4.5,
+    });
+
+}
+
+function rational(x) {
+  var y = (x+1)/(x-3)/x/(x+2);
+  return [y, 1, x];
+}
+
+function rationalWrap(x) {
+  var y = (x+1)/(x-3)/x/(x+2);
+  if (Math.abs(y) > 1) {
+    if (y > 0) {
+      y = 2 - 1/y;
+    }
+    if (y < 0) {
+      y = -2 - 1/y
+    }
+  }
+  return [y * π/2, 1, x];
+}
+
+function asymp(offset) {
+  return function (x) {
+    return [x, 1, offset];
+  }
+}
+
+window.mathBoxScript = [
+
+  [
+    ['add', 'grid', {
+      axis: [0, 2],
+      n: [64, 2],
+      color: 0xB0B0B0,
+      tickUnit: [π, 1],
+      zIndex: -5,
+      offset: [0, 1, 0],
+    }],
+  ],
+
+  [
+    // Curve segments
+    ['add', 'curve', {
+      id: "f",
+      n: 256,
+      domain: [-4, -2.0005],
+      live: true,
+      expression: rational,
+      lineWidth: 6,
+    }],
+    ['add', 'curve', {
+      id: "f",
+      n: 256,
+      domain: [-1.9995, -0.0005],
+      live: true,
+      expression: rational,
+      lineWidth: 6,
+    }],
+    ['add', 'curve', {
+      id: "f",
+      n: 384,
+      domain: [0.0005, 2.9995],
+      live: true,
+      expression: rational,
+      lineWidth: 6,
+    }],
+    ['add', 'curve', {
+      id: "f",
+      n: 128,
+      domain: [3.0005, 4],
+      live: true,
+      expression: rational,
+      lineWidth: 6,
+    }],
+
+    ['add', 'curve', {
+      id: "asymp",
+      n: 2,
+      domain: [-4, 4],
+      live: true,
+      lineWidth: 4,
+      color: 0x20C050,
+      expression: asymp(-2),
+    }, {
+      delay: 600,
+    }],
+    ['add', 'curve', {
+      id: "asymp",
+      n: 2,
+      domain: [-4, 4],
+      live: true,
+      lineWidth: 4,
+      color: 0x20C050,
+      expression: asymp(0),
+    }, {
+      delay: 600,
+    }],
+    ['add', 'curve', {
+      id: "asymp",
+      n: 2,
+      domain: [-4, 4],
+      live: true,
+      lineWidth: 4,
+      color: 0x20C050,
+      expression: asymp(3),
+    }, {
+      delay: 600,
+    }],
+  ],
+
+  [
+    ['remove', '#asymp'],
+    ['animate', 'viewport', {
+      position: [.5, 0, 0],
+    }],
+    ['animate', 'camera', {
+      phi: τ*(1/2+1/8),
+      theta: .3,
+      orbit: 5.5,
+    }, {
+      duration: 1000,
+    }],
+    ['animate', '#f', {
+      expression: rationalWrap,
+    }, {
+      delay: 1000,
+      duration: 1000
+    }],
+  ],
+
+  [
+    ['animate', 'viewport', {
+      polar: 1,
+    }, {
+      duration: 2000,
+    }],
+    ['animate', 'viewport', {
+      rotation: [0, 0, π*3],
+    }, {
+      delay: 2000,
+      duration: 15000,
+    }],
+    ['animate', 'camera', {
+      phi: τ*(3/2+1/8),
+    }, {
+      delay: 2000,
+      duration: 15000,
+    }]
+  ],
+
+
+];
+
+</script>
