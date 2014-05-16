@@ -1,0 +1,241 @@
+<meta charset="utf-8">
+<script type="text/javascript" charset="utf-8">
+
+var particles = [
+];
+
+var npart = 48;
+
+var sd1 = 313, sd2 = 137;
+function rnd() {
+  sd1 = (sd1 * 13 + 149) % 2000;
+  sd2 = (sd2 * 31 + 367) % 2000;
+  return (sd1+sd2)/1000 - 2;
+}
+
+_.loop(npart, function () {
+  particles.push(new Physics.Particle(rnd(), rnd(), 0, rnd(), rnd(), 0, .09, 1));
+});
+
+particles.push(new Physics.Particle(rnd(), rnd() - .5, 0, 0, 0, 0, .2, 4));
+particles.push(new Physics.Particle(rnd(), rnd() - .5, 0, 0, 0, 0, .2, 4));
+particles.push(new Physics.Particle(rnd(), rnd() - .5, 0, 0, 0, 0, .2, 4));
+particles.push(new Physics.Particle(rnd(), rnd() - .5, 0, 0, 0, 0, .2, 4));
+particles.push(new Physics.Particle(rnd(), rnd() - .5, 0, 0, 0, 0, .2, 4));
+particles.push(new Physics.Particle(rnd(), rnd() - .5, 0, 0, 0, 0, .2, 4));
+
+var gravityUp = new Physics.GravityWell(0, 100, 0, 40000);
+var gravityDown = new Physics.Gravity(4);
+
+var constraints = [
+  new Physics.Friction(.998),
+  new Physics.BoxCollider(4, 4, 4, .8),
+  new Physics.ParticleCollider(.8),
+  gravityDown,
+];
+
+var physics = window.physics = new Physics.Engine({
+  method: 'verlet',
+  step: 1/60/4,
+}, particles, constraints);
+
+var activePhysics = [2, 3, 4, 5, 6, 7, 8, 9];
+
+window.requestAnimationFrame(function loop() {
+  window.requestAnimationFrame(loop);
+
+  if (window.director && (activePhysics.indexOf(window.director[0].step) != -1)) {
+    physics.update();
+    physics.update();
+    physics.update();
+    physics.update();
+  }
+});
+
+function bigparticle(index) {
+  return function (x, i) {
+    var p = physics.position(index);
+    var r = physics.particles[index].radius;
+    return [p[0] + Math.cos(x) * r, p[1] + Math.sin(x) * r];
+  }
+}
+
+window.mathBoxSetup = function (mathbox, director) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-2, 2], [-2, 2]],
+      scale: [1, 1],
+    })
+    .grid({
+      ticks: [2, 2],
+    })
+    .curve({
+      n: 5,
+      points: false,
+      line: true,
+      live: true,
+      expression: function (x, i) {
+        return [Math.cos(x*τ+τ/8)/0.707*2, Math.sin(x*τ+τ/8)/0.707*2, 0];
+      },
+      color: 0x000000,
+      opacity: 0.5,
+      zIndex: -1,
+    });
+
+  director.on('go', function (step, direction) {
+    if (step == 2) {
+      constraints.pop();
+      constraints.push(gravityDown);
+    }
+    if (step == 3) {
+      constraints.pop();
+      constraints.push(gravityUp);
+    }
+    if (step == 4) {
+      constraints.pop();
+      constraints.push(gravityDown);
+    }
+    if (step == 5) {
+      constraints.pop();
+      constraints.push(gravityUp);
+    }
+    if (step == 6) {
+      constraints.pop();
+      constraints.push(gravityDown);
+    }
+    if (step == 7) {
+      constraints.pop();
+      constraints.push(gravityUp);
+    }
+    if (step == 8) {
+      constraints.pop();
+      constraints.push(gravityDown);
+    }
+  });
+}
+
+window.mathBoxScript = [
+
+  [
+    ['add', 'curve', {
+      n: npart,
+      points: true,
+      line: false,
+      live: true,
+      expression: function (x, i) {
+        return physics.position(i);
+      },
+      pointSize: 30,
+      zIndex: 2,
+    }],
+
+    ['add', 'curve', {
+      n: 32,
+      domain: [-π, π],
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: bigparticle(npart),
+      zIndex: 2,
+    }],
+    ['add', 'curve', {
+      n: 32,
+      domain: [-π, π],
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: bigparticle(npart + 1),
+      zIndex: 2,
+    }],
+    ['add', 'curve', {
+      n: 32,
+      domain: [-π, π],
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: bigparticle(npart + 2),
+      zIndex: 2,
+    }],
+    ['add', 'curve', {
+      n: 32,
+      domain: [-π, π],
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: bigparticle(npart + 3),
+      zIndex: 2,
+    }],
+    ['add', 'curve', {
+      n: 32,
+      domain: [-π, π],
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: bigparticle(npart + 4),
+      zIndex: 2,
+    }],
+    ['add', 'curve', {
+      n: 32,
+      domain: [-π, π],
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: bigparticle(npart + 5),
+      zIndex: 2,
+    }],
+
+  ],
+
+  [],
+  [],
+  [],
+
+  [
+    ['add', 'vector', {
+      n: npart + 6,
+      domain: [-π, π],
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (i, end) {
+        return physics.velocity(i, end, .125);
+      },
+      color: 0x50C020,
+      zIndex: 3,
+    }],
+  ],
+  [],
+
+  [
+    ['add', 'vector', {
+      n: npart + 6,
+      domain: [-π, π],
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      expression: function (i, end) {
+        return physics.acceleration(i, end, .125, .125*.5);
+      },
+      color: 0xC05020,
+      zIndex: 4,
+    }],
+  ],
+
+  [],
+  [],
+  [],
+  [],
+];
+
+
+</script>

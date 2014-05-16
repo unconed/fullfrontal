@@ -1,0 +1,935 @@
+<html>
+<head>
+<meta charset="utf-8">
+<script type="text/javascript" charset="utf-8">
+
+var darkred = 0x220000, _darkred = '#200',
+    orangered = 0xc03000, _orangered = "#c03000",
+    green = 0x50c020, _green = "#50c020",
+    indigo = 0x7040f0,
+    gold = 0xD0A020,
+    land = 0x509000, _land = "#509000",
+    blue = 0x3080ff,
+    red = 0xC02050,
+    surfacered = 0xdf5000, _slate = '#efb030',
+    purple = 0xd040b0,
+    water = 0x103070,
+    gray = 0xa0a0a0,
+    white = 0xffffff,
+    black = 0x000000,
+    channelR = 0xff1010,
+    channelG = 0x10d010,
+    channelB = 0x1030f0,
+    creme = 0xffffdd;
+
+/**
+ * Catmull-rom x=0..4
+ */
+function catmullRom(x) {
+  var xx;
+  if (x < 0 || x > 4) return 0;
+  if (x < 1) {
+    xx = 1 - x;
+    return .5*xx*(-1+xx*(2-xx));
+  }
+  else if (x < 2) {
+    xx = 2 - x;
+    return (2+(-5+3*xx)*xx*xx)*.5;
+  }
+  else if (x < 3) {
+    xx = x - 2;
+    return (2+(-5+3*xx)*xx*xx)*.5;
+  }
+  else {
+    xx = x - 3;
+    return .5*xx*(-1+xx*(2-xx));
+  }
+}
+
+window.mathBoxSetup = function (mathbox) {
+
+  mathbox
+    .viewport({
+      type: 'cartesian',
+      range: [[-4, 4], [-4, 4]],
+      scale: [1.29, .65],
+    })
+    .grid({
+      id: 'g2',
+      color: 0x000000,
+      ticks: [6, 16],
+      zIndex: -1,
+      opacity: 0.001,
+    })
+    .grid({
+      id: 'g1',
+      color: 0xA0A0A0,
+      ticks: [6, 6],
+      zIndex: -1,
+      opacity: 0.001,
+    })
+    .axis({
+      axis: 0,
+      color: 0xB0B0B0,
+      ticks: 4,
+      lineWidth: 4,
+      opacity: 0.001,
+    })
+    .axis({
+      axis: 1,
+      color: 0xB0B0B0,
+      ticks: 4,
+      lineWidth: 4,
+      opacity: 0.001,
+      zIndex: -100,
+      labels: true,
+    })
+    .curve({
+      id: 'fdots',
+      n: 9,
+      domain: [-4, 4],
+      expression: function (x) {
+        return x;
+      },
+      points: true,
+      line: false,
+      live: true,
+      pointSize: 15,
+      zIndex: 2,
+      opacity: 0.001,
+    });
+
+}
+
+function fractalS(x, shift, t, xscale, yscale) {
+  var clip = π;
+  x = x * xscale + shift;
+  x = Math.min(clip, Math.max(-clip, x));
+  var win = .5 + .5 * Math.cos(x);
+  return win * fractal(x, t) * yscale;
+};
+
+function fractal(x, t) {
+  return .5 + .25 * (
+    Math.cos(x+t+Math.cos(x*.71-t*.3))*.5 +
+    Math.cos(2.21*x-t+Math.cos(5.4*x+t))*.5+
+    Math.cos(4.37*x+t-Math.cos(11.4*x-1+t))*.32+
+    Math.sin(35.31*x-t + Math.cos(12.86*x-1-t))*.1
+  );
+}
+
+window.mathBoxScript = [
+
+  [],
+
+  // Grid
+  [
+    ['animate', '#g1, axis, curve', {
+      opacity: 1,
+    }],
+  ],
+
+  // Continuous function
+  [
+    ['remove', 'curve'],
+    ['animate', 'viewport', {
+      range: [[-6, 6], [-6, 6]],
+      scale: [1.935, .975],
+    }, { duration: 1000 }],
+    ['add', 'curve', {
+      id: 'f',
+      n: 192,
+      domain: [-4, 4],
+      expression: function (x) {
+        return x;
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 5,
+      zIndex: 2,
+    }],
+    ['animate', '#f', {
+      domain: [-6, 6],
+    }, { duration: 1000 }],
+  ],
+
+  // 1
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return 1;
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // 2x
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return 2*x;
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // 2*x + 1
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return 2*x + 1;
+      },
+    }, {
+      duration: 400,
+    }],
+  ],
+
+  // |2*x + 1|
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return Math.abs(2*x + 1);
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // f(f(x)) |2x + 1|-4
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return Math.abs(2*x + 1) - 4;
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // f(f(x)) ||2x + 1|-4|
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return Math.abs(Math.abs(2*x + 1) - 4);
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // f(f(x)) ||2x + 1|-4|-2.5
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return Math.abs(Math.abs(2*x + 1) - 4) - 2.5;
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // f(f(x)) |||2x + 1|-4|-2.5|
+  [
+    ['animate', '#f', {
+      expression: function (x) {
+        return Math.abs(Math.abs(Math.abs(2*x + 1) - 4) - 2.5);
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // fill in
+  [
+    ['add', 'surface', {
+      id: 'white',
+      color: 0xffffff,
+      shaded: false,
+      n: 2,
+      data: [
+        [[-6, 1], [6, 1]],
+        [[-6, 2], [6, 2]],
+      ],
+    }, {
+      duration: 500,
+    }],
+    ['add', 'surface', {
+      id: 'white2',
+      color: 0xffffff,
+      shaded: false,
+      n: 2,
+      data: [
+        [[-6, 1], [6, 1]],
+        [[-6, 2], [6, 2]],
+      ],
+      zIndex: 50,
+      opacity: .75,
+    }, {
+      duration: 500,
+    }],
+
+    ['add', 'surface', {
+      id: 'gap',
+      color: 0x60a0e0,
+      shaded: false,
+      n: 2,
+      data: [
+        [[-4.25, 2], [-4.75, 2]],
+        [[-4.25, 1], [-4.75, 1]],
+      ],
+      zIndex: 1,
+      opacity: .7,
+    }, {
+      delay: 600,
+      duration: 600,
+    }],
+    ['add', 'surface', {
+      id: 'gap',
+      color: 0x60a0e0,
+      shaded: false,
+      n: 2,
+      data: [
+        [[-3.25, 1], [-2.75, 1]],
+        [[-3.25, 2], [-2.75, 2]],
+      ],
+      zIndex: 1,
+      opacity: .7,
+    }, {
+      delay: 600,
+      duration: 600,
+    }],
+    ['add', 'surface', {
+      id: 'gap',
+      color: 0x60a0e0,
+      shaded: false,
+      n: 2,
+      data: [
+        [[-2.25, 1], [-1.75, 1]],
+        [[-2.25, 2], [-1.75, 2]],
+      ],
+      zIndex: 1,
+      opacity: .7,
+    }, {
+      delay: 600,
+      duration: 600,
+    }],
+    ['add', 'surface', {
+      id: 'gap',
+      color: 0x60a0e0,
+      shaded: false,
+      n: 2,
+      data: [
+        [[-.25, 2], [-.75, 2]],
+        [[-.25, 1], [-.75, 1]],
+      ],
+      zIndex: 1,
+      opacity: .7,
+    }, {
+      delay: 600,
+      duration: 600,
+    }],
+    ['add', 'surface', {
+      id: 'gap',
+      color: 0x60a0e0,
+      shaded: false,
+      n: 2,
+      data: [
+        [[1.25, 2], [.75, 2]],
+        [[1.25, 1], [.75, 1]],
+      ],
+      zIndex: 1,
+      opacity: .7,
+    }, {
+      delay: 600,
+      duration: 600,
+    }],
+    ['add', 'surface', {
+      id: 'gap',
+      color: 0x60a0e0,
+      shaded: false,
+      n: 2,
+      data: [
+        [[2.25, 2], [1.75, 2]],
+        [[2.25, 1], [1.75, 1]],
+      ],
+      zIndex: 1,
+      opacity: .7,
+    }, {
+      delay: 600,
+      duration: 600,
+    }],
+    ['add', 'surface', {
+      id: 'gap',
+      color: 0x60a0e0,
+      shaded: false,
+      n: 2,
+      data: [
+        [[3.25, 2], [3.75, 2]],
+        [[3.25, 1], [3.75, 1]],
+      ],
+      zIndex: 1,
+      opacity: .7,
+    }, {
+      delay: 600,
+      duration: 600,
+    }],
+  ],
+
+  // atan
+  [
+    ['remove', '#white, #white2, #gap'],
+    ['animate', '#f', {
+      expression: function (x) {
+        return 2.5*Math.atan(x);
+      },
+    }, {
+      delay: 0,
+      duration: 700,
+    }],
+  ],
+
+  // mapping
+  [
+    ['add', 'curve', {
+      id: 'ident',
+      n: 2,
+      domain: [-8, 8],
+      expression: function (x) {
+        return x;
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 4,
+      zIndex: 1,
+      color: green,
+    }],
+    ['add', 'vector', {
+      id: 'diff',
+      n: 31,
+      expression: function (i, end) {
+        var x = i*.5 - 7.5;
+        return [x, x+(2.5*Math.atan(x)-x)*end];
+      },
+      lineWidth: 4,
+      color: 0x18609f,
+    }, {
+      delay: 500,
+      duration: 1000,
+    }],
+    ['animate', '#f', {
+      opacity: .5,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // mapping clip
+  [
+    ['remove', '#ident, #diff'],
+    ['add', 'curve', {
+      id: 'top',
+      n: 2,
+      domain: [-8, 8],
+      expression: function (x) {
+        return π/2*2.5;
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 4,
+      zIndex: 10,
+      color: green,
+    }],
+    ['add', 'curve', {
+      id: 'bottom',
+      n: 2,
+      domain: [-8, 8],
+      expression: function (x) {
+        return -π/2*2.5;
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 4,
+      zIndex: 10,
+      color: green,
+    }],
+    ['animate', '#f', {
+      opacity: 1,
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  // sin x
+  [
+    ['animate', '#f, #top, #bottom', {
+      domain: [-6, 6],
+    }, {
+      duration: 1000,
+    }],
+    ['remove', '#top, #bottom'],
+    ['animate', 'viewport', {
+      range: [[-6, 6], [-6, 6]],
+      scale: [1.935, .975],
+    }, {
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      id: 'g',
+      n: 192,
+      domain: [-8, 8],
+      expression: function (x) {
+        return Math.sin(6*x);
+      },
+      points: false,
+      line: true,
+      live: true,
+      lineWidth: 4,
+      zIndex: 2,
+      color: 0x20C050,
+      opacity: 0.001,
+    }, {
+      duration: 1,
+    }],
+    ['animate', '#g', {
+      domain: [-6, 6],
+      opacity: 1,
+    }, {
+      duration: 1000,
+    }],
+  ],
+
+  // Add up f + g
+  [
+    ['add', 'curve', {
+      id: 'envelope',
+      n: 32,
+      domain: [-6, 6],
+      expression: function (x) {
+        return 2.5*Math.atan(x);
+      },
+      points: false,
+      line: true,
+      live: true,
+      color: 0x000000,
+      opacity: .35,
+      lineWidth: 4,
+      zIndex: 1,
+    }],
+    ['animate', '#f', {
+      expression: function (x) {
+        return 2.5*Math.atan(x)+Math.sin(6*x);
+      },
+      color: 0xC02050,
+    }, {
+      delay: 300,
+      duration: 1000,
+    }],
+    ['animate', '#g', {
+      opacity: .5,
+    }, {
+      duration: 200,
+    }],
+  ],
+
+  [
+    ['animate', '#f', {
+      opacity: .5,
+    }, {
+      duration: 200,
+    }],
+    ['animate', '#g', {
+      opacity: 1,
+    }, {
+      duration: 200,
+    }],
+    ['animate', '#g', {
+      expression: function (x) {
+        return 2.5*Math.atan(x)+Math.sin(6*x);
+      },
+      color: 0xC02050,
+    }, {
+      delay: 300,
+      duration: 1000,
+    }],
+  ],
+
+  [
+    ['remove', '#f, #g, #envelope'],
+    ['animate', 'viewport', {
+      range: [[-6, 6], [-1, 2]],
+      scale: [1.875, 1],
+      power: 1,
+    }, {
+      duration: 1000,
+    }],
+    ['add', 'curve', {
+      id: 'f',
+      n: 128,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x, i) {
+        return Math.cos(x)*.5+.5;
+      },
+      zIndex: 5,
+    }, {
+      delay: 500,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'left',
+      n: 2,
+      lineWidth: 3,
+      color: 0xA0A0A0,
+      domain: [-1, 2],
+      live: true,
+      expression: function (x, i) {
+        var t = clock(1) - .2;
+        var rolloff = .5-.5*Math.cos(π*Math.max(0,Math.min(1,t*.7)));
+        var clip = 6+(π-6)*rolloff;
+        return [-clip, x];
+      },
+      zIndex: 4,
+    }],
+    ['add', 'curve', {
+      id: 'right',
+      n: 2,
+      lineWidth: 3,
+      color: 0xA0A0A0,
+      domain: [-1, 2],
+      live: true,
+      expression: function (x, i) {
+        var t = clock(1) - .2;
+        var rolloff = .5-.5*Math.cos(π*Math.max(0,Math.min(1,t*.7)));
+        var clip = 6+(π-6)*rolloff;
+        return [clip, x];
+      },
+      zIndex: 4,
+    }],
+    ['set', '#f', {
+      expression: function (x, i) {
+        var t = clock(1) - .2;
+        var rolloff = .5-.5*Math.cos(π*Math.max(0,Math.min(1,t*.7)));
+        var clip = 6+(π-6)*rolloff;
+        x = Math.min(clip, Math.max(-clip, x));
+        return Math.cos(x)*.5 + .5;
+      },
+    }]
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'g',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      color: 0x20C050,
+      expression: function (x, i) {
+        var t = clock(2);
+        return fractal(x, t);
+      },
+    }, {
+      delay: 350,
+      duration: 500,
+    }],    
+  ],
+
+  [
+    ['animate', '#f', {
+      opacity: .3,
+    }],
+    ['animate', '#g', {
+      expression: function (x, i) {
+        var t = clock(2);
+        var clip = π;
+        x = Math.min(clip, Math.max(-clip, x));
+        var win = .5 + .5 * Math.cos(x);
+        var val = fractal(x, t);
+        return win * val;
+      },
+      color: 0xC02050,
+    }, {
+      duration: 700,
+    }],
+  ],
+
+  [
+    ['remove', 'curve'],
+    ['add', 'curve', {
+      id: 'f',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      color: 0xC02050,
+      expression: function (x) { return fractalS(x, 2.4, 0, 1, 1.4); },
+    }, {
+      duration: 700,
+      zIndex: 0,
+    }],
+    ['add', 'curve', {
+      id: 'g',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x) { return fractalS(x, 0, 4, 1.5, -.75); },
+    }, {
+      delay: 350,
+      duration: 700,
+      zIndex: 1,
+    }],
+    ['add', 'curve', {
+      id: 'h',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      color: 0x20C050,
+      expression: function (x) { return fractalS(x, -1.5, 1, 0.5, 0.3); },
+      color: 0x20C050,
+      zIndex: 2,
+    }, {
+      delay: 700,
+      duration: 700,
+    }],
+  ],
+
+  [
+    ['animate', 'curve', {
+      opacity: .5,
+    }, {
+      duration: 500,
+    }],
+    ['add', 'curve', {
+      id: 'sum',
+      n: 512,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      color: 0x20C050,
+      expression: function (x) {
+        var a = fractalS(x, 2.4, 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75);
+        var c = fractalS(x, -1.5, 1, 0.5, 0.3);
+        return a+b+c;
+      },
+      color: 0x404040,
+      zIndex: 10,
+      lineWidth: 6,
+    }, {
+      delay: 500,
+      duration: 700,
+    }],
+  ],
+
+  [
+    ['set', '#f', {
+      expression: function (x) {
+        var t = director[0].clock(25);
+        t = t<1 ? t*t*.5 : t-.5;
+        var a = fractalS(x, 2.4 + Math.sin(t), 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75 * (1 + .85 * Math.sin(t * .141)));
+        var c = fractalS(x, -.5 - Math.cos(t * .331), 1, 0.5, 0.3);
+        return a;
+      },
+    }, {
+      duration: 500,
+    }],
+    ['set', '#g', {
+      expression: function (x) {
+        var t = director[0].clock(25);
+        t = t<1 ? t*t*.5 : t-.5;
+        var a = fractalS(x, 2.4 + Math.sin(t), 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75 * (1 + .85 * Math.sin(t * .141)));
+        var c = fractalS(x, -.5 - Math.cos(t * .331), 1, 0.5, 0.3);
+        return b;
+      },
+    }, {
+      duration: 500,
+    }],
+    ['set', '#h', {
+      expression: function (x) {
+        var t = director[0].clock(25);
+        t = t<1 ? t*t*.5 : t-.5;
+        var a = fractalS(x, 2.4 + Math.sin(t), 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75 * (1 + .85 * Math.sin(t * .141)));
+        var c = fractalS(x, -.5 - Math.cos(t * .331), 1, 0.5, 0.3);
+        return c;
+      },
+    }, {
+      duration: 500,
+    }],
+    ['set', '#sum', {
+      expression: function (x) {
+        var t = director[0].clock(25);
+        t = t<1 ? t*t*.5 : t-.5;
+        var a = fractalS(x, 2.4 + Math.sin(t), 0, 1, 1.4);
+        var b = fractalS(x, 0, 4, 1.5, -.75 * (1 + .85 * Math.sin(t * .141)));
+        var c = fractalS(x, -.5 - Math.cos(t * .331), 1, 0.5, 0.3);
+        return a+b+c;
+      },
+    }, {
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['remove', '#f, #g, #h, #sum', {
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'spline1',
+      n: 128,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x) {
+        return [x, catmullRom(x + 2)];
+      },
+      color: green,
+      zIndex: 10,
+      lineWidth: 6,
+    }, {
+      delay: 300,
+      duration: 500,
+    }],
+  ],
+
+  [
+    ['add', 'curve', {
+      id: 'spline2',
+      n: 128,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x) {
+        return [x, catmullRom(x + 3)];
+      },
+      color: red,
+      zIndex: 9,
+      lineWidth: 6,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'spline3',
+      n: 128,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x) {
+        return [x, catmullRom(x + 1)];
+      },
+      zIndex: 11,
+      lineWidth: 6,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'spline4',
+      n: 128,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x) {
+        return [x, catmullRom(x + 4)];
+      },
+      color: purple,
+      zIndex: 8,
+      lineWidth: 6,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'spline5',
+      n: 128,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x) {
+        return [x, catmullRom(x + 0)];
+      },
+      color: indigo,
+      zIndex: 12,
+      lineWidth: 6,
+    }, {
+      delay: 0,
+      duration: 300,
+    }],
+  ],
+
+  [
+    ['animate', '#spline1, #spline2, #spline3, #spline4, #spline5', {
+      opacity: .5,
+    }, {
+      duration: 300,
+    }],
+    ['add', 'curve', {
+      id: 'spline6',
+      n: 128,
+      domain: [-6, 6],
+      live: true,
+      lineWidth: 4,
+      expression: function (x) {
+        return [x, catmullRom(x + 0) + catmullRom(x + 1) + catmullRom(x + 2) + catmullRom(x + 3) + catmullRom(x + 4)];
+      },
+      color: black,
+      zIndex: 13,
+      lineWidth: 6,
+    }, {
+      delay: 300,
+      duration: 300,
+    }],
+  ],
+
+  [
+    ['animate', '#spline6', {
+      expression: function (x) {
+        return [x, catmullRom(x + 0)*.75 + catmullRom(x + 1)*-.3 + catmullRom(x + 2)*.25 + catmullRom(x + 3)*.81 + catmullRom(x + 4)*.6];
+      },
+    }, {
+      duration: 3000,
+    }],
+    ['animate', '#spline4', {
+      mathScale: [1, .6, 1],
+    }, {
+      duration: 3000,
+    }],
+    ['animate', '#spline2', {
+      mathScale: [1, .81, 1],
+    }, {
+      duration: 3000,
+    }],
+    ['animate', '#spline1', {
+      mathScale: [1, .25, 1],
+    }, {
+      duration: 3000,
+    }],
+    ['animate', '#spline3', {
+      mathScale: [1, -.3, 1],
+    }, {
+      duration: 3000,
+    }],
+    ['animate', '#spline5', {
+      mathScale: [1, .75, 1],
+    }, {
+      duration: 3000,
+    }],
+  ],
+
+];
+
+</script>
