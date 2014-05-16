@@ -43,7 +43,7 @@ $(function() {
 
   function disable(iframe) {
     if (!$(iframe).data('src')) {
-      var src = $(iframe).attr('src');
+      var src = $(iframe).attr('src') || $(iframe).attr('data-src');
       $(iframe).data('src', src);
       iframe.onload = null;
       iframe.src = 'about:blank';

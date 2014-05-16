@@ -86,7 +86,6 @@ DomReady.ready(function() {
       window.director.push(director);
 
       setup && setup(mathbox, director);
-
     });
 
     // Controls for stand-alone
