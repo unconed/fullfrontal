@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MathBox - Repeat</title>
+  <script src="./mathbox-bundle.js"></script>
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+</head>
+<body>
+  <script>
+    mathbox = mathBox({
+      plugins: ['core', 'controls', 'cursor'],
+      controls: {
+        klass: THREE.OrbitControls
+      },
+    });
+    three = mathbox.three;
+
+    three.camera.position.set(7, 2, -7);
+    three.renderer.setClearColor(new THREE.Color(0xFFFFFF), 1.0);
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    time = 0
+    three.on('update', function () {
+      time = three.Time.now
+
+
+      t = Math.max(three.Time.clock, 0) / 20
+      t = t < .5 ? t * t : t - .25
+
+      o = .5 - .5 * Math.cos(Math.min(1, t) * π)
+      p = .5 - .5 * Math.cos((t * 4) * π);
+      q = .5 - .5 * Math.cos((t * 1.13) * π);
+      m = .5 - .5 * Math.cos((t * 0.387) * π);
+      n = .5 - .5 * Math.cos(Math.max(0, Math.min(1, t - 40)) * π)
+
+      r = t * 2;
+      c = Math.cos(r);
+      s = Math.sin(r);
+      view.set('rotation', [0, s, 0, c]);
+
+      view.set('bend', lerp(0.005, .721 - p * .1, o));
+      view.set('helix', o * .1);
+
+      r = o *.2 + q * .8 - m * 2 + n;
+      c = Math.cos(r);
+      s = Math.sin(r);
+      r = (m) * .1;
+      cc = Math.cos(r);
+      ss = Math.sin(r);
+      surface.set('rotation', [s*cc, 0, s*ss, c]);
+    });
+
+    view = mathbox.polar({
+      bend: 1/128,
+      range: [[-π, π], [-1, 1], [-1, 1]],
+      scale: [2, 2, 2],
+    });
+
+    view.interval({
+      length: 32,
+      centered: false,
+      expression: function (x, i, emit) {
+        var a = Math.sin(x + time) * .5 - 1;
+        var b = Math.cos(x - time * .917) * .25 - 1
+
+        emit(a);
+        emit(b);
+      },
+      items: 2,
+      dimensions: 1,
+    });
+    view.swizzle({
+      order: 'yx',
+    });
+    view.repeat({
+      height: 20,
+      depth: 11,
+    });
+    view.spread({
+      id: 'spread',
+      width: [π/31, 0, 0, 0],
+      height: [π, 0, 0, 0],
+      depth: [0, 0, 1/10, 0],
+      anchor: 0,
+    });
+    view.transpose({
+      order: 'zwxy'
+    });
+    view.surface({
+      color: 0x3090FF,
+      position: [0, 2, 0],
+    });
+    view.transpose({
+      source: '#spread',
+      order: 'wxzy',
+    });
+    view.surface({
+      color: 0x3090FF,
+      position: [0, 2, 0],
+    });
+
+    surface = mathbox.select('surface');
+
+  </script>
+</body>
+</html>

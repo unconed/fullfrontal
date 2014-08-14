@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=1280, user-scalable=no">
+
+  <title>MathBox²</title>
+  
+  <!-- Required stylesheet -->
+  <link rel="stylesheet" href="../deck.js/core/deck.core.css">
+  
+  <!-- Theme -->
+  <link rel="stylesheet" href="resources/transition.css">
+  <link rel="stylesheet" href="resources/layout.css">
+  <link rel="stylesheet" href="resources/typography.css">
+  
+  <!-- Required Modernizr file -->
+  <script src="../deck.js/modernizr.custom.js"></script>
+
+  <!-- Typekit fonts -->
+  <!--
+  <script type="text/javascript" src="//use.typekit.net/nde6wmn.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  -->
+
+  <!-- Required JS files. -->
+  <script src="../deck.js/jquery-1.7.2.min.js"></script>
+  <script src="../deck.js/core/deck.core.js"></script>
+  <script src="../mathbox/vendor/underscore.js"></script>
+  <script src="resources/slides.js"></script>
+  
+  <!-- MathJax typesetting -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      "HTML-CSS": { availableFonts: ["TeX"] },
+      extensions: ["tex2jax.js"],
+      jax: ["input/TeX","output/HTML-CSS"],
+      tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+      messageStyle: 'none',
+    });
+  </script>
+  <script type="text/javascript" src="../mathjax/MathJax.js?config=TeX-AMS_HTML"></script>
+  
+</head>
+<body class="offline">
+
+<div class="deck-container">
+
+
+
+
+<!-- Begin slides. -->
+
+
+
+<section class="slide page-cover">
+  <h1 class="white-outline">MathBox²</h1>
+  <h4><i>Work in Progress</i></h4>
+
+  <h2 class="recessed">Steven Wittens</h2>
+  <h3 class="recessed"><img src="images/github.png" width="48" height="48" class="inline"><img class="inline" src="images/twitter.png" width="48" height="48"> &nbsp;<span>unconed</span><br>http:// <span>acko.net</span></h3>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost:4000/" class="mathbox"></iframe>
+  <div class="slide temp abs-bc"><h3 class="mj">Undisplaced Mesh</h3></div>
+  <div class="slide zoom overlay temp abs-r t-2" style="width: 450px; right: 100px;"><img style="opacity: .9" class="t2" src="images/datatexture.png" width="600"></div>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="spotlight"><img src="images/time.png"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/vector.html" class="mathbox"></iframe>
+  <div class="abs-bc"><h3 class="mj">Data Driven Geometry</h3></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/curvedots.html" class="mathbox"></iframe>
+  <div class="slide temp abs-bc"><h3 class="mj">SVG = 1 <span class="mj-red">&lt;path&gt;</span> + 32 × <span class="mj-purple">&lt;circle&gt;</span></h3></div>
+  <div class="slide temp abs-bc"><h3 class="mj">MB² = 1 <span class="mj-blue">&lt;interval length="32"&gt;</span> + 1 <span class="mj-red">&lt;line&gt;</span> + 1 <span class="mj-purple">&lt;point&gt;</span></h3>(Note: MathBox is <strong>not</strong> XML based, is just a helpful notation)</div>
+  <div class="slide temp abs-bc"><h3 class="mj">MathBox = O(1) Box</h3></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/math/hopf.html" class="mathbox"></iframe>
+  <div class="abs-bc"><h3 class="mj">Native 4D – Hopf Fibration</h3></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/curve.html" class="mathbox"></iframe>
+
+  <div class="slide temp spotlight abs-tc t1">
+    <img src="images/code1.png" class="t1" style="opacity: .95; vertical-align: middle; display: inline; width: 500px;">
+    <img src="images/code2.png" class="t0" style="opacity: .95; vertical-align: middle; display: inline; width: 500px">
+  </div>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+&lt;cartesian&gt;
+  …
+  <span class="mj-blue">&lt;<strong>interval</strong> expression="..." /&gt;</span>
+  <span class="mj-red">&lt;<strong>line</strong> /&gt;</span>
+&lt;/cartesian&gt;
+</pre>
+  </div>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+<span class="mj-blue">expression: function</span> (x, i, <span class="mj-red">emit</span>) {
+  y <span class="mj-indigo">=</span> Math.sin(x <span class="mj-indigo">+</span> time) <span class="mj-indigo">+</span> … ;
+  <span class="mj-red"><strong>emit</strong></span>(x, y);   
+},
+<span class="mj-gold">// typedArray[p++] = x;<br>// typedArray[p++] = y;</span>
+</pre>
+  </div>
+
+
+  <div class="slide temp inflate"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/spherical.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+&lt;spherical&gt;
+  <span class="mj-blue">&lt;area items="2" expression="..." /&gt;</span>
+  <span class="mj-green">&lt;<strong>lerp</strong> items="32" /&gt;</span>
+  <span class="mj-red">&lt;vector /&gt;</span>
+&lt;/spherical&gt;
+</pre>
+  </div>
+
+    <div class="slide temp inflate">
+  <pre class="wrap overlay abs-bc">
+  <span class="mj-blue">expression: function</span> (x, y, i, j, <span class="mj-red">emit</span>) {
+    ...
+    <span class="mj-red"><strong>emit</strong></span>(x, y, o);
+    <span class="mj-red"><strong>emit</strong></span>(x + a * r, y + b * r, o + c * r);
+  },
+  </pre>
+    </div>
+
+    <div class="slide temp inflate dummy"></div>
+</section>
+
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/history.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+&lt;cartesian&gt;
+  <span class="mj-blue">&lt;interval <strong>history="96" id="woosh"</strong> expression="..." /&gt;</span>
+  <span class="mj-green">&lt;transpose order="xwzy" /&gt;</span>
+  <span class="mj-red">&lt;vector /&gt;</span>
+
+  <span class="mj-green">&lt;transpose order="ywzx" <span class="mj-blue">source="#woosh"</span> /&gt;</span>
+  <span class="mj-red">&lt;vector /&gt;</span>
+&lt;/cartesian&gt;
+</pre>
+  </div>
+
+  <div class="slide temp inflate dummy"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/repeat.html" class="mathbox"></iframe>
+    
+  <div class="temp abs-bc"><h3 class="mj">Virtual Geometry Shading<br><small>64 → 981,522 floats&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;109,058 ▲</small></h3></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/compose.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+&lt;cartesian&gt; &lt;grid /&gt; &lt;/cartesian&gt;
+
+<span class="mj-blue">&lt;<strong>rtt</strong>&gt;</span>
+  &lt;cartesian&gt; &lt;grid /&gt; &lt;/cartesian&gt;
+<span class="mj-blue">&lt;/rtt&gt;</span>
+<span class="mj-red">&lt;<strong>compose</strong> /&gt;</span>
+
+<span class="mj-blue">&lt;area expression="..." /&gt;</span>
+<span class="mj-red">&lt;<strong>compose</strong> /&gt;</span>
+</pre>
+  </div>
+
+  <div class="slide temp inflate dummy"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/feedback.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+<span class="mj-blue">&lt;<strong>rtt</strong>&gt;</span>
+  <span class="mj-red">&lt;<strong>compose</strong> /&gt;</span>
+  &lt;cartesian&gt; &lt;grid /&gt; &lt;/cartesian&gt;
+<span class="mj-blue">&lt;/rtt&gt;</span>
+<span class="mj-red">&lt;<strong>compose</strong> /&gt;</span>
+</pre>
+  </div>
+
+  <div class="slide temp inflate dummy"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/remap.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+<span class="mj-blue">&lt;rtt <strong>history="2"</strong>&gt;</span>
+  <span class="mj-green">&lt;<strong>remap</strong> shader="..." /&gt;</span>
+  <span class="mj-red">&lt;compose /&gt;</span>
+  &lt;cartesian&gt; &lt;grid /&gt; &lt;/cartesian&gt;
+<span class="mj-blue">&lt;/rtt&gt;</span>
+<span class="mj-red">&lt;compose /&gt;</span>
+</pre>
+  </div>
+
+    <div class="slide temp inflate">
+      <div class="overlay abs-t center t2"><h3 class="mj">Sampling Kernel</h3></div>
+  <pre class="wrap overlay abs-bc"><span class="mj-blue">vec4 getSample(vec3 xyz);</span>
+vec4 <span class="mj-green">getFramesSample</span>(vec3 xyz) {
+  vec4 c = <span class="mj-blue">getSample</span>(xyz + vec3( 0.0, 0.0, 1.0));
+  vec3 t = <span class="mj-blue">getSample</span>(xyz + vec3( 0.0, 1.0, 0.0)).xyz;
+  vec3 b = <span class="mj-blue">getSample</span>(xyz + vec3( 0.0,-1.0, 0.0)).xyz;
+  vec3 l = <span class="mj-blue">getSample</span>(xyz + vec3(-1.0, 0.0, 0.0)).xyz;
+  vec3 r = <span class="mj-blue">getSample</span>(xyz + vec3( 1.0, 0.0, 0.0)).xyz;
+  return vec4((t + b + l + r) / 2.0 - c.xyz, c.w);
+}</pre>
+    </div>
+
+    <div class="slide temp inflate dummy"></div>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/remap2.html" class="mathbox"></iframe>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://localhost/mathbox2/examples/test/rtt-vectors.html" class="mathbox"></iframe>
+
+    <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc"><span class="mj-blue">&lt;<strong>rtt</strong>&gt;</span>
+  …
+<span class="mj-blue">&lt;/rtt&gt;</span>
+<span class="mj-green">&lt;<strong>lerp</strong> /&gt;</span>
+<span class="mj-green">&lt;<strong>remap shader="..."</strong> /&gt;</span>
+<span class="mj-red">&lt;<strong>vector</strong> /&gt;</span>
+</pre>
+  </div>
+
+  <div class="slide temp inflate dummy"></div>
+
+</section>
+
+<section class="slide t-1">
+  <h1><small>ShaderGraph<br><i><small>Functional GLSL Linker</small></i></small></h1>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="abs-tc"><h3 class="mj">Pipeline</h3></div>
+  <div class="spotlight t6">
+    <img src="images/pipeline.png" class="t1">      
+  </div>
+</section>
+
+<section class="slide page-centerfold fade">
+  <div class="abs-tc"><h3 class="mj">Directed Acyclic Graph</h3></div>
+  <div class="spotlight t6">
+    <img src="images/dag.png" class="t1">      
+  </div>
+</section>
+
+<section class="slide page-centerfold fade">
+  <div class="abs-tc"><h3 class="mj">Callbacks</h3></div>
+  <div class="spotlight t6">
+    <img src="images/callback.png" class="t1">      
+  </div>
+</section>
+
+<section class="slide page-centerfold fade">
+  <div class="abs-tc"><h3 class="mj">Callback Graphs</h3></div>
+  <div class="spotlight t6">
+    <img src="images/callback2.png" class="t1" style="position: relative;left: 7px;top: -1px;">      
+  </div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+<div class="inflate">
+<pre class="wrap overlay t2 small">…
+vec3 _sn_1_truncateVec(vec4 v) { return v.xyz; }
+vec4 <span class="mj-green">_sn_6_getFramesSample</span>(vec3 xyz) {
+  vec4 c = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3( 0.0, 0.0, 1.0));
+  vec3 t = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3( 0.0, 1.0, 0.0)).xyz;
+  vec3 b = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3( 0.0,-1.0, 0.0)).xyz;
+  vec3 l = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3(-1.0, 0.0, 0.0)).xyz;
+  vec3 r = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3( 1.0, 0.0, 0.0)).xyz;
+  return vec4((t + b + l + r) / 2.0 - c.xyz, c.w);
+}
+vec4 <span class="mj-red"><strong>_pg_2_</strong></span>(vec4 _io_1_v) {
+  vec3 _io_2_return;
+  vec4 _io_15_return;
+
+  _io_2_return = _sn_1_truncateVec(_io_1_v);
+  _io_15_return = <span class="mj-green">_sn_6_getFramesSample</span>(_io_2_return);
+  return _io_15_return;
+}
+</pre>
+    </div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <iframe src="http://localhost/mathbox2/examples/test/transpose.html" class="mathbox"></iframe>
+  <div class="abs-tc mj"><h2>MathBox²</h2></div>
+  <div class="abs-bc mj">
+    <ul>
+      <li><strong>Reactive DOM</strong></li>
+      <li><strong>Virtual Geometry Shaders</strong></li>
+      <li><strong>Functional GLSL Linking</strong></li>
+  </div>
+</section>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=1280, user-scalable=no">
+
+  <title>MathBox²</title>
+  
+  <!-- Required stylesheet -->
+  <link rel="stylesheet" href="../deck.js/core/deck.core.css">
+  
+  <!-- Theme -->
+  <link rel="stylesheet" href="resources/transition.css">
+  <link rel="stylesheet" href="resources/layout.css">
+  <link rel="stylesheet" href="resources/typography.css">
+  
+  <!-- Required Modernizr file -->
+  <script src="../deck.js/modernizr.custom.js"></script>
+
+  <!-- Typekit fonts -->
+  <!--
+  <script type="text/javascript" src="//use.typekit.net/nde6wmn.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  -->
+
+  <!-- Required JS files. -->
+  <script src="../deck.js/jquery-1.7.2.min.js"></script>
+  <script src="../deck.js/core/deck.core.js"></script>
+  <script src="../mathbox/vendor/underscore.js"></script>
+  <script src="resources/slides.js"></script>
+  
+  <!-- MathJax typesetting -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      "HTML-CSS": { availableFonts: ["TeX"] },
+      extensions: ["tex2jax.js"],
+      jax: ["input/TeX","output/HTML-CSS"],
+      tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+      messageStyle: 'none',
+    });
+  </script>
+  <script type="text/javascript" src="../mathjax/MathJax.js?config=TeX-AMS_HTML"></script>
+  
+</head>
+<body class="online">
+
+<div class="deck-container">
+
+
+
+
+<!-- Begin slides. -->
+
+<section class="slide page-cover">
+  <h1 class="white-outline">MathBox²</h1>
+  <h4><i>Work in Progress / SIGGRAPH 2014 WebGL BOF</i></h4>
+
+  <h2 class="recessed">Steven Wittens</h2>
+  <h3 class="recessed"><img src="images/github.png" width="48" height="48" class="inline"><img class="inline" src="images/twitter.png" width="48" height="48"> &nbsp;<span>unconed</span><br>http:// <span>acko.net</span></h3>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="http://acko.net/" class="mathbox"></iframe>
+  <div class="slide temp abs-bc"><h3 class="mj">Undisplaced Mesh</h3></div>
+  <div class="slide zoom overlay temp abs-r t-2" style="width: 450px; right: 100px;"><img style="opacity: .9" class="t2" src="images/datatexture.png" width="600"></div>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="spotlight"><img src="images/time.png"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/vector.html" class="mathbox"></iframe>
+  <div class="abs-bc"><h3 class="mj">Data Driven Geometry</h3></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/curvedots.html" class="mathbox"></iframe>
+  <div class="slide temp abs-bc"><h3 class="mj">SVG = 1 <span class="mj-red">&lt;path&gt;</span> + 32 × <span class="mj-purple">&lt;circle&gt;</span></h3></div>
+  <div class="slide temp abs-bc"><h3 class="mj">MB² = 1 <span class="mj-blue">&lt;interval length="32"&gt;</span> + 1 <span class="mj-red">&lt;line&gt;</span> + 1 <span class="mj-purple">&lt;point&gt;</span></h3>(MathBox is <strong>not</strong> XML based)</div>
+  <div class="slide temp abs-bc"><h3 class="mj">MathBox = O(1) Box</h3></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/hopf.html" class="mathbox"></iframe>
+  <div class="abs-bc"><h3 class="mj">Native 4D – Hopf Fibration</h3></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/curve.html" class="mathbox"></iframe>
+
+  <div class="slide temp spotlight abs-tc t1">
+    <img src="images/code1.png" class="t1" style="opacity: .95; vertical-align: middle; display: inline; width: 500px;">
+    <img src="images/code2.png" class="t0" style="opacity: .95; vertical-align: middle; display: inline; width: 500px">
+  </div>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+&lt;cartesian&gt;
+  …
+  <span class="mj-blue">&lt;<strong>interval</strong> expression="..." /&gt;</span>
+  <span class="mj-red">&lt;<strong>line</strong> /&gt;</span>
+&lt;/cartesian&gt;
+</pre>
+  </div>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+<span class="mj-blue">expression: function</span> (x, i, <span class="mj-red">emit</span>) {
+  y <span class="mj-indigo">=</span> Math.sin(x <span class="mj-indigo">+</span> time) <span class="mj-indigo">+</span> … ;
+  <span class="mj-red"><strong>emit</strong></span>(x, y);   
+},
+<span class="mj-gold">// typedArray[p++] = x;<br>// typedArray[p++] = y;</span>
+</pre>
+  </div>
+
+
+  <div class="slide temp inflate"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/spherical.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+&lt;spherical&gt;
+  <span class="mj-blue">&lt;area items="2" expression="..." /&gt;</span>
+  <span class="mj-green">&lt;<strong>lerp</strong> items="32" /&gt;</span>
+  <span class="mj-red">&lt;vector /&gt;</span>
+&lt;/spherical&gt;
+</pre>
+  </div>
+
+    <div class="slide temp inflate">
+  <pre class="wrap overlay abs-bc">
+  <span class="mj-blue">expression: function</span> (x, y, i, j, <span class="mj-red">emit</span>) {
+    ...
+    <span class="mj-red"><strong>emit</strong></span>(x, y, z);
+    <span class="mj-red"><strong>emit</strong></span>(x + a * r, y + b * r, z + c * r);
+  },
+  </pre>
+    </div>
+
+    <div class="slide temp inflate dummy"></div>
+</section>
+
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/history.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+&lt;cartesian&gt;
+  <span class="mj-blue">&lt;interval <strong>history="96" id="woosh"</strong> expression="..." /&gt;</span>
+  <span class="mj-green">&lt;transpose order="xwzy" /&gt;</span>
+  <span class="mj-red">&lt;vector /&gt;</span>
+
+  <span class="mj-green">&lt;transpose order="ywzx" <span class="mj-blue">source="#woosh"</span> /&gt;</span>
+  <span class="mj-red">&lt;vector /&gt;</span>
+&lt;/cartesian&gt;
+</pre>
+  </div>
+
+  <div class="slide temp inflate dummy"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/repeat.html" class="mathbox"></iframe>
+    
+  <div class="temp abs-bc"><h3 class="mj">Virtual Geometry Shading<br><small>64 → 981,522 floats&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;109,058 ▲</small></h3></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/compose.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+&lt;cartesian&gt; &lt;grid /&gt; &lt;/cartesian&gt;
+
+<span class="mj-blue">&lt;<strong>rtt</strong>&gt;</span>
+  &lt;cartesian&gt; &lt;grid /&gt; &lt;/cartesian&gt;
+<span class="mj-blue">&lt;/rtt&gt;</span>
+<span class="mj-red">&lt;<strong>compose</strong> /&gt;</span>
+
+<span class="mj-blue">&lt;area expression="..." /&gt;</span>
+<span class="mj-red">&lt;<strong>compose</strong> /&gt;</span>
+</pre>
+  </div>
+
+  <div class="slide temp inflate dummy"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/feedback.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+<span class="mj-blue">&lt;<strong>rtt</strong>&gt;</span>
+  <span class="mj-red">&lt;<strong>compose</strong> color="#fcfbfa" /&gt;</span>
+  &lt;cartesian&gt; &lt;grid /&gt; &lt;/cartesian&gt;
+<span class="mj-blue">&lt;/rtt&gt;</span>
+<span class="mj-red">&lt;<strong>compose</strong> /&gt;</span>
+</pre>
+  </div>
+
+  <div class="slide temp inflate dummy"></div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/remap.html" class="mathbox"></iframe>
+
+  <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc">
+<span class="mj-blue">&lt;rtt <strong>history="2"</strong>&gt;</span>
+  <span class="mj-green">&lt;<strong>remap</strong> shader="..." /&gt;</span>
+  <span class="mj-red">&lt;compose /&gt;</span>
+  &lt;cartesian&gt; &lt;grid /&gt; &lt;/cartesian&gt;
+<span class="mj-blue">&lt;/rtt&gt;</span>
+<span class="mj-red">&lt;compose /&gt;</span>
+</pre>
+  </div>
+
+    <div class="slide temp inflate">
+      <div class="overlay abs-t center t4"><h3 class="mj">Sampling Kernel</h3></div>
+  <pre class="wrap overlay abs-bc"><span class="mj-blue">vec4 getSample(vec3 xyz);</span>
+vec4 <span class="mj-green">getFramesSample</span>(vec3 xyz) {
+  vec4 c = <span class="mj-blue">getSample</span>(xyz + vec3( 0.0, 0.0, 1.0));
+  vec3 t = <span class="mj-blue">getSample</span>(xyz + vec3( 0.0, 1.0, 0.0)).xyz;
+  vec3 b = <span class="mj-blue">getSample</span>(xyz + vec3( 0.0,-1.0, 0.0)).xyz;
+  vec3 l = <span class="mj-blue">getSample</span>(xyz + vec3(-1.0, 0.0, 0.0)).xyz;
+  vec3 r = <span class="mj-blue">getSample</span>(xyz + vec3( 1.0, 0.0, 0.0)).xyz;
+  return vec4((t + b + l + r) / 2.0 - c.xyz, c.w);
+}</pre>
+    </div>
+
+    <div class="slide temp inflate dummy"></div>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/remap2.html" class="mathbox"></iframe>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+  <iframe src="iframes/rtt-vectors.html" class="mathbox"></iframe>
+
+    <div class="slide temp inflate">
+<pre class="wrap overlay abs-bc"><span class="mj-blue">&lt;<strong>rtt</strong>&gt;</span>
+  …
+<span class="mj-blue">&lt;/rtt&gt;</span>
+<span class="mj-green">&lt;<strong>lerp</strong> /&gt;</span>
+<span class="mj-green">&lt;<strong>remap shader="..."</strong> /&gt;</span>
+<span class="mj-red">&lt;<strong>vector</strong> /&gt;</span>
+</pre>
+  </div>
+
+  <div class="slide temp inflate dummy"></div>
+
+</section>
+
+<section class="slide t-1">
+  <h1><small>ShaderGraph<br><i><small>Functional GLSL Linker</small></i></small></h1>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <div class="abs-tc"><h3 class="mj t2">Pipeline</h3></div>
+  <div class="spotlight t6">
+    <img src="images/pipeline.png" class="t1">      
+  </div>
+</section>
+
+<section class="slide page-centerfold fade">
+  <div class="abs-tc"><h3 class="mj t2">Directed Acyclic Graph</h3></div>
+  <div class="spotlight t6">
+    <img src="images/dag.png" class="t1">      
+  </div>
+</section>
+
+<section class="slide page-centerfold fade">
+  <div class="abs-tc"><h3 class="mj t2">Callbacks</h3></div>
+  <div class="spotlight t6">
+    <img src="images/callback.png" class="t1">      
+  </div>
+</section>
+
+<section class="slide page-centerfold fade">
+  <div class="abs-tc"><h3 class="mj t2">Callback Graphs</h3></div>
+  <div class="spotlight t6">
+    <img src="images/callback2.png" class="t1" style="position: relative;left: 7px;top: -1px;">      
+  </div>
+</section>
+
+<section class="slide page-centerfold zoom instant">
+<div class="inflate">
+<pre class="wrap overlay t2 small">…
+vec3 _sn_1_truncateVec(vec4 v) { return v.xyz; }
+vec4 <span class="mj-green">_sn_6_getFramesSample</span>(vec3 xyz) {
+  vec4 c = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3( 0.0, 0.0, 1.0));
+  vec3 t = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3( 0.0, 1.0, 0.0)).xyz;
+  vec3 b = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3( 0.0,-1.0, 0.0)).xyz;
+  vec3 l = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3(-1.0, 0.0, 0.0)).xyz;
+  vec3 r = <span class="mj-blue">_sn_6_getSample</span>(xyz + vec3( 1.0, 0.0, 0.0)).xyz;
+  return vec4((t + b + l + r) / 2.0 - c.xyz, c.w);
+}
+vec4 <span class="mj-red"><strong>_pg_2_</strong></span>(vec4 _io_1_v) {
+  vec3 _io_2_return;
+  vec4 _io_15_return;
+
+  _io_2_return = _sn_1_truncateVec(_io_1_v);
+  _io_15_return = <span class="mj-green">_sn_6_getFramesSample</span>(_io_2_return);
+  return _io_15_return;
+}
+</pre>
+    </div>
+</section>
+
+<section class="slide zoom">
+  <div class="abs-tl">→</div>
+</section>
+
+<section class="slide page-centerfold zoom">
+  <iframe src="iframes/transpose.html" class="mathbox"></iframe>
+  <div class="abs-tc mj"><h2>MathBox²</h2></div>
+  <div class="abs-bc mj">
+    <ul>
+      <li><strong>Reactive DOM</strong></li>
+      <li><strong>Virtual Geometry Shaders</strong></li>
+      <li><strong>Functional GLSL Linking</strong></li>
+  </div>
+</section>
+
+</div>
+
+<div id="message">
+  <script type="text/javascript">
+  if (!document.createElement('canvas').getContext('experimental-webgl')) {
+    document.write('<p class="error"><strong>Your browser does not support WebGL, which is required to view these slides.</strong><!--<br><br>You can <a href="http://youtube.com/watch?v=Zkx1aKv2z8o">view the video on YouTube</a> instead.<br><br>Try Google Chrome or Mozilla Firefox.</p>-->');
+  }
+  </script>
+  
+  <p class="note"><strong>Notes will appear here.</strong><br>Please view in Chrome or Firefox. Chrome is glitchy, Firefox is stuttery. Work in progress. :/</p>
+
+  <p class="note">This is my website, Acko.net. Which you may know as <em>that</em> site with <em>that</em> header,  made with WebGL, using Three.js.</p>
+
+  <p class="note">The entire effect is based on <em>Vertex Displacement</em>, applied on the GPU.<br>If I disable the part of the vertex shader that fetches the position, only a static mesh is left.</p>
+
+  <p class="note">It's more accurate to call it Vertex <em>Replacement</em>. The actual positions, normals and occlusion are read from a texture, indexed by the mesh. The texture can be updated independently of the underlying draw call. This nicely separates the <em>how</em> from the <em>what</em>.<br><br>It's an indirection with an associated cost, but you gain something very valuable: random access to all your geometry data.</p>
+
+  <p class="note">Specifically, it enables you to emulate Geometry Shaders on WebGL 1, a feature we won't get until WebGL 3. Also transform feedback. Today, in a browser, on a phone.</p>
+
+  <p class="note">For the past year, I've been exploring how to apply this principle in general and at scale. The result is MathBox 2. Still incomplete, but already showing some very neat behavior.</p>
+
+  <p class="note">Education is the art of conveying a sense of truth by telling a series of decreasing lies. In order to explain MathBox 2, I'm going to use some creative license.<br><br>MathBox 2 enables Data Driven Geometry. When I say it's "somewhat like D3 but for WebGL", that's a good introduction, but not very accurate.</p>
+
+  <p class="note">MathBox is like a better SVG. It aims to be a better fit for data visualization.</p>
+
+  <p class="note">See if you want to render this simple graph with SVG, you need 1 path but 32 circles.<br><br>Which means you need a completely different tree structure depending on the choice of representation (line or points).<br>Libraries like D3 contain helpers to make this easier, but it's still a very leaky abstraction.</p>
+
+  <p class="note">In MathBox, I separate the data from the representation. Here I use an <em>interval</em> along which I sample an expression 32 times. An <em>interval</em> is just a fancy array with sampling behavior. It's rendered as lines and points, but there's only one line node and one point node.<br>Nodes combine like lego to form visible objects.<br><br>Note the XML is just a helpful notation, MathBox is not XML based, but it does have a DOM just like XML / HTML.</p>
+
+  <p class="note">The goal of MathBox is to be O(1) Box. It shouldn't matter how many of something you draw. 1 is as simple as 100. Or 100 × 100. Or 100 × 100 × 100.<br>Insert giant asterisk here.</p>
+
+  <p class="note">It supports offloading complicated computations to the GPU. Like projecting native 4D points to 3D, tesselating them into lines and surfaces, and differentiating them on the fly. Here I'm drawing distorted toruses using the Hopf Fibration of the 3-Sphere. Trust me, this is good math porn.</p>
+
+  <p class="note">So what does the code actually look like? Take this simple graph: a rectangular or <em>cartesian</em> grid, with axes, and a moving curve on top.</p>
+
+  <p class="note">It's created just using some JavaScript, passing in a set of properties for each node. It's generous in what it accepts (e.g. CSS colors), but strict in what it stores: each property has a type and canonical representation. The properties are still somewhat in flux, so don't stare yourself blind.</p>
+
+  <p class="note">I'm going to pretend it <em>is</em> XML and only highlight the relevant properties. It's easier because it's familiar.<br>You can see how the MathBox DOM is a tree, but with composition between siblings, not just parents and children.</p>
+
+  <p class="note">The curve renders live data, provided by a JS expression. It's a function of one variable <em>x</em> (and the array index <em>i</em>). But rather than returning values, you <em>emit</em> them. This <em>emit()</em> call streams the arguments into a typed array of floats. It's very optimizable, and profiling shows it's not that far from native floating point performance. This is the only real O(n) JS code in the entire visualization, everything else is O(1).</p>
+
+  <p class="note">Once filled, the array is uploaded to GPU memory. The new data is automatically used to produce the next frame. The best two-way data binding is just two pointers to the same piece of memory.<br><br>Changing a property on a node (like a color) works similarly. Three.js manages shader uniforms using <em>{value: x}</em> objects. These can be shared by reference like registers, bound directly to specific DOM node attributes. Change a node, and all its Three.js materials update instantly. No cascade required.</p>
+
+  <p class="note">Here's a more interesting example: two spherical clouds of vectors. Note the vectors are curved, not straight. Scroll to zoom.</p>
+
+  <p class="note">For each cloud, I sample a 2D <em>area</em> with an expression. Each iteration produces two <em>items</em>: the start and end point of each vector. Hence this is really a 2+1D array: N × N × 2. The array is linearly interpolated (<em>lerp</em>) to N × N × 32, then rendered as polyline vectors in spherical coordinates.</p>
+
+  <p class="note">The <em>expression</em> is now a function of <em>x</em> and <em>y</em> (indices <em>i</em> and <em>j</em>), and it emits two points per call.<br><br>But each point is itself a 3D vector. So it's really an N × N × 32 × 3 array. Remember what I said about lies.</p>
+
+  <p class="note">Again, it's all done on the GPU: tessellating points into lines into triangle strips, placing and orienting the cones, cutting off the (curved) polyline where the arrow begins, etc. In fact, the lines are sized in a hybrid 2.5D fashion to enhance the line-art quality. It's more sophisticated than it might seem.</p>
+
+  <p class="note">These arrays can do more tricks, for example they support <em>history</em>. Here I'm filling a 2D array of points, one row at a time. This is really just a cyclic buffer. The data sampling shader scrolls through the data virtually, without being aware of it.</p>
+
+  <p class="note">History is simple, just set <em>history: N</em>. Each array is secretly always 4D (or 5D if you're picky), opening up its extra dimensions as needed. 4 is the max today, for technical reasons.<br><br>Here I'm actually drawing two renderables from a single data source, transposed differently in each case. I use a CSS selector <em>#woosh</em> to link to the source the 2nd time, similar to anchor tags.</p>
+
+  <p class="note">The <em>&lt;vector&gt;</em> doesn't care what it's rendering from. It just samples an abstract data source at certain coordinates. The sophisticated polyline arrow behavior still works.</p>
+
+  <p class="note">What you're really doing is building shaders and draw calls automatically. Which operate on giant arrays that may only exist as transient values deep inside a GPU core. Memory bandwidth is the biggest bottleneck there, so this is usually a net win, despite the 'wasteful' repeated computation.<br><br>There's still a static geometry <em>template</em> of course, created once on init per renderable, but it doesn't change, just like Acko.net's header.</p>
+
+  <p class="note">It goes beyond just math diagrams though. Here I'm rendering two scenes on top of each other, with a gradient blended on top.</p>
+
+  <p class="note">This is done using the render-to-texture operator, &lt;rtt&gt;. It renders whatever's inside to a texture. The RTT acts as just another data source, which can be piped into a &lt;compose&gt;. This is a full screen drawing pass. Document order is drawing order.<br><br>You can also pipe a regular array into &lt;compose&gt;, that's how the gradient works.</p>
+
+  <p class="note">This is where this model really starts to show some surprising expressivity. All drawables support blend modes, so this is already ridiculously close to a generic effects composer.</p>
+  
+  <p class="note">For example, nothing needs to be added to support framebuffer feedback.</p>
+  
+  <p class="note">This is because the auto-linking behavior extends to parents too. If you place a naked compose directly inside an RTT, it links up with its parent, rendering the output back as input the next frame. Here I'm applying a fade out by setting the inner compose's color to slightly less than white.</p>
+
+  <p class="note">It just works because the RTT is automatically double buffered, creating a read and write target, doing the swapping for you.</p>
+
+  <p class="note">In fact, I only needed to add a single operator to do this classic demoscene water effect. This is a discrete approximation of the Navier-Stokes equation, for shallow surface waves.</p>
+
+  <p class="note">It uses the <em>remap</em> operator. It applies a sampling kernel, supplied as a GLSL shader. RTT also supports history, so when you set history: 2, you get a triple buffered render target: two read buffers, and one write buffer. </p>
+
+  <p class="note">The shader is vanilla GLSL, but with one twist: it declares and uses a function <em>getSample</em> without a body. This <em>callback</em> is linked in for you, allowing you to sample anything without having to care how. The render target is exposed as a single N x N x 2 volume texture, despite the constant buffer swapping.</p>
+
+  <p class="note">By adding only three operators: RTT, compose and remap, MathBox has suddenly turned into Winamp AVS or Milkdrop.</p>
+
+  <p class="note">You could do all of this by hand of course, this is old school GPGPU... But all the tedious set up and state management has been abstracted for you.</p>
+
+  <p class="note">For example, this is something I threw together in 15 minutes. It uses the same simple fluid solver, but creates resonant waves with an additional rotozoomer movement, finishing off with a color map. This is 3 remaps and 3 RTTs, set up as a directed <em>cyclic</em> graph.</p>
+
+  <p class="note">What I've shown you is pretty much all the major pieces I have today. It's definitely incomplete, and significant parts around it are missing (e.g. tracked animations, camera nodes, html/text overlays, slides director, etc). So you'll have to use your imagination to see where this can really go.</p>
+
+  <p class="note">In this example, I'm rendering to a texture just like before, but I'm not composing it into the scene. Instead I'm rendering the texture as a grid of 3D vectors.</p>
+
+  <p class="note">It works, because RTT is just a data source.</p>
+
+  <p class="note">Now imagine what happens when you add audio input... or audio <em>output</em>. Or maybe physics, so you can do force-directed layout on the GPU.</p>
+
+  <p class="note">The secret sauce behind all of this is ShaderGraph 2. It's a functional GLSL linker/recompiler. It's a total rewrite of ShaderGraph 1, powering MathBox 1.</p>
+
+  <p class="note">ShaderGraph 1 could link up snippets of GLSL into pipelines, by matching type signatures. This is just a simple one-input one-output scenario.</p>
+
+  <p class="note">You could construct arbitrary directed acyclic graphs out of snippets, which got compiled into a single vertex and fragment shader. It's driven by code though, it's <em>not a graphical UI</em>.</p>
+
+  <p class="note">ShaderGraph 2 fixes some bad design decisions, and adds one major change: callbacks. It turns the traditional data flow into something functional, allowing e.g. the <em>getArrowGeometry</em> shader to call <em>getSample</em> as much as it wants. The data flow is essentially redirected to a completely different part of the graph.</p>
+
+  <p class="note">But callbacks can be graphs themselves. Any open inputs or outputs are bundled up into its type signature. This is what allows complicated behavior to be wrapped up and re-used in a completely modular fashion.</p>
+
+  <p class="note">The output looks like this, though this is only part of a (fragment) shader. You can recognize the sampling kernel from earlier, whose global symbols have been namespaced to avoid collisions. You can also see <em>_pg_2_</em>, a generated <em>program</em> that calls two functions in order and returns the result.</p>
+
+  <p class="note">Using ShaderGraph 2's chainable <em>factory</em> API, partially built shaders can be passed around and extended in a completely agnostic fashion. Shader uniforms can be instanced too, binding unique parameters to each instance. You only need to agree on a type signature between partners. It's fast too, compiling a shader in a few milliseconds if the cache is warm, or a few tens of ms when cold.</p>
+
+  <p class="note">In summary: MathBox 2 is a reactive DOM for data visualization. It lets you stream data into virtual geometry shaders and more, offloading various computations to the GPU. It's built as an extensible, multi-layered architecture on top of Three.js which I won't go into yet, but suffice it to say, it is not as opaque as presented here. I hope to release MathBox 2 before the end of the year, and ShaderGraph 2 sooner.</p>
+
+</div>
+
+<div id="context">
+  Diagrams powered by MathBox 2 alpha.
+</div>
+
+<div id="video">
+  Use Ctrl/Cmd + or Ctrl/Cmd - to size to fit.
+  <!--
+  <!- -<a href="http://youtube.com/watch?v=Zkx1aKv2z8o" target="_blank"><span> ►</span> Watch Presentation Video</a></a>- ->
+  <a href="http://2013.jsconf.us/schedule"><em>Video available soon</em></a>
+  -->
+</div>
+
+<div id="controls">
+  <a href="javascript:$.deck('prev')">‹</a>
+  <a href="javascript:$.deck('next')">›</a>
+</div>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-288349-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>
