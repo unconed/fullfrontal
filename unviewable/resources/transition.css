@@ -138,6 +138,9 @@
 }
 
 /* subslide positioning */
+.csstransitions.csstransforms .deck-container > .slide > * {
+  will-change: transform;
+}
 .csstransitions.csstransforms .deck-container > .slide .slide {
   position: relative;
   left: 0;

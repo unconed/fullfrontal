@@ -138,6 +138,9 @@
 }
 
 /* subslide positioning */
+.csstransitions.csstransforms .deck-container > .slide > * {
+  will-change: transform;
+}
 .csstransitions.csstransforms .deck-container > .slide .slide {
   position: relative;
   left: 0;
@@ -149,8 +152,6 @@
   -webkit-transform-style: preserve-3d;
   -moz-transform-style: preserve-3d;
   transform-style: preserve-3d;
-
-  will-change: transform;
 }
 
 /* ensure current slide is still gpu backed */
