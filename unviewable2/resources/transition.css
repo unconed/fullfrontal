@@ -136,8 +136,12 @@
 }
 
 /* subslide positioning */
-.csstransitions.csstransforms .deck-container > .slide > *:not(.box.images) {
+.csstransitions.csstransforms .deck-container > .slide > * {
   will-change: transform;
+}
+.csstransitions.csstransforms .deck-container > .slide > .box.images:not(.slide),
+.csstransitions.csstransforms .deck-container > .slide.invert > h1 {
+  will-change: auto;
 }
 .csstransitions.csstransforms .deck-container > .slide .slide {
   position: relative;
