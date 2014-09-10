@@ -470,6 +470,7 @@ iframe.mathbox.punch {
   -moz-transform-style: preserve-3d;
   transform: scale3d(1.1, 1.1, 1) translate3d(0, 16.5px, -100px);
   transform-style: preserve-3d;
+  will-change: transform;
 }
 .deck-container .slide .slide iframe {
   height: 720px;

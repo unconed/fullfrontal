@@ -136,7 +136,7 @@
 }
 
 /* subslide positioning */
-.csstransitions.csstransforms .deck-container > .slide > * {
+.csstransitions.csstransforms .deck-container > .slide > *:not(.box.images) {
   will-change: transform;
 }
 .csstransitions.csstransforms .deck-container > .slide .slide {
