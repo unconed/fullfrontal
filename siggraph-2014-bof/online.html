@@ -31,6 +31,7 @@
   <script src="resources/slides.js"></script>
   
   <!-- MathJax typesetting -->
+  <!--
   <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
       "HTML-CSS": { availableFonts: ["TeX"] },
@@ -41,6 +42,7 @@
     });
   </script>
   <script type="text/javascript" src="../mathjax/MathJax.js?config=TeX-AMS_HTML"></script>
+  -->
   
 </head>
 <body class="online">
@@ -61,7 +63,7 @@
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="http://acko.net/" class="mathbox"></iframe>
+  <iframe data-src="http://acko.net/" class="mathbox"></iframe>
   <div class="slide temp abs-bc"><h3 class="mj">Undisplaced Mesh</h3></div>
   <div class="slide zoom overlay temp abs-r t-2" style="width: 450px; right: 100px;"><img style="opacity: .9" class="t2" src="images/datatexture.png" width="600"></div>
 </section>
@@ -71,28 +73,28 @@
 </section>
 
 <section class="slide page-centerfold zoom">
-  <div class="spotlight"><img src="images/time.png"></div>
+  <div class="spotlight"><img src="images/time.jpg"></div>
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/vector.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/vector.html" class="mathbox"></iframe>
   <div class="abs-bc"><h3 class="mj">Data Driven Geometry</h3></div>
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/curvedots.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/curvedots.html" class="mathbox"></iframe>
   <div class="slide temp abs-bc"><h3 class="mj">SVG = 1 <span class="mj-red">&lt;path&gt;</span> + 32 × <span class="mj-purple">&lt;circle&gt;</span></h3></div>
   <div class="slide temp abs-bc"><h3 class="mj">MB² = 1 <span class="mj-blue">&lt;interval length="32"&gt;</span> + 1 <span class="mj-red">&lt;line&gt;</span> + 1 <span class="mj-purple">&lt;point&gt;</span></h3>(MathBox is <strong>not</strong> XML based)</div>
   <div class="slide temp abs-bc"><h3 class="mj">MathBox = O(1) Box</h3></div>
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/hopf.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/hopf.html" class="mathbox"></iframe>
   <div class="abs-bc"><h3 class="mj">Native 4D – Hopf Fibration</h3></div>
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/curve.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/curve.html" class="mathbox"></iframe>
 
   <div class="slide temp spotlight abs-tc t1">
     <img src="images/code1.png" class="t1" style="opacity: .95; vertical-align: middle; display: inline; width: 500px;">
@@ -124,7 +126,7 @@
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/spherical.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/spherical.html" class="mathbox"></iframe>
 
   <div class="slide temp inflate">
 <pre class="wrap overlay abs-bc">
@@ -151,7 +153,7 @@
 
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/history.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/history.html" class="mathbox"></iframe>
 
   <div class="slide temp inflate">
 <pre class="wrap overlay abs-bc">
@@ -170,13 +172,13 @@
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/repeat.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/repeat.html" class="mathbox"></iframe>
     
   <div class="temp abs-bc"><h3 class="mj">Virtual Geometry Shading<br><small>64 → 981,522 floats&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;109,058 ▲</small></h3></div>
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/compose.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/compose.html" class="mathbox"></iframe>
 
   <div class="slide temp inflate">
 <pre class="wrap overlay abs-bc">
@@ -196,7 +198,7 @@
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/feedback.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/feedback.html" class="mathbox"></iframe>
 
   <div class="slide temp inflate">
 <pre class="wrap overlay abs-bc">
@@ -212,7 +214,7 @@
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/remap.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/remap.html" class="mathbox"></iframe>
 
   <div class="slide temp inflate">
 <pre class="wrap overlay abs-bc">
@@ -246,7 +248,7 @@ vec4 <span class="mj-green">getFramesSample</span>(vec3 xyz) {
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/remap2.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/remap2.html" class="mathbox"></iframe>
 </section>
 
 <section class="slide zoom">
@@ -254,7 +256,7 @@ vec4 <span class="mj-green">getFramesSample</span>(vec3 xyz) {
 </section>
 
 <section class="slide page-centerfold zoom instant">
-  <iframe src="iframes/rtt-vectors.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/rtt-vectors.html" class="mathbox"></iframe>
 
     <div class="slide temp inflate">
 <pre class="wrap overlay abs-bc"><span class="mj-blue">&lt;<strong>rtt</strong>&gt;</span>
@@ -331,7 +333,7 @@ vec4 <span class="mj-red"><strong>_pg_2_</strong></span>(vec4 _io_1_v) {
 </section>
 
 <section class="slide page-centerfold zoom">
-  <iframe src="iframes/transpose.html" class="mathbox"></iframe>
+  <iframe data-src="iframes/transpose.html" class="mathbox"></iframe>
   <div class="abs-tc mj"><h2>MathBox²</h2></div>
   <div class="abs-bc mj">
     <ul>
@@ -366,7 +368,7 @@ vec4 <span class="mj-red"><strong>_pg_2_</strong></span>(vec4 _io_1_v) {
 
   <p class="note">MathBox is like a better SVG. It aims to be a better fit for data visualization.</p>
 
-  <p class="note">See if you want to render this simple graph with SVG, you need 1 path but 32 circles.<br><br>Which means you need a completely different tree structure depending on the choice of representation (line or points).<br>Libraries like D3 contain helpers to make this easier, but it's still a very leaky abstraction.</p>
+  <p class="note">See, if you want to render this simple graph with SVG, you need 1 path but 32 circles.<br><br>Which means you need a completely different tree structure depending on the choice of representation (line or points).<br>Libraries like D3 contain helpers to make this easier, but it's still a very leaky abstraction.</p>
 
   <p class="note">In MathBox, I separate the data from the representation. Here I use an <em>interval</em> along which I sample an expression 32 times. An <em>interval</em> is just a fancy array with sampling behavior. It's rendered as lines and points, but there's only one line node and one point node.<br>Nodes combine like lego to form visible objects.<br><br>Note the XML is just a helpful notation, MathBox is not XML based, but it does have a DOM just like XML / HTML.</p>
 

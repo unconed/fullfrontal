@@ -106,8 +106,8 @@ $(function() {
 
   // Respond to presentation deck navigation
   var $frames = null;
-
-	$(document).bind('deck.change', function (e, from, to) {
+  var onDeckChange;
+	$(document).bind('deck.change', onDeckChange = function (e, from, to) {
     var out = [];
 
     var $slides = $('#message .note');
@@ -162,4 +162,7 @@ $(function() {
       disable(this);
     });
   });
+  setTimeout(function () {
+    onDeckChange(null, 0, 0);
+  }, 100);
 });
