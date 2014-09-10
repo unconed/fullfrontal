@@ -33,10 +33,11 @@ $(function() {
   $('.slide').each(function (i) {
     var $this = $(this);
     var $parents = $this.parents('.slide');
+    var mask = $this.is('.instant') ? [i, i+1] : [i-1, i, i+1];
 
     // Build index of which iframes are active per slide
     if ($parents.length) $this = $parents;
-    _.each([i-1, i, i+1], function (i) {
+    _.each(mask, function (i) {
       $iframes[i] = ($iframes[i] || $()).add($this.find('iframe'));
     });
   });
