@@ -421,11 +421,13 @@ void main() {
 
   // Boom
   uv -= vec2(0, -1.);
-  force -= (normalize(uv) * max(0., 1. - length(uv))) * strength * 10.;
+  force -= (normalize(uv) * max(0., 1. - length(uv))) * strength * 5.;
 
   // Convection
   vec4 sample = texture2D(texture, vUV);
   force.y -= sample.z * convection;
+
+  force *= 0.2;
 
   gl_FragColor = vec4(force, density, charm);
 }

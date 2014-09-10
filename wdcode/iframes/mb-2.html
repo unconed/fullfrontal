@@ -32,9 +32,13 @@ window.mathBoxSetup = function (mathbox, director) {
       if (step == 8) {
         activeFluid = true;
         setTimeout(function () {
-          exports.compelUniforms.strength.value = .04;
+          exports.compelUniforms.strength.value = .02;
           exports.compelUniforms.convection.value = .02;
         }, 100);
+        setTimeout(function () {
+          exports.compelUniforms.strength.value = .02;
+          exports.compelUniforms.convection.value = .005;
+        }, 300);
       }
       if (step == 7) {
         activeFluid = false;
@@ -68,8 +72,8 @@ function fluidSetup(mathbox, exports) {
   var timeStep = 6.;
 
   var bufferOpts = {
-    width: 350,
-    height: 350,
+    width: 512,
+    height: 512,
     history: -1,
     autoRendering: false,
     texture: {
@@ -112,7 +116,7 @@ function fluidSetup(mathbox, exports) {
   var pressure = world
     .rtt(pressureOpts);
   pressure
-    .iterate(12, 'cfd-pressure-relax', {
+    .iterate(24, 'cfd-pressure-relax', {
       pressure: pressure,
       divergence: divergence,
     })
