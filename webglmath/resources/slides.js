@@ -44,7 +44,7 @@ $(function() {
 
   function disable(iframe) {
     if (!$(iframe).data('src')) {
-      var src = $(iframe).attr('src');
+      var src = $(iframe).attr('src') || $(iframe).attr('data-src');
       $(iframe).data('src', src);
       iframe.onload = null;
       iframe.src = 'about:blank';
@@ -74,27 +74,29 @@ $(function() {
 
   // Interface with websocket for remote navigation commands
   (function () {
-    var host = window.document.location.host.replace(/:.*/, '');
-    var ws = new WebSocket('ws://' + host + ':8080');
-    ws.onmessage = function (event) {
-      var data = JSON.parse(event.data);
-      var command = {
-          up:    'prev',
-          left:  'prev',
-          right: 'next',
-          play:  'next',
-        }[data.type];
+    try {
+      var host = window.document.location.host.replace(/:.*/, '');
+      var ws = new WebSocket('ws://' + host + ':8080');
+      ws.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        var command = {
+            up:    'prev',
+            left:  'prev',
+            right: 'next',
+            play:  'next',
+          }[data.type];
 
-      if (command) {
-        $.deck(command);
-      }
-      else if (data.type == 'down') {
-        var speed = data.hold && data.pressed ? .2 : 1;
-        $frames && $frames.each(function () {
-          mathboxSpeed(this, speed);
-        });
-      }
-    };
+        if (command) {
+          $.deck(command);
+        }
+        else if (data.type == 'down') {
+          mathboxSpeed(data.hold && data.pressed);
+        }
+      };
+    }
+    catch (e) {
+      
+    }
   })();
 
   // Respond to presentation deck navigation

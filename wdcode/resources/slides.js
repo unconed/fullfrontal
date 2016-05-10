@@ -74,24 +74,29 @@ $(function() {
 
   // Interface with websocket for remote navigation commands
   (function () {
-    var host = window.document.location.host.replace(/:.*/, '');
-    var ws = new WebSocket('ws://' + host + ':8080');
-    ws.onmessage = function (event) {
-      var data = JSON.parse(event.data);
-      var command = {
-          up:    'prev',
-          left:  'prev',
-          right: 'next',
-          play:  'next',
-        }[data.type];
+    try {
+      var host = window.document.location.host.replace(/:.*/, '');
+      var ws = new WebSocket('ws://' + host + ':8080');
+      ws.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        var command = {
+            up:    'prev',
+            left:  'prev',
+            right: 'next',
+            play:  'next',
+          }[data.type];
 
-      if (command) {
-        $.deck(command);
-      }
-      else if (data.type == 'down') {
-        mathboxSpeed(data.hold && data.pressed);
-      }
-    };
+        if (command) {
+          $.deck(command);
+        }
+        else if (data.type == 'down') {
+          mathboxSpeed(data.hold && data.pressed);
+        }
+      };
+    }
+    catch (e) {
+      
+    }
   })();
 
   // Respond to presentation deck navigation
