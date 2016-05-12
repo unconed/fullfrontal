@@ -4,3 +4,21 @@
 [submodule "wdcode/iframes/lib/ThreeRTT.js"]
         path = wdcode/iframes/lib/ThreeRTT.js
         url = https://github.com/unconed/ThreeRTT.js
+[submodule "webglmath/iframes/lib/ShaderGraph.js"]
+        path = webglmath/iframes/lib/ShaderGraph.js
+        url = https://github.com/unconed/ShaderGraph.js.git
+[submodule "webglmath/iframes/lib/ThreeRTT.js"]
+        path = webglmath/iframes/lib/ThreeRTT.js
+        url = https://github.com/unconed/ThreeRTT.js
+[submodule "unviewable/iframes/lib/ShaderGraph.js"]
+        path = unviewable/iframes/lib/ShaderGraph.js
+        url = https://github.com/unconed/ShaderGraph.js.git
+[submodule "unviewable/iframes/lib/ThreeRTT.js"]
+        path = unviewable/iframes/lib/ThreeRTT.js
+        url = https://github.com/unconed/ThreeRTT.js
+[submodule "unviewable2/iframes/lib/ShaderGraph.js"]
+        path = unviewable2/iframes/lib/ShaderGraph.js
+        url = https://github.com/unconed/ShaderGraph.js.git
+[submodule "unviewable2/iframes/lib/ThreeRTT.js"]
+        path = unviewable2/iframes/lib/ThreeRTT.js
+        url = https://github.com/unconed/ThreeRTT.js
